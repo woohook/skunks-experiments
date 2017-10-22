@@ -1,0 +1,1 @@
+g++ src/sk-js.c -o sk-js `sdl-config --cflags --libs` -I./ODE/local/include -L./ODE/local/lib -lode -lm -ldl -O3 -march=pentium2 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W

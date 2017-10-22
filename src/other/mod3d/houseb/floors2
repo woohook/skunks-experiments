@@ -1,0 +1,12 @@
+objtypes 5
+houseb/floor.geo houseb/floor.col houseb/floor.cld
+houseb/floor1.geo houseb/floor1.col houseb/floor1.cld
+houseb/roof1.geo houseb/roof1.col houseb/roof1.cld
+houseb/stairs.geo houseb/stairs.col houseb/stairs.cld
+houseb/sub.geo houseb/sub.col houseb/sub.cld
+objects 6
+5 0 0 0
+4 0 -2.44 -4
+2 0.6 0 0
+1 3.35 0 0
+3 6.1 0 0

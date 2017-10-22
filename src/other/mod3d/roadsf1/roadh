@@ -1,0 +1,6 @@
+objtypes 2
+roadsf1/roads.geo roadsf1/road.col roadsf1/road.cld
+roadsf1/surf.geo roadsf1/surf.col roadsf1/surf.cld
+objects 2
+1 0 0 0
+2 2.0 0 5.0

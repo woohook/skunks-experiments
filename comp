@@ -1,0 +1,2 @@
+g++ src/skunks.c -o skunks `sdl-config --cflags --libs` -I./ODE/local/include -L./ODE/local/lib -lode -lm -ldl -O3 -march=pentium3 -fomit-frame-pointer -ffast-math -funroll-loops -mfpmath=sse -Wall -W
+gcc src/replay.c -o replay `sdl-config --cflags --libs` -lm -ldl -O3 -march=pentium3 -fomit-frame-pointer -ffast-math -funroll-loops -mfpmath=sse -Wall -W

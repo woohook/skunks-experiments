@@ -1,0 +1,3 @@
+gcc gentr1.c -o gentr1 -Wall -W -lm
+gcc gentr2.c -o gentr2 -Wall -W -lm
+gcc gentr2v.c -o gentr2v -Wall -W -lm

@@ -1,0 +1,15 @@
+camera 0.80 1.75
+objtypes 2
+data/rocar.geo data/rocar.col data/rocar.ref data/rocar.cld
+data/wheel3.geo data/wheel.col data/wheel.ref data/wheel.cld
+objects 5
+1 1 2.8 0 14 box 2.0 0.8 1.2 4
+2 3 2.45 -0.8 12.74 sph 0.05 0.4
+2 3 2.45 0.8 12.74 sph 0.05 0.4
+2 4 2.45 -0.8 15.19 sph 0.05 0.4
+2 4 2.45 0.8 15.19 sph 0.05 0.4
+accel 2.0
+brake 1.1
+spring 75
+damper 5
+friction 0.8

@@ -1,0 +1,4 @@
+cd ODE/ode-0.12;
+./configure --prefix=`cd ..;pwd;`/local --disable-demos;
+make;
+make install;

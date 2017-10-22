@@ -1,0 +1,6 @@
+objtypes 2
+roadh/roads.geo roadh/road.col roadh/road.cld
+roadh/hill1.geo roadh/hill1.col roadh/hill1.cld
+objects 2
+1 0 0 0
+2 -20 60 0

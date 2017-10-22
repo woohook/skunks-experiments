@@ -1,0 +1,6 @@
+"camera.h", render16.h" and "render32.h" from this directory are
+without aspect correction, otherwise identical to the other ones.
+
+"rendergl.h" and "sk-gl.c" from this directory have been replaced
+by other files, in which fog is simulated only  by setting the
+colors of the triangles.

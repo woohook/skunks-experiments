@@ -1,0 +1,2 @@
+g++ src/sk-gl.c -o sk-gl `sdl-config --cflags --libs` -lGL -lGLU -I./ODE/local/include -L./ODE/local/lib -lode -lm -ldl -O3 -march=pentium2 -Wall -W;
+gcc src/rep-gl.c -o rep-gl `sdl-config --cflags --libs` -lGL -lGLU -lm -ldl -O3 -march=pentium2 -Wall -W;

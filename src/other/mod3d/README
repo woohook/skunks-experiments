@@ -1,0 +1,14 @@
+To compile:
+
+./comp
+
+To run:
+
+./mod3d FILENAME
+
+Example:
+
+./mod3d house/floors1
+
+This program combines several 3d models into a single one,
+stored in the files "out.geo", "out.col" and "out.cld".

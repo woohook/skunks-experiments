@@ -1,0 +1,15 @@
+camera 0.75 0.6
+objtypes 2
+data/combi.geo data/combi.col data/combi.ref data/combi.cld
+data/wheel.geo data/wheel.col data/wheel.ref data/wheel.cld
+objects 5
+1 1 2.8 0 14 box 1.2 0.7 1 3.7
+2 3 2.7 -0.7 12.98 sph 0.05 0.4
+2 3 2.7 0.7 12.98 sph 0.05 0.4
+2 4 2.7 -0.7 15.45 sph 0.05 0.4
+2 4 2.7 0.7 15.45 sph 0.05 0.4
+accel 1.35
+brake 0.9
+spring 75
+damper 5
+friction 0.8

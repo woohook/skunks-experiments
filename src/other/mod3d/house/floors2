@@ -1,0 +1,11 @@
+objtypes 4
+house/floor1.geo  house/floor1.col  house/floor.cld
+house/roof1.geo  house/roof1.col  house/roof.cld
+house/sidew1.geo  house/sidew.col  house/sidew.cld
+house/balcon.geo  house/balcon.col  house/nocl.cld
+objects 5
+1 0.1 0 0
+1 2.85 0 0
+4 2.85 0 0
+2 5.6 0 0
+3 0 0 0

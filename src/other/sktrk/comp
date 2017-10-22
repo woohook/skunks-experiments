@@ -1,0 +1,1 @@
+gcc sktrk.c -o sktrk -lm -ldl `sdl-config --cflags --libs` -Wall -W

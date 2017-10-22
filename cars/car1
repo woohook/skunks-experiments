@@ -1,0 +1,15 @@
+camera 0.75 0.1
+objtypes 2
+data/cdt3.geo data/cdt1.col data/cdt3.ref data/cdt2.cld
+data/wheel.geo data/wheel.col data/wheel.ref data/wheel.cld
+objects 5
+1 1 2.8 0 14 box 1.2 0.7 1 3.7
+2 6 2.7 -0.7 12.25 sph 0.05 0.4
+2 6 2.7 0.7 12.25 sph 0.05 0.4
+2 5 2.7 -0.7 14.95 sph 0.05 0.4
+2 5 2.7 0.7 14.95 sph 0.05 0.4
+accel 1.05
+brake 0.6
+spring 75
+damper 5
+friction 0.8

@@ -1,0 +1,9 @@
+These files require SDL 1.2. You should try
+to use them only if the software rendering
+is too slow on your computer. If you really
+want OpenGL, copy these files into the main
+directory and compile with "./comp-gl".
+
+Don't expect them to work though, since
+OpenGL and 3D acceleration in general don't
+function properly on most computers.

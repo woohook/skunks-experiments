@@ -1,0 +1,11 @@
+objtypes 4
+house/walls1.geo  house/walls.col  house/walls.cld
+house/wind_e.geo  house/window.col  house/wind_e.cld
+house/wind_w.geo  house/window.col  house/wind_w.cld
+house/door.geo  house/door.col  house/door.cld
+objects 5
+1	0	0	0
+2	1.1	4	-2.75
+2	1.1	4	0.75
+3	1.1	0	-2.75
+4	0	0	1.31

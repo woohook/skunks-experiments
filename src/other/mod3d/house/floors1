@@ -1,0 +1,8 @@
+objtypes 3
+house/floor1.geo  house/floor1.col  house/floor.cld
+house/roof1.geo  house/roof1.col  house/roof.cld
+house/sidew1.geo  house/sidew.col  house/sidew.cld
+objects 3
+1 0.1 0 0
+2 2.85 0 0
+3 0 0 0

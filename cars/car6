@@ -1,0 +1,15 @@
+camera 0.8 4.0
+objtypes 2
+data/bus.geo data/bus.col data/bus.ref data/bus.cld
+data/wheel2.geo data/wheel.col data/wheel2.ref data/wheel.cld
+objects 5
+1 1 2.1 0 12 box 10 1.5 2.0 8
+2 3 1.5 -1.0 9.3 sph 0.2 0.6
+2 3 1.5 1.0 9.3 sph 0.2 0.6
+2 4 1.5 -1.0 15.8 sph 0.2 0.6
+2 4 1.5 1.0 15.8 sph 0.2 0.6
+accel 12.0
+brake 9.5
+spring 500
+damper 20
+friction 0.7
