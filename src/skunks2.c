@@ -29,6 +29,8 @@ SDL_Window *RGLOBwindow; /*for SDL 2*/
 void SDL_UpdateRect(SDL_Surface *screen,int a,int b,int c,int d)
 {SDL_UpdateWindowSurface(RGLOBwindow);}
 
+#include "defstr.h"
+
 #if CLBITS==16
   #include "render16.h"
 #elif CLBITS==24
@@ -37,9 +39,7 @@ void SDL_UpdateRect(SDL_Surface *screen,int a,int b,int c,int d)
   #include "render32.h"
 #endif
 
-#include "defstr.h"
 #include "trans.h"
-#include "camera.h"
 #include "readfile.h"
 #include "game.h"
 

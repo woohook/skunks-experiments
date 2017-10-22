@@ -21,12 +21,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <math.h>
 #include <string.h>
 #include <SDL.h>
+#include <ode/ode.h>
 #include <time.h>
 #include "config.h"
 
 SDL_Window *RGLOBwindow; /*for SDL 2*/
 void SDL_UpdateRect(SDL_Surface *screen,int a,int b,int c,int d)
 {SDL_UpdateWindowSurface(RGLOBwindow);}
+
+#include "defstr.h"
 
 #if CLBITS==16
   #include "render16.h"
@@ -36,9 +39,7 @@ void SDL_UpdateRect(SDL_Surface *screen,int a,int b,int c,int d)
   #include "render32.h"
 #endif
 
-#include "rep_dfst.h"
 #include "trans.h"
-#include "camera.h"
 #include "rep_rdf.h"
 #include "rep_game.h"
 

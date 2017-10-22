@@ -49,10 +49,6 @@ REALN dy;
 REALN dz;
 } lightpr; /*light parameters*/
 
-/*functie care elimina triunghiurile care sunt in plus*/
-int fclip(tria *face,int nrfaces,REALN zmin,tria *facedisp,REALN zmax,REALN tgh,REALN tgv);
-
-
 /*functie care determina ecuatia planului cu numarul de ordine 'i'
 dupa care determina punctul de intersectie al planului cu o dreapta care trece prin
 O(0,0,0) si F(xf,yf,zf)
@@ -60,4 +56,7 @@ nrfaces - numar total de triunghiuri*/
 void findplan(tria *face,int i,REALN *a,REALN *b,REALN *c,REALN *d);
 
 
-void displaysdl(SDL_Surface *screen,tria *face,int nrfaces,REALN *distmin,unsigned int width,unsigned int height,REALN focal,pixcol backcol,REALN zfog,REALN zmax,lightpr *light);
+/*function which displays the objcts which are closer than zmax
+nob - total number of objects
+cam - camera*/
+void odis(SDL_Surface *screen,sgob *objs,int nob,pixcol backcol,REALN zfog,REALN zmax,sgob *cam,lightpr *light);

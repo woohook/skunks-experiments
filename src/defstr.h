@@ -91,6 +91,6 @@ REALN camd; /*camera position*/
 } vhc; /*vehicle*/
 
 
-tria **fceglob; /*array with triangles and colors of object types*/
+struct _tria **fceglob; /*array with triangles and colors of object types*/
 refpo *refglob; /*array with reference points of object types*/
 dWorldID wglob; /*world for ODE*/
