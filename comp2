@@ -1,2 +1,2 @@
-g++ src/skunks2.c -o skunks2 `sdl2-config --cflags --libs` -I./ODE/local/include -L./ODE/local/lib -lode -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W
+gcc src/skunks2.c -o skunks2 `sdl2-config --cflags --libs` -I./ODE/local/include -L./ODE/local/lib -lode -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W
 gcc src/replay2.c -o replay2 `sdl2-config --cflags --libs` -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W
