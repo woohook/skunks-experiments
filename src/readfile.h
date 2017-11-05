@@ -174,14 +174,16 @@ if(!(fis=fopen(numefis,"r"))){printf("File '%s' could not be open\r\n",numefis);
 
 fscanf(fis,"%d",&colors); /*found number of colors*/
 
-for(i=1;i<=nrfaces;i++){face[i].red=255;face[i].green=255;face[i].blue=255;}
+for(i=1;i<=nrfaces;i++)
+{
+  set_face_color(face, i, 255, 255, 255);
+}
 
 for(j=1;j<=colors;j++){
 fscanf(fis,"%d %d %d %d %d",&fstart,&fend,&fred,&fgreen,&fblue);
-  for(i=fstart;i<=fend;i++){
-    face[i].red=fred;
-    face[i].green=fgreen;
-    face[i].blue=fblue;
+  for(i=fstart;i<=fend;i++)
+  {
+    set_face_color(face, i, fred, fgreen, fblue);
   }
 }
 
@@ -191,7 +193,7 @@ if(identcom(s)==16){ /*fullbright*/
   for(j=1;j<=colors;j++){
     fscanf(fis,"%d %d",&fstart,&fend);
     for(i=fstart;i<=fend;i++){
-      face[i].cull=((face[i].cull)&1)+2;
+      set_face_fullbright(face, i);
     }
   }
 }

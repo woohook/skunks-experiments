@@ -36,6 +36,18 @@ void add_face(tria* face, int face_id, REALN x1, REALN y1, REALN z1, REALN x2, R
   face[face_id].cull = 0; /*no culling and no fullbright if not specified*/
 }
 
+void set_face_color(tria* face, int face_id, int red, int green, int blue)
+{
+  face[face_id].red   = red;
+  face[face_id].green = green;
+  face[face_id].blue  = blue;
+}
+
+void set_face_fullbright(tria* face, int face_id)
+{
+  face[face_id].cull = ((face[face_id].cull)&1)+2;
+}
+
 /*functie care elimina triunghiurile care sunt in plus*/
 int fclip(tria *face,int nrfaces,REALN zmin,tria *facedisp,REALN zmax,REALN tgh,REALN tgv)
 {int i,j,k,l,kmin,invs;
