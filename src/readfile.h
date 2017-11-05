@@ -273,7 +273,8 @@ fclose(fis);
 /*order vertices, so triangles can be culled correctly*/
 void ordercl(tria *face,char *numefis)
 {int i,j,nrcmd,nf1,nf2;
-REALN x,y,z,dx,dy,dz,a,b,c,d,prodscal,tmp;
+REALN x,y,z,dx,dy,dz,a,b,c,d,prodscal;
+REALN x1,y1,z1, x2,y2,z2;
 char vis; /*'v'-visible from (x,y,z); 'i'-not visible*/
 FILE *fis;
 
@@ -285,24 +286,22 @@ for(i=1;i<=nrcmd;i++){
   fscanf(fis,"%d %d %c %f %f %f",&nf1,&nf2,&vis,&x,&y,&z);
 
   for(j=nf1;j<=nf2;j++){
+    get_face_vertex(face,j,1,&x1,&y1,&z1);
+    get_face_vertex(face,j,2,&x2,&y2,&z2);
     findplan(face,j,&a,&b,&c,&d);
-     dx=face[j].x1-x;
-     dy=face[j].y1-y;
-     dz=face[j].z1-z;
+     dx=x1-x;
+     dy=y1-y;
+     dz=z1-z;
     prodscal=a*dx+b*dy+c*dz;
     switch(vis){
-      case 'v': face[j].cull=((face[j].cull)&2)+1;
+      case 'v': enable_face_culling(face,j);
         if(prodscal<0){
-          tmp=face[j].x1; face[j].x1=face[j].x2; face[j].x2=tmp;
-          tmp=face[j].y1; face[j].y1=face[j].y2; face[j].y2=tmp;
-          tmp=face[j].z1; face[j].z1=face[j].z2; face[j].z2=tmp;
+          reverse_face_vertices(face,j);
         } break;
 
-      case 'i': face[j].cull=((face[j].cull)&2)+1;
+      case 'i': enable_face_culling(face,j);
         if(prodscal>=0){
-          tmp=face[j].x1; face[j].x1=face[j].x2; face[j].x2=tmp;
-          tmp=face[j].y1; face[j].y1=face[j].y2; face[j].y2=tmp;
-          tmp=face[j].z1; face[j].z1=face[j].z2; face[j].z2=tmp;
+          reverse_face_vertices(face,j);
         } break;
 
       default: break;
@@ -318,6 +317,7 @@ fclose(fis);
 void eval_obj(tria *face,sgob *objs)
 {int i,nrfaces;
 REALD xmin,xmax,ymin,ymax,zmin,zmax,lenx,leny,lenz;
+REALN x1,y1,z1, x2,y2,z2, x3,y3,z3;
 
 nrfaces=objs->nfa;
 
@@ -326,26 +326,30 @@ ymin=ymax=face[1].y1;
 zmin=zmax=face[1].z1;
 
 for(i=1;i<=nrfaces;i++){
-if(xmin>face[i].x1){xmin=face[i].x1;}
-if(xmin>face[i].x2){xmin=face[i].x2;}
-if(xmin>face[i].x3){xmin=face[i].x3;}
-if(xmax<face[i].x1){xmax=face[i].x1;}
-if(xmax<face[i].x2){xmax=face[i].x2;}
-if(xmax<face[i].x3){xmax=face[i].x3;}
+get_face_vertex(face,i,1,&x1,&y1,&z1);
+get_face_vertex(face,i,2,&x2,&y2,&z2);
+get_face_vertex(face,i,3,&x3,&y3,&z3);
 
-if(ymin>face[i].y1){ymin=face[i].y1;}
-if(ymin>face[i].y2){ymin=face[i].y2;}
-if(ymin>face[i].y3){ymin=face[i].y3;}
-if(ymax<face[i].y1){ymax=face[i].y1;}
-if(ymax<face[i].y2){ymax=face[i].y2;}
-if(ymax<face[i].y3){ymax=face[i].y3;}
+if(xmin>x1){xmin=x1;}
+if(xmin>x2){xmin=x2;}
+if(xmin>x3){xmin=x3;}
+if(xmax<x1){xmax=x1;}
+if(xmax<x2){xmax=x2;}
+if(xmax<x3){xmax=x3;}
 
-if(zmin>face[i].z1){zmin=face[i].z1;}
-if(zmin>face[i].z2){zmin=face[i].z2;}
-if(zmin>face[i].z3){zmin=face[i].z3;}
-if(zmax<face[i].z1){zmax=face[i].z1;}
-if(zmax<face[i].z2){zmax=face[i].z2;}
-if(zmax<face[i].z3){zmax=face[i].z3;}
+if(ymin>y1){ymin=y1;}
+if(ymin>y2){ymin=y2;}
+if(ymin>y3){ymin=y3;}
+if(ymax<y1){ymax=y1;}
+if(ymax<y2){ymax=y2;}
+if(ymax<y3){ymax=y3;}
+
+if(zmin>z1){zmin=z1;}
+if(zmin>z2){zmin=z2;}
+if(zmin>z3){zmin=z3;}
+if(zmax<z1){zmax=z1;}
+if(zmax<z2){zmax=z2;}
+if(zmax<z3){zmax=z3;}
 }
 
 lenx=xmax-xmin;

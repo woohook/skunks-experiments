@@ -55,6 +55,12 @@ void set_face_color(tria* face, int face_id, int red, int green, int blue);
 
 void set_face_fullbright(tria* face, int face_id);
 
+void get_face_vertex(tria* face, int face_id, int vertex_id, REALN *x, REALN *y, REALN *z);
+
+void reverse_face_vertices(tria* face, int face_id);
+
+void enable_face_culling(tria* face, int face_id);
+
 /*functie care determina ecuatia planului cu numarul de ordine 'i'
 dupa care determina punctul de intersectie al planului cu o dreapta care trece prin
 O(0,0,0) si F(xf,yf,zf)

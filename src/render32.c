@@ -48,6 +48,43 @@ void set_face_fullbright(tria* face, int face_id)
   face[face_id].cull = ((face[face_id].cull)&1)+2;
 }
 
+void get_face_vertex(tria* face, int face_id, int vertex_id, REALN *x, REALN *y, REALN *z)
+{
+  switch(vertex_id)
+  {
+    case 1:
+      *x = face[face_id].x1;
+      *y = face[face_id].y1;
+      *z = face[face_id].z1;
+      break;
+    case 2:
+      *x = face[face_id].x2;
+      *y = face[face_id].y2;
+      *z = face[face_id].z2;
+      break;
+    case 3:
+      *x = face[face_id].x3;
+      *y = face[face_id].y3;
+      *z = face[face_id].z3;
+      break;
+    default:
+      break;
+  }
+}
+
+void reverse_face_vertices(tria* face, int face_id)
+{
+  REALN tmp;
+  tmp = face[face_id].x1; face[face_id].x1 = face[face_id].x2; face[face_id].x2 = tmp;
+  tmp = face[face_id].y1; face[face_id].y1 = face[face_id].y2; face[face_id].y2 = tmp;
+  tmp = face[face_id].z1; face[face_id].z1 = face[face_id].z2; face[face_id].z2 = tmp;
+}
+
+void enable_face_culling(tria* face, int face_id)
+{
+  face[face_id].cull = ((face[face_id].cull)&2)+1;
+}
+
 /*functie care elimina triunghiurile care sunt in plus*/
 int fclip(tria *face,int nrfaces,REALN zmin,tria *facedisp,REALN zmax,REALN tgh,REALN tgv)
 {int i,j,k,l,kmin,invs;
