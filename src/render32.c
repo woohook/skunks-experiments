@@ -24,6 +24,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "sdltext.h"
 char textglob[MAXWLG];
 
+void add_face(tria* face, int face_id, REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN x3, REALN y3, REALN z3)
+{
+  face[face_id].x1 = x1; face[face_id].y1 = y1; face[face_id].z1 = z1;
+  face[face_id].x2 = x2; face[face_id].y2 = y2; face[face_id].z2 = z2;
+  face[face_id].x3 = x3; face[face_id].y3 = y3; face[face_id].z3 = z3;
+  face[face_id].red = 255;
+  face[face_id].green = 200;
+  face[face_id].blue = 0;
+
+  face[face_id].cull = 0; /*no culling and no fullbright if not specified*/
+}
+
 /*functie care elimina triunghiurile care sunt in plus*/
 int fclip(tria *face,int nrfaces,REALN zmin,tria *facedisp,REALN zmax,REALN tgh,REALN tgv)
 {int i,j,k,l,kmin,invs;

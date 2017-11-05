@@ -132,7 +132,7 @@ return nrfaces;}
 
 /*functie care afla coordonatele varfurilor triunghiurilor*/
 void faces(tria *face,char *numefis)
-{int err,lincr=0,i,j,nrfaces,nvert;
+{int err,lincr=0,i,j,k,l,nrfaces,nvert;
 FILE *fis;
 REALN *x,*y,*z;
 char s[MAXWLG];
@@ -154,18 +154,8 @@ err=fisgetw(fis,s,&lincr); z[i]=atof(s);
 
 for(i=1;i<=nrfaces;i++){
   err=fisgetw(fis,s,&lincr); /*sarit peste "f"*/
-  fscanf(fis,"%d",&j);
-    face[i].x1=x[j];face[i].y1=y[j];face[i].z1=z[j];
-  fscanf(fis,"%d",&j);
-    face[i].x2=x[j];face[i].y2=y[j];face[i].z2=z[j];
-  fscanf(fis,"%d",&j);
-    face[i].x3=x[j];face[i].y3=y[j];face[i].z3=z[j];
-
-  face[i].red=255;
-  face[i].green=200;
-  face[i].blue=0;
-
-  face[i].cull=0; /*no culling and no fullbright if not specified*/
+  fscanf(fis,"%d %d %d", &j, &k, &l);
+  add_face(face, i, x[j], y[j], z[j], x[k], y[k], z[k], x[l], y[l], z[l]);
 }
 
 free(x);free(y);free(z);

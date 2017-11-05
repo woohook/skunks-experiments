@@ -49,6 +49,8 @@ REALN dy;
 REALN dz;
 } lightpr; /*light parameters*/
 
+void add_face(tria* face, int face_id, REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN x3, REALN y3, REALN z3);
+
 /*functie care determina ecuatia planului cu numarul de ordine 'i'
 dupa care determina punctul de intersectie al planului cu o dreapta care trece prin
 O(0,0,0) si F(xf,yf,zf)
