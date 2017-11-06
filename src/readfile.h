@@ -321,9 +321,10 @@ REALN x1,y1,z1, x2,y2,z2, x3,y3,z3;
 
 nrfaces=objs->nfa;
 
-xmin=xmax=face[1].x1;
-ymin=ymax=face[1].y1;
-zmin=zmax=face[1].z1;
+get_face_vertex(face,1,1,&x1,&y1,&z1);
+xmin=xmax=x1;
+ymin=ymax=y1;
+zmin=zmax=z1;
 
 for(i=1;i<=nrfaces;i++){
 get_face_vertex(face,i,1,&x1,&y1,&z1);
