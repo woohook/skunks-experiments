@@ -26,8 +26,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "config.h"
 
 SDL_Window *RGLOBwindow; /*for SDL 2*/
-void SDL_UpdateRect(SDL_Surface *screen,int a,int b,int c,int d)
-{SDL_UpdateWindowSurface(RGLOBwindow);}
+void SDL_UpdateRect()
+{
+  SDL_UpdateWindowSurface(RGLOBwindow);
+}
 
 #include "defstr.h"
 

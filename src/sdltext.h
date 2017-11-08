@@ -25,10 +25,10 @@ void mdraw(SDL_Surface *screen,int x,int y,char s)
 float rap;
 static int x1=0,y1=0;
 Uint16 *ptr,bright;
-int width,height,red=255,green=255,blue=255;
+int height,red=255,green=255,blue=255;
 
 bright=SDL_MapRGB(screen->format,red,green,blue);
-width=SCREENWIDTH; height=SCREENHEIGHT;
+height=SCREENHEIGHT;
 
 switch(s){
   case 'p': x1=x;y1=y;ptr=(Uint16 *)((Uint8 *)screen->pixels + (height-y1)*screen->pitch + x1*2); *ptr=bright;
@@ -70,11 +70,11 @@ void mdraw(SDL_Surface *screen,int x,int y,char s)
 float rap;
 static int x1=0,y1=0;
 Uint8 *ptr;
-int width,height,bitd;
+int height,bitd;
 
 bitd=CLBITS/8;
 
-width=SCREENWIDTH; height=SCREENHEIGHT;
+height=SCREENHEIGHT;
 
 switch(s){
   case 'p': x1=x;y1=y;ptr=((Uint8 *)screen->pixels + (height-y1)*screen->pitch + x1*bitd);

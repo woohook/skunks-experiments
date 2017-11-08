@@ -18,9 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /*function which translates an object by x,y and z*/
 void translat(sgob *objs,REALD x,REALD y,REALD z)
-{int i,nref;
-
-  nref=objs->nref;
+{int i;
 
   for(i=1;i<=objs->nref;i++){
     objs->xref[i]+=x;
