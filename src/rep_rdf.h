@@ -132,7 +132,7 @@ return nrfaces;}
 
 /*functie care afla coordonatele varfurilor triunghiurilor*/
 void faces(tria *face,char *numefis)
-{int err,lincr=0,i,j,nrfaces,nvert;
+{int lincr=0,i,j,nrfaces,nvert;
 FILE *fis;
 REALN *x,*y,*z;
 char s[MAXWLG];
@@ -147,13 +147,13 @@ if(!(y=(REALN *)malloc((nvert+1)*sizeof(REALN)))){printf("Out of memory");}
 if(!(z=(REALN *)malloc((nvert+1)*sizeof(REALN)))){printf("Out of memory");}
 
 for(i=1;i<=nvert;i++){
-err=fisgetw(fis,s,&lincr); x[i]=atof(s);
-err=fisgetw(fis,s,&lincr); y[i]=atof(s);
-err=fisgetw(fis,s,&lincr); z[i]=atof(s);
+  fisgetw(fis,s,&lincr); x[i]=atof(s);
+  fisgetw(fis,s,&lincr); y[i]=atof(s);
+  fisgetw(fis,s,&lincr); z[i]=atof(s);
 } /*aflat coordonatele punctelor*/
 
 for(i=1;i<=nrfaces;i++){
-  err=fisgetw(fis,s,&lincr); /*sarit peste "f"*/
+  fisgetw(fis,s,&lincr); /*sarit peste "f"*/
   fscanf(fis,"%d",&j);
     face[i].x1=x[j];face[i].y1=y[j];face[i].z1=z[j];
   fscanf(fis,"%d",&j);
@@ -373,8 +373,7 @@ sgob *readvehicle(char *numefis,sgob *objs,int *nrtyp,int *nrobt,vhc *car)
 char s[MAXWLG]; /*a word*/
 FILE *fis;
 int i,j,k,nto,nob; /*number of object types and number of objects*/
-REALN tx,ty,tz, /*initial translations*/
-      len;
+REALN tx,ty,tz; /*initial translations*/
 
 nto=*nrtyp;
 nob=*nrobt;
@@ -442,13 +441,13 @@ s[0]='1';while(s[0]){
 
 	            if(!(err=fisgetw(fis,s,&lincr))){afermex(numefis,lincr,s,1);}
 	            switch(identcmg(s)){
-	              case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); len=atof(s); /*mass*/
+	              case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); /*mass*/
 	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
 	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s); /*box lengths*/
                               break;
 
-	              case 3: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); len=atof(s); /*mass*/
+	              case 3: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); /*mass*/
 	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s); /*sphere radius*/
                               break;
 
