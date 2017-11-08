@@ -648,3 +648,12 @@ nrdisp=fclip(face,nrfaces,zmin,facedisp,zmax,tgh,tgv);
 displaysdl(screen,facedisp,nrdisp,distmin,width,height,focal,backcol,zfog,zmax,&rotlight);
 
 }
+
+void renderer_release()
+{
+  for(int i=1;i<mesh_count;i++)
+  {
+    free(fceglob[i]);
+  }
+  free(fceglob);
+}

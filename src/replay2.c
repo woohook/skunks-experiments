@@ -200,8 +200,8 @@ SDL_Quit();
 
 
 runsim(objs,&car,repf,&timp,&speed,1); /*freed static variables from runsim()*/
-for(i=1;i<=nto;i++){free(fceglob[i]);}
-free(fceglob); free (refglob); free(objs);
+renderer_release();
+free (refglob); free(objs);
 
 fclose(repf);
 

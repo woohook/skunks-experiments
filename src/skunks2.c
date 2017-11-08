@@ -360,8 +360,8 @@ SDL_Quit();
 free(obtained);
 #endif
 
-for(i=1;i<=nto;i++){free(fceglob[i]);}
-free(fceglob); free (refglob); free(objs);
+renderer_release();
+free (refglob); free(objs);
 
 #if REPLAY==1
 fclose(repf);
