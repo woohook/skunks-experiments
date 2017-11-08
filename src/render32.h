@@ -72,3 +72,5 @@ void findplan(tria *face,int i,REALN *a,REALN *b,REALN *c,REALN *d);
 nob - total number of objects
 cam - camera*/
 void odis(SDL_Surface *screen,sgob *objs,int nob,pixcol backcol,REALN zfog,REALN zmax,sgob *cam,lightpr *light);
+
+extern struct _tria **fceglob; // array with triangles and colors of object types

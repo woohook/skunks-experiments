@@ -22,7 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "defstr.h"
 #include "render32.h"
 #include "sdltext.h"
+
 char textglob[MAXWLG];
+struct _tria **fceglob = 0; // array with triangles and colors of object types
 
 void add_face(tria* face, int face_id, REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN x3, REALN y3, REALN z3)
 {
