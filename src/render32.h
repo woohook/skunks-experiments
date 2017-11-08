@@ -49,6 +49,8 @@ REALN dy;
 REALN dz;
 } lightpr; /*light parameters*/
 
+void create_mesh();
+
 void add_face(tria* face, int face_id, REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN x3, REALN y3, REALN z3);
 
 void set_face_color(tria* face, int face_id, int red, int green, int blue);

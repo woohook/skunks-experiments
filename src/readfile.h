@@ -388,9 +388,9 @@ s[0]='1';while(s[0]){
 
 	switch(identcom(s)){
 	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); (*nrtyp)+=atoi(s);
-	          if(!(fceglob=(tria **)realloc(fceglob,((*nrtyp)+1)*sizeof(tria *)))){printf("Out of memory");}
 	          if(!(refglob=(refpo *)realloc(refglob,((*nrtyp)+1)*sizeof(refpo)))){printf("Out of memory");}
 	          for(i=nto+1;i<=(*nrtyp);i++){
+                    create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
 	            refglob[i].nfa=findnf(s);
 	            if(!(fceglob[i]=(tria *)malloc((refglob[i].nfa+1)*sizeof(tria)))){printf("Out of memory");}
@@ -662,9 +662,9 @@ s[0]='1';while(s[0]){
 	          break;
 
 	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); (*nrtyp)=nto=atoi(s);
-	          if(!(fceglob=(tria **)malloc((nto+1)*sizeof(tria *)))){printf("Out of memory");}
 	          if(!(refglob=(refpo *)malloc((nto+1)*sizeof(refpo)))){printf("Out of memory");}
 	          for(i=1;i<=nto;i++){
+                    create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
 	            refglob[i].nfa=findnf(s);
 	            if(!(fceglob[i]=(tria *)malloc((refglob[i].nfa+1)*sizeof(tria)))){printf("Out of memory");}
