@@ -393,7 +393,6 @@ s[0]='1';while(s[0]){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
 	            refglob[i].nfa=findnf(s);
-	            if(!(fceglob[i]=(tria *)malloc((refglob[i].nfa+1)*sizeof(tria)))){printf("Out of memory");}
 	            faces(fceglob[i],s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
 	              readcolor(fceglob[i],refglob[i].nfa,s);
@@ -667,7 +666,6 @@ s[0]='1';while(s[0]){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
 	            refglob[i].nfa=findnf(s);
-	            if(!(fceglob[i]=(tria *)malloc((refglob[i].nfa+1)*sizeof(tria)))){printf("Out of memory");}
 	            faces(fceglob[i],s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
 	              readcolor(fceglob[i],refglob[i].nfa,s);

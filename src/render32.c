@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 char textglob[MAXWLG];
 struct _tria **fceglob = 0; // array with triangles and colors of object types
 int mesh_count = 0;
+int face_count = 0;
 
 void create_mesh()
 {
@@ -39,10 +40,25 @@ void create_mesh()
     if(!(fceglob=(tria **)realloc(fceglob,(mesh_count+1)*sizeof(tria *)))){printf("Out of memory");}
     mesh_count++;
   }
+  face_count = 0;
 }
 
 void add_face(tria* face, int face_id, REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN x3, REALN y3, REALN z3)
 {
+  face_count++;
+  if(face_count==1)
+  {
+    face_count = 2;
+    if(!(fceglob[mesh_count-1]=(tria *)malloc(face_count*sizeof(tria)))){printf("Out of memory");}
+  }
+  else
+  {
+    if(!(fceglob[mesh_count-1]=(tria *)realloc(fceglob[mesh_count-1], face_count*sizeof(tria)))){printf("Out of memory");}
+  }
+
+  face = fceglob[mesh_count-1];
+  face_id = face_count-1;
+
   face[face_id].x1 = x1; face[face_id].y1 = y1; face[face_id].z1 = z1;
   face[face_id].x2 = x2; face[face_id].y2 = y2; face[face_id].z2 = z2;
   face[face_id].x3 = x3; face[face_id].y3 = y3; face[face_id].z3 = z3;
