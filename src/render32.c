@@ -76,6 +76,14 @@ void set_face_color(tria* face, int face_id, int red, int green, int blue)
   face[face_id].blue  = blue;
 }
 
+void get_face_color(int mesh_id, int face_id, int* red, int* green, int* blue)
+{
+  tria* face = fceglob[mesh_id];
+  *red   = face[face_id].red;
+  *green = face[face_id].green;
+  *blue  = face[face_id].blue;
+}
+
 void set_face_fullbright(tria* face, int face_id)
 {
   face[face_id].cull = ((face[face_id].cull)&1)+2;

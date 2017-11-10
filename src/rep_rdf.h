@@ -596,12 +596,18 @@ fclose(fis);
 
 for(i=1;i<=nto;i++){
   for(j=1;j<=refglob[i].nfa;j++){
-    len=fceglob[i][j].red*fred;
-    fceglob[i][j].red=(int)len; if(fceglob[i][j].red>255){fceglob[i][j].red=255;}
-    len=fceglob[i][j].green*fgreen;
-    fceglob[i][j].green=(int)len; if(fceglob[i][j].green>255){fceglob[i][j].green=255;}
-    len=fceglob[i][j].blue*fblue;
-    fceglob[i][j].blue=(int)len; if(fceglob[i][j].blue>255){fceglob[i][j].blue=255;}
+    int red, green, blue;
+    get_face_color(i,j,&red,&green,&blue);
+    len=red*fred;
+    if(len>255){len=255;}
+    red=(int)len;
+    len=green*fgreen;
+    if(len>255){len=255;}
+    green=(int)len;
+    len=blue*fblue;
+    if(len>255){len=255;}
+    blue=(int)len;
+    set_face_color(fceglob[i],j,red,green,blue);
   }
 }
 
