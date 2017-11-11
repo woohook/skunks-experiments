@@ -43,7 +43,7 @@ void create_mesh()
   face_count = 0;
 }
 
-void add_face(int mesh_id, int face_id, REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN x3, REALN y3, REALN z3)
+void add_face(int mesh_id, REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN x3, REALN y3, REALN z3)
 {
   face_count++;
   if(face_count==1)
@@ -57,7 +57,7 @@ void add_face(int mesh_id, int face_id, REALN x1, REALN y1, REALN z1, REALN x2, 
   }
 
   tria* face = fceglob[mesh_id];
-  face_id = face_count-1;
+  int face_id = face_count-1;
 
   face[face_id].x1 = x1; face[face_id].y1 = y1; face[face_id].z1 = z1;
   face[face_id].x2 = x2; face[face_id].y2 = y2; face[face_id].z2 = z2;

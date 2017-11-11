@@ -155,7 +155,7 @@ for(i=1;i<=nvert;i++){
 for(i=1;i<=nrfaces;i++){
   fisgetw(fis,s,&lincr); /*sarit peste "f"*/
   fscanf(fis,"%d %d %d", &j, &k, &l);
-  add_face(mesh_id, i, x[j], y[j], z[j], x[k], y[k], z[k], x[l], y[l], z[l]);
+  add_face(mesh_id, x[j], y[j], z[j], x[k], y[k], z[k], x[l], y[l], z[l]);
 }
 
 free(x);free(y);free(z);
