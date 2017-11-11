@@ -164,7 +164,7 @@ fclose(fis);}
 
 /*functie care coloreaza triunghiurile
 *bred,*bgreen,*bblue - culoarea fundalului*/
-void readcolor(tria *face,int nrfaces,char *numefis)
+void readcolor(int mesh_id,char *numefis)
 {int i,j,colors,fstart,fend,fred,fgreen,fblue; /*colors - numar de culori*/
 /*fstart si fend - primul, respectiv ultimul triunghi cu culoarea(fred,fgreen,fblue)*/
 FILE *fis;
@@ -174,16 +174,11 @@ if(!(fis=fopen(numefis,"r"))){printf("File '%s' could not be open\r\n",numefis);
 
 fscanf(fis,"%d",&colors); /*aflat numar de culori*/
 
-for(i=1;i<=nrfaces;i++)
-{
-  set_face_color(face, i, 255, 255, 255);
-}
-
 for(j=1;j<=colors;j++){
 fscanf(fis,"%d %d %d %d %d",&fstart,&fend,&fred,&fgreen,&fblue);
   for(i=fstart;i<=fend;i++)
   {
-    set_face_color(face, i, fred, fgreen, fblue);
+    set_face_color(mesh_id, i, fred, fgreen, fblue);
   }
 }
 
@@ -193,7 +188,7 @@ if(identcom(s)==16){ /*fullbright*/
   for(j=1;j<=colors;j++){
     fscanf(fis,"%d %d",&fstart,&fend);
     for(i=fstart;i<=fend;i++){
-      set_face_fullbright(face, i);
+      set_face_fullbright(mesh_id, i);
     }
   }
 }
@@ -388,7 +383,7 @@ s[0]='1';while(s[0]){
 	            refglob[i].nfa=findnf(s);
 	            faces(i,s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
-	              readcolor(fceglob[i],refglob[i].nfa,s);
+	              readcolor(i,s);
 	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
 	            readref(&refglob[i],s);
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
@@ -530,7 +525,7 @@ s[0]='1';while(s[0]){
 	            refglob[i].nfa=findnf(s);
 	            faces(i,s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
-	              readcolor(fceglob[i],refglob[i].nfa,s);
+	              readcolor(i,s);
 	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
 	            readref(&refglob[i],s);
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
@@ -605,7 +600,7 @@ for(i=1;i<=nto;i++){
     len=blue*fblue;
     if(len>255){len=255;}
     blue=(int)len;
-    set_face_color(fceglob[i],j,red,green,blue);
+    set_face_color(i,j,red,green,blue);
   }
 }
 

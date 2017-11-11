@@ -53,11 +53,11 @@ void create_mesh();
 
 void add_face(int mesh_id, REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN x3, REALN y3, REALN z3);
 
-void set_face_color(tria* face, int face_id, int red, int green, int blue);
+void set_face_color(int mesh_id, int face_id, int red, int green, int blue);
 
 void get_face_color(int mesh_id, int face_id, int* red, int* green, int* blue);
 
-void set_face_fullbright(tria* face, int face_id);
+void set_face_fullbright(int mesh_id, int face_id);
 
 void get_face_vertex(tria* face, int face_id, int vertex_id, REALN *x, REALN *y, REALN *z);
 

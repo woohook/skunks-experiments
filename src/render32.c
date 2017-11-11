@@ -69,8 +69,9 @@ void add_face(int mesh_id, REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REA
   face[face_id].cull = 0; /*no culling and no fullbright if not specified*/
 }
 
-void set_face_color(tria* face, int face_id, int red, int green, int blue)
+void set_face_color(int mesh_id, int face_id, int red, int green, int blue)
 {
+  tria* face = fceglob[mesh_id];
   face[face_id].red   = red;
   face[face_id].green = green;
   face[face_id].blue  = blue;
@@ -84,8 +85,9 @@ void get_face_color(int mesh_id, int face_id, int* red, int* green, int* blue)
   *blue  = face[face_id].blue;
 }
 
-void set_face_fullbright(tria* face, int face_id)
+void set_face_fullbright(int mesh_id, int face_id)
 {
+  tria* face = fceglob[mesh_id];
   face[face_id].cull = ((face[face_id].cull)&1)+2;
 }
 
