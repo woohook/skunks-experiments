@@ -43,20 +43,20 @@ void create_mesh()
   face_count = 0;
 }
 
-void add_face(tria* face, int face_id, REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN x3, REALN y3, REALN z3)
+void add_face(int mesh_id, int face_id, REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN x3, REALN y3, REALN z3)
 {
   face_count++;
   if(face_count==1)
   {
     face_count = 2;
-    if(!(fceglob[mesh_count-1]=(tria *)malloc(face_count*sizeof(tria)))){printf("Out of memory");}
+    if(!(fceglob[mesh_id]=(tria *)malloc(face_count*sizeof(tria)))){printf("Out of memory");}
   }
   else
   {
-    if(!(fceglob[mesh_count-1]=(tria *)realloc(fceglob[mesh_count-1], face_count*sizeof(tria)))){printf("Out of memory");}
+    if(!(fceglob[mesh_id]=(tria *)realloc(fceglob[mesh_id], face_count*sizeof(tria)))){printf("Out of memory");}
   }
 
-  face = fceglob[mesh_count-1];
+  tria* face = fceglob[mesh_id];
   face_id = face_count-1;
 
   face[face_id].x1 = x1; face[face_id].y1 = y1; face[face_id].z1 = z1;

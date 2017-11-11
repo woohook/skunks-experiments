@@ -131,7 +131,7 @@ return nrfaces;}
 
 
 /*functie care afla coordonatele varfurilor triunghiurilor*/
-void faces(tria *face,char *numefis)
+void faces(int mesh_id, char *numefis)
 {int lincr=0,i,j,k,l,nrfaces,nvert;
 FILE *fis;
 REALN *x,*y,*z;
@@ -155,7 +155,7 @@ for(i=1;i<=nvert;i++){
 for(i=1;i<=nrfaces;i++){
   fisgetw(fis,s,&lincr); /*sarit peste "f"*/
   fscanf(fis,"%d %d %d", &j, &k, &l);
-  add_face(face, i, x[j], y[j], z[j], x[k], y[k], z[k], x[l], y[l], z[l]);
+  add_face(mesh_id, i, x[j], y[j], z[j], x[k], y[k], z[k], x[l], y[l], z[l]);
 }
 
 free(x);free(y);free(z);
@@ -393,7 +393,7 @@ s[0]='1';while(s[0]){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
 	            refglob[i].nfa=findnf(s);
-	            faces(fceglob[i],s);
+	            faces(i,s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
 	              readcolor(fceglob[i],refglob[i].nfa,s);
 	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
@@ -666,7 +666,7 @@ s[0]='1';while(s[0]){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
 	            refglob[i].nfa=findnf(s);
-	            faces(fceglob[i],s);
+	            faces(i,s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
 	              readcolor(fceglob[i],refglob[i].nfa,s);
 	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
