@@ -69,7 +69,7 @@ void enable_face_culling(tria* face, int face_id);
 dupa care determina punctul de intersectie al planului cu o dreapta care trece prin
 O(0,0,0) si F(xf,yf,zf)
 nrfaces - numar total de triunghiuri*/
-void findplan(tria *face,int i,REALN *a,REALN *b,REALN *c,REALN *d);
+void findplan(REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN x3, REALN y3, REALN z3, REALN *a,REALN *b,REALN *c,REALN *d);
 
 
 /*function which displays the objcts which are closer than zmax

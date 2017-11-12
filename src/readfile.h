@@ -269,7 +269,7 @@ fclose(fis);
 void ordercl(tria *face,char *numefis)
 {int i,j,nrcmd,nf1,nf2;
 REALN x,y,z,dx,dy,dz,a,b,c,d,prodscal;
-REALN x1,y1,z1, x2,y2,z2;
+REALN x1,y1,z1, x2,y2,z2, x3,y3,z3;
 char vis; /*'v'-visible from (x,y,z); 'i'-not visible*/
 FILE *fis;
 
@@ -283,7 +283,8 @@ for(i=1;i<=nrcmd;i++){
   for(j=nf1;j<=nf2;j++){
     get_face_vertex(face,j,1,&x1,&y1,&z1);
     get_face_vertex(face,j,2,&x2,&y2,&z2);
-    findplan(face,j,&a,&b,&c,&d);
+    get_face_vertex(face,j,3,&x3,&y3,&z3);
+    findplan(x1,y1,z1,x2,y2,z2,x3,y3,z3,&a,&b,&c,&d);
      dx=x1-x;
      dy=y1-y;
      dz=z1-z;

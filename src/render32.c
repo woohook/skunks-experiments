@@ -283,14 +283,14 @@ return dist;}
 dupa care determina punctul de intersectie al planului cu o dreapta care trece prin
 O(0,0,0) si F(xf,yf,zf)
 nrfaces - numar total de triunghiuri*/
-void findplan(tria *face,int i,REALN *a,REALN *b,REALN *c,REALN *d)
+void findplan(REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN x3, REALN y3, REALN z3, REALN *a,REALN *b,REALN *c,REALN *d)
 {REALN a1,b1,c1,a2,b2,c2;
 
-	a1=face[i].x1-face[i].x2; b1=face[i].y1-face[i].y2; c1=face[i].z1-face[i].z2;
-	a2=face[i].x1-face[i].x3; b2=face[i].y1-face[i].y3; c2=face[i].z1-face[i].z3;
+	a1=x1-x2; b1=y1-y2; c1=z1-z2;
+	a2=x1-x3; b2=y1-y3; c2=z1-z3;
 
 	*a=b1*c2-b2*c1; *b=a2*c1-a1*c2; *c=a1*b2-a2*b1;
-	*d=(*a)*face[i].x1+(*b)*face[i].y1+(*c)*face[i].z1;
+	*d=(*a)*x1+(*b)*y1+(*c)*z1;
 	/*ecuatia planului este ax+by+cz=d*/
 }
 
@@ -336,7 +336,8 @@ if(SDL_MUSTLOCK(screen)){
 
 for(crf=1;(int)crf<=nrfaces;crf++){
 
-findplan(face,crf,&a,&b,&c,&d);
+tria* pFace = &face[crf];
+findplan(pFace->x1,pFace->y1,pFace->z1,pFace->x2,pFace->y2,pFace->z2,pFace->x3,pFace->y3,pFace->z3,&a,&b,&c,&d);
 
 aizf=a*izf; bizf=b*izf; id=1/d;
 
