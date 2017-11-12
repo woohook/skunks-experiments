@@ -78,5 +78,3 @@ cam - camera*/
 void odis(SDL_Surface *screen,sgob *objs,int nob,pixcol backcol,REALN zfog,REALN zmax,sgob *cam,lightpr *light);
 
 void renderer_release();
-
-extern struct _tria **fceglob; // array with triangles and colors of object types
