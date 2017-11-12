@@ -91,8 +91,9 @@ void set_face_fullbright(int mesh_id, int face_id)
   face[face_id].cull = ((face[face_id].cull)&1)+2;
 }
 
-void get_face_vertex(tria* face, int face_id, int vertex_id, REALN *x, REALN *y, REALN *z)
+void get_face_vertex(int mesh_id, int face_id, int vertex_id, REALN *x, REALN *y, REALN *z)
 {
+  tria* face = fceglob[mesh_id];
   switch(vertex_id)
   {
     case 1:
@@ -115,16 +116,18 @@ void get_face_vertex(tria* face, int face_id, int vertex_id, REALN *x, REALN *y,
   }
 }
 
-void flip_face(tria* face, int face_id)
+void flip_face(int mesh_id, int face_id)
 {
+  tria* face = fceglob[mesh_id];
   REALN tmp;
   tmp = face[face_id].x1; face[face_id].x1 = face[face_id].x2; face[face_id].x2 = tmp;
   tmp = face[face_id].y1; face[face_id].y1 = face[face_id].y2; face[face_id].y2 = tmp;
   tmp = face[face_id].z1; face[face_id].z1 = face[face_id].z2; face[face_id].z2 = tmp;
 }
 
-void enable_face_culling(tria* face, int face_id)
+void enable_face_culling(int mesh_id, int face_id)
 {
+  tria* face = fceglob[mesh_id];
   face[face_id].cull = ((face[face_id].cull)&2)+1;
 }
 

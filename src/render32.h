@@ -59,11 +59,11 @@ void get_face_color(int mesh_id, int face_id, int* red, int* green, int* blue);
 
 void set_face_fullbright(int mesh_id, int face_id);
 
-void get_face_vertex(tria* face, int face_id, int vertex_id, REALN *x, REALN *y, REALN *z);
+void get_face_vertex(int mesh_id, int face_id, int vertex_id, REALN *x, REALN *y, REALN *z);
 
-void flip_face(tria* face, int face_id);
+void flip_face(int mesh_id, int face_id);
 
-void enable_face_culling(tria* face, int face_id);
+void enable_face_culling(int mesh_id, int face_id);
 
 /*functie care determina ecuatia planului cu numarul de ordine 'i'
 dupa care determina punctul de intersectie al planului cu o dreapta care trece prin

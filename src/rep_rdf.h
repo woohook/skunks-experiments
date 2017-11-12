@@ -266,7 +266,7 @@ fclose(fis);
 
 
 /*order vertices, so triangles can be culled correctly*/
-void ordercl(tria *face,char *numefis)
+void ordercl(int mesh_id,char *numefis)
 {int i,j,nrcmd,nf1,nf2;
 REALN x,y,z,dx,dy,dz,a,b,c,d,prodscal;
 REALN x1,y1,z1, x2,y2,z2, x3,y3,z3;
@@ -281,23 +281,23 @@ for(i=1;i<=nrcmd;i++){
   fscanf(fis,"%d %d %c %f %f %f",&nf1,&nf2,&vis,&x,&y,&z);
 
   for(j=nf1;j<=nf2;j++){
-    get_face_vertex(face,j,1,&x1,&y1,&z1);
-    get_face_vertex(face,j,2,&x2,&y2,&z2);
-    get_face_vertex(face,j,3,&x3,&y3,&z3);
+    get_face_vertex(mesh_id,j,1,&x1,&y1,&z1);
+    get_face_vertex(mesh_id,j,2,&x2,&y2,&z2);
+    get_face_vertex(mesh_id,j,3,&x3,&y3,&z3);
     findplan(x1,y1,z1,x2,y2,z2,x3,y3,z3,&a,&b,&c,&d);
      dx=x1-x;
      dy=y1-y;
      dz=z1-z;
     prodscal=a*dx+b*dy+c*dz;
     switch(vis){
-      case 'v': enable_face_culling(face,j);
+      case 'v': enable_face_culling(mesh_id,j);
         if(prodscal<0){
-          flip_face(face,j);
+          flip_face(mesh_id,j);
         } break;
 
-      case 'i': enable_face_culling(face,j);
+      case 'i': enable_face_culling(mesh_id,j);
         if(prodscal>=0){
-          flip_face(face,j);
+          flip_face(mesh_id,j);
         } break;
 
       default: break;
@@ -310,22 +310,22 @@ fclose(fis);
 
 
 /*function which finds the center and size of the object*/
-void eval_obj(tria *face,sgob *objs)
+void eval_obj(int mesh_id,sgob *objs)
 {int i,nrfaces;
 REALD xmin,xmax,ymin,ymax,zmin,zmax,lenx,leny,lenz;
 REALN x1,y1,z1, x2,y2,z2, x3,y3,z3;
 
 nrfaces=objs->nfa;
 
-get_face_vertex(face,1,1,&x1,&y1,&z1);
+get_face_vertex(mesh_id,1,1,&x1,&y1,&z1);
 xmin=xmax=x1;
 ymin=ymax=y1;
 zmin=zmax=z1;
 
 for(i=1;i<=nrfaces;i++){
-get_face_vertex(face,i,1,&x1,&y1,&z1);
-get_face_vertex(face,i,2,&x2,&y2,&z2);
-get_face_vertex(face,i,3,&x3,&y3,&z3);
+get_face_vertex(mesh_id,i,1,&x1,&y1,&z1);
+get_face_vertex(mesh_id,i,2,&x2,&y2,&z2);
+get_face_vertex(mesh_id,i,3,&x3,&y3,&z3);
 
 if(xmin>x1){xmin=x1;}
 if(xmin>x2){xmin=x2;}
@@ -388,7 +388,7 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
 	            readref(&refglob[i],s);
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
-	              ordercl(fceglob[i],s);
+	              ordercl(i,s);
 	          }
 	          break;
 
@@ -413,7 +413,7 @@ s[0]='1';while(s[0]){
 	                objs[i].yref[j]=refglob[objs[i].otyp].y[j];
 	                objs[i].zref[j]=refglob[objs[i].otyp].z[j];
 	              }
-	              eval_obj(fceglob[objs[i].otyp],&objs[i]);
+	              eval_obj(objs[i].otyp,&objs[i]);
 
                     k=i-nob+car->nob; /*1...car->nob*/
                     car->oid[k]=i;
@@ -530,7 +530,7 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
 	            readref(&refglob[i],s);
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
-	              ordercl(fceglob[i],s);
+	              ordercl(i,s);
 	          }
 	          break;
 
@@ -554,7 +554,7 @@ s[0]='1';while(s[0]){
 	                objs[i].yref[j]=refglob[objs[i].otyp].y[j];
 	                objs[i].zref[j]=refglob[objs[i].otyp].z[j];
 	              }
-	              eval_obj(fceglob[objs[i].otyp],&objs[i]);
+	              eval_obj(objs[i].otyp,&objs[i]);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
