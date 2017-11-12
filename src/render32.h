@@ -61,7 +61,7 @@ void set_face_fullbright(int mesh_id, int face_id);
 
 void get_face_vertex(tria* face, int face_id, int vertex_id, REALN *x, REALN *y, REALN *z);
 
-void reverse_face_vertices(tria* face, int face_id);
+void flip_face(tria* face, int face_id);
 
 void enable_face_culling(tria* face, int face_id);
 

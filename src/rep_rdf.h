@@ -291,12 +291,12 @@ for(i=1;i<=nrcmd;i++){
     switch(vis){
       case 'v': enable_face_culling(face,j);
         if(prodscal<0){
-          reverse_face_vertices(face,j);
+          flip_face(face,j);
         } break;
 
       case 'i': enable_face_culling(face,j);
         if(prodscal>=0){
-          reverse_face_vertices(face,j);
+          flip_face(face,j);
         } break;
 
       default: break;

@@ -115,7 +115,7 @@ void get_face_vertex(tria* face, int face_id, int vertex_id, REALN *x, REALN *y,
   }
 }
 
-void reverse_face_vertices(tria* face, int face_id)
+void flip_face(tria* face, int face_id)
 {
   REALN tmp;
   tmp = face[face_id].x1; face[face_id].x1 = face[face_id].x2; face[face_id].x2 = tmp;
