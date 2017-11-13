@@ -31,9 +31,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SDLSCREENFLAG SDL_SWSURFACE
 /*SDL_FULLSCREEN or SDL_SWSURFACE*/
 
-#define CLBITS 32
-/*number of colour bits; can be 16, 24 or 32*/
-
 #define DOUBLEPIX 0
 /*1 - large pixels; 0 - normal pixels*/
 

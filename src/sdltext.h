@@ -17,53 +17,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 
-#if CLBITS==16
-
-/*draw points and lines*/
-void mdraw(SDL_Surface *screen,int x,int y,char s)
-{long int i,j,x2,y2;
-float rap;
-static int x1=0,y1=0;
-Uint16 *ptr,bright;
-int height,red=255,green=255,blue=255;
-
-bright=SDL_MapRGB(screen->format,red,green,blue);
-height=SCREENHEIGHT;
-
-switch(s){
-  case 'p': x1=x;y1=y;ptr=(Uint16 *)((Uint8 *)screen->pixels + (height-y1)*screen->pitch + x1*2); *ptr=bright;
-            break;
-
-  case 'l': x2=x1+x;y2=y1+y;
-            if((fabs(x2-x1))||(fabs(y2-y1))){
-              if (fabs(x1-x2)<fabs(y1-y2)){
-                rap=(float)(x2-x1)/(y2-y1);
-                if(y2>y1){
-                  for(i=y1;i<=y2;i++){j=(int)(x1+(i-y1)*rap);
-                    ptr=(Uint16 *)((Uint8 *)screen->pixels + (height-i)*screen->pitch + j*2); *ptr=bright;}
-                }else{
-                  for(i=y1;i>=y2;i--){j=(int)(x1+(i-y1)*rap);
-                    ptr=(Uint16 *)((Uint8 *)screen->pixels + (height-i)*screen->pitch + j*2); *ptr=bright;}}
-              }else{
-                rap=(float)(y2-y1)/(x2-x1);
-                if(x2>x1){
-                  for(j=x1;j<=x2;j++){i=(int)(y1+(j-x1)*rap);
-                    ptr=(Uint16 *)((Uint8 *)screen->pixels + (height-i)*screen->pitch + j*2); *ptr=bright;}
-                }else{
-                  for(j=x1;j>=x2;j--){i=(int)(y1+(j-x1)*rap);
-                    ptr=(Uint16 *)((Uint8 *)screen->pixels + (height-i)*screen->pitch + j*2); *ptr=bright;}}
-              }
-            }else{ptr=(Uint16 *)((Uint8 *)screen->pixels + (height-y1)*screen->pitch + x1*2); *ptr=bright;}
-            x1=x2;y1=y2;
-            break;
-
-  default: break;
-}
-
-}
-
-#else
-
 /*draw points and lines*/
 void mdraw(SDL_Surface *screen,int x,int y,char s)
 {long int i,j,x2,y2;
@@ -72,7 +25,8 @@ static int x1=0,y1=0;
 Uint8 *ptr;
 int height,bitd;
 
-bitd=CLBITS/8;
+const int bits_per_pixel = 32;
+bitd=bits_per_pixel/8;
 
 height=SCREENHEIGHT;
 
@@ -113,8 +67,6 @@ switch(s){
 }
 
 }
-
-#endif
 
 
 /*draws 1 character*/
