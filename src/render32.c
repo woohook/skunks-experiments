@@ -325,7 +325,8 @@ area=width*height+1;
 
 izmax=1/zmax; izfog=1/zfog;
 
-bitd=CLBITS/8;
+const int bits_per_pixel = 32;
+bitd=bits_per_pixel/8;
 
 /*desenare imagine*/
 for(i=0;i<=(int)area;i++){distmin[i]=izmax;}

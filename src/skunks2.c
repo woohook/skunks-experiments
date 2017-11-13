@@ -33,13 +33,7 @@ void SDL_UpdateRect()
 
 #include "defstr.h"
 
-#if CLBITS==16
-  #include "render16.h"
-#elif CLBITS==24
-  #include "render32.h"
-#elif CLBITS==32
-  #include "render32.h"
-#endif
+#include "render32.h"
 
 #include "trans.h"
 #include "readfile.h"
