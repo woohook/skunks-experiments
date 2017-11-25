@@ -24,9 +24,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "sdltext.h"
 
 char textglob[MAXWLG];
+
+typedef struct _pixcol
+{int red;int green;int blue; /*culoarea pixelului*/
+} pixcol;
+
 struct _tria **fceglob = 0; // array with triangles and colors of object types
 int mesh_count = 0;
 int face_count = 0;
+pixcol g_backcol = {0,0,0};
 
 void create_mesh()
 {
@@ -129,6 +135,13 @@ void enable_face_culling(int mesh_id, int face_id)
 {
   tria* face = fceglob[mesh_id];
   face[face_id].cull = ((face[face_id].cull)&2)+1;
+}
+
+void set_background_color(int red, int green, int blue)
+{
+  g_backcol.red   = red;
+  g_backcol.green = green;
+  g_backcol.blue  = blue;
 }
 
 /*functie care elimina triunghiurile care sunt in plus*/
@@ -298,7 +311,7 @@ void findplan(REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN 
 }
 
 
-void displaysdl(SDL_Surface *screen,tria *face,int nrfaces,REALN *distmin,unsigned int width,unsigned int height,REALN focal,pixcol backcol,REALN zfog,REALN zmax,lightpr *light)
+void displaysdl(SDL_Surface *screen,tria *face,int nrfaces,REALN *distmin,unsigned int width,unsigned int height,REALN focal,REALN zfog,REALN zmax,lightpr *light)
 {int i,j,jmin,jmax,xcr,ycr,isp,bitd,red,green,blue,red0,green0,blue0;
 Uint8 *ptr;
 pixcol pixcb; /*culoarea pixelului curent*/
@@ -317,6 +330,7 @@ REALN a,b,c,d,izf, /*izf=1/zf - pt. marit viteza; ecuatia planului este ax+by+cz
   printf("Error: DOUBLEPIX should be set to 0 or 1 in 'src/config.h'\r\n"); exit(1);
 #endif
 
+pixcol backcol = g_backcol;
 red0=backcol.red; green0=backcol.green; blue0=backcol.blue;
 
 thres=1/(width+height);
@@ -523,7 +537,7 @@ if(SDL_MUSTLOCK(screen)){SDL_UnlockSurface(screen);}
 /*function which displays the objcts which are closer than zmax
 nob - total number of objects
 cam - camera*/
-void odis(SDL_Surface *screen,sgob *objs,int nob,pixcol backcol,REALN zfog,REALN zmax,sgob *cam,lightpr *light)
+void odis(SDL_Surface *screen,sgob *objs,int nob,REALN zfog,REALN zmax,sgob *cam,lightpr *light)
 {int i,j,focal;
 unsigned int width,height;
 unsigned long int area;
@@ -540,7 +554,7 @@ REALN tgh,tgv,zmin;
 REALN x,y,z,ix,iy,iz,jx,jy,jz,kx,ky,kz; /*temporary variables for transformations*/
 
 if(nob==0){free(face); free(facedisp); free(obdis); free(distmin); return;}
-/*to free static variables, call odis(0,0,0,backcol,0,0,0,0)*/
+/*to free static variables, call odis(0,0,0,0,0,0,0)*/
 
 width=SCREENWIDTH;
 height=SCREENHEIGHT;
@@ -676,7 +690,7 @@ for(i=1;i<=nobdis;i++){
 
 nrdisp=fclip(face,nrfaces,zmin,facedisp,zmax,tgh,tgv);
 
-displaysdl(screen,facedisp,nrdisp,distmin,width,height,focal,backcol,zfog,zmax,&rotlight);
+displaysdl(screen,facedisp,nrdisp,distmin,width,height,focal,zfog,zmax,&rotlight);
 
 }
 

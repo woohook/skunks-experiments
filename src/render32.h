@@ -18,10 +18,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 extern char textglob[MAXWLG];
 
-typedef struct _pixcol
-{int red;int green;int blue; /*culoarea pixelului*/
-} pixcol;
-
 typedef struct _tria
 {REALN x1; REALN y1;REALN z1;
 REALN x2; REALN y2;REALN z2;
@@ -65,6 +61,8 @@ void flip_face(int mesh_id, int face_id);
 
 void enable_face_culling(int mesh_id, int face_id);
 
+void set_background_color(int red, int green, int blue);
+
 /*functie care determina ecuatia planului cu numarul de ordine 'i'
 dupa care determina punctul de intersectie al planului cu o dreapta care trece prin
 O(0,0,0) si F(xf,yf,zf)
@@ -75,6 +73,6 @@ void findplan(REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN 
 /*function which displays the objcts which are closer than zmax
 nob - total number of objects
 cam - camera*/
-void odis(SDL_Surface *screen,sgob *objs,int nob,pixcol backcol,REALN zfog,REALN zmax,sgob *cam,lightpr *light);
+void odis(SDL_Surface *screen,sgob *objs,int nob,REALN zfog,REALN zmax,sgob *cam,lightpr *light);
 
 void renderer_release();

@@ -482,7 +482,7 @@ return objs;}
 
 
 /*function which reads the track; nrobt - number of objects*/
-sgob *readtrack(char *numefis,int *nrobt,int *nrtyp,pixcol *backcol,lightpr *light)
+sgob *readtrack(char *numefis,int *nrobt,int *nrtyp,int* background_red, int* background_green, int* background_blue,lightpr *light)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
@@ -605,7 +605,7 @@ for(i=1;i<=nto;i++){
   }
 }
 
-backcol->red=bred; backcol->green=bgreen; backcol->blue=bblue;
+*background_red=bred; *background_green=bgreen; *background_blue=bblue;
 
 len=sqrt(light->dx*light->dx+light->dy*light->dy+light->dz*light->dz);
 light->dx/=len;
