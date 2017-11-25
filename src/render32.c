@@ -29,6 +29,24 @@ typedef struct _pixcol
 {int red;int green;int blue; /*culoarea pixelului*/
 } pixcol;
 
+typedef struct _tria
+{REALN x1; REALN y1;REALN z1;
+REALN x2; REALN y2;REALN z2;
+REALN x3; REALN y3;REALN z3;
+int red; int green; int blue; /*culoarea triunghiului*/
+int redd; int greend; int blued;
+unsigned char cull; /*first bit(&1):1-cull;0-no cull;second bit(&2):1-fullbright;0-usual*/
+} tria;
+
+typedef struct _tripf
+{REALN x1; REALN y1;
+REALN x2; REALN y2;
+REALN x3; REALN y3;
+} tripf;
+
+typedef struct _trilim
+{int imin;int imax;} trilim;
+
 struct _tria **fceglob = 0; // array with triangles and colors of object types
 int mesh_count = 0;
 int face_count = 0;
