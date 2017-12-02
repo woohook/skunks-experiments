@@ -39,6 +39,8 @@ void SDL_UpdateRect()
 #include "rep_rdf.h"
 #include "rep_game.h"
 
+char speedometer[MAXWLG];
+
 int main(int argc,char *argv[])
 {char numefis1[MAXWLG],numefis2[MAXWLG];
 
@@ -130,8 +132,8 @@ for(i=1;i<=nob;i++){
 }
 
 
-sprintf(textglob,"%3.0f km/h",speed*3.6);
-
+sprintf(speedometer,"%3.0f km/h",speed*3.6);
+display_text(speedometer,strlen(speedometer));
 
 
 setcamg(objs,&camera,&car,camflag);

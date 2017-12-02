@@ -16,8 +16,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-extern char textglob[MAXWLG];
-
 typedef struct _lightpr
 {REALN ambient;
 REALN headlight;
@@ -44,6 +42,8 @@ void flip_face(int mesh_id, int face_id);
 void enable_face_culling(int mesh_id, int face_id);
 
 void set_background_color(int red, int green, int blue);
+
+void display_text(char* text, int number_of_characters);
 
 /*functie care determina ecuatia planului cu numarul de ordine 'i'
 dupa care determina punctul de intersectie al planului cu o dreapta care trece prin

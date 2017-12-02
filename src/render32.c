@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "render32.h"
 #include "sdltext.h"
 
-char textglob[MAXWLG];
+char textglob[MAXWLG] = {0};
 
 typedef struct _pixcol
 {int red;int green;int blue; /*culoarea pixelului*/
@@ -160,6 +160,20 @@ void set_background_color(int red, int green, int blue)
   g_backcol.red   = red;
   g_backcol.green = green;
   g_backcol.blue  = blue;
+}
+
+void display_text(char* text, int number_of_characters)
+{
+  if(number_of_characters<MAXWLG)
+  {
+    memcpy(textglob, text, number_of_characters*sizeof(char));
+    textglob[number_of_characters] = '\0';
+  }
+  else
+  {
+    memcpy(textglob, text, (MAXWLG-1)*sizeof(char));
+    textglob[MAXWLG-1] = '\0';
+  }
 }
 
 /*functie care elimina triunghiurile care sunt in plus*/
