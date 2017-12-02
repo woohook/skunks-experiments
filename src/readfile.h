@@ -604,7 +604,7 @@ dTriIndex indexlglob[3]={0,1,2},
           indexrglob[3]={0,2,1}; /*global variables used by the function below*/
 
 /*function which reads the track; nrobt - number of objects*/
-sgob *readtrack(char *numefis,int *nrobt,int *nrtyp,int* background_red, int* background_green, int* background_blue,lightpr *light)
+sgob *readtrack(char *numefis,int *nrobt,int *nrtyp,int* background_red, int* background_green, int* background_blue)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
@@ -634,12 +634,12 @@ dGeomTriMeshDataBuildSimple(trid[4],vert4glob,3,indexrglob,3);
 
 objs=&objtmp; /*ca sa nu "warning"*/
 
-light->ambient=0.5;
-light->headlight=0.3;
-light->directional=0.5;
-light->dx=-0.5;
-light->dy=1;
-light->dz=1; /*set default values for the light*/
+float light_ambient=0.5;
+float light_headlight=0.3;
+float light_directional=0.5;
+float light_dx=-0.5;
+float light_dy=1;
+float light_dz=1; /*set default values for the light*/
 
   if(!(fis=fopen(numefis,"r"))){printf("Error: File %s could not be open\r\n",numefis);exit(1);}
 s[0]='1';while(s[0]){
@@ -754,15 +754,15 @@ s[0]='1';while(s[0]){
 	          }
 	          break;
 
-	  case 12: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light->ambient=atof(s); break;
+	  case 12: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_ambient=atof(s); break;
 
-	  case 13: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light->headlight=atof(s); break;
+	  case 13: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_headlight=atof(s); break;
 
-	  case 14: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light->directional=atof(s); break;
+	  case 14: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_directional=atof(s); break;
 
-	  case 15: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light->dx=atof(s);
-	           err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light->dy=atof(s);
-	           err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light->dz=atof(s);
+	  case 15: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_dx=atof(s);
+	           err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_dy=atof(s);
+	           err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_dz=atof(s);
 	           break;
 	
 	  default: if(s[0]){printf("Error: '%s' line %d - word '%s' not recognized\r\n",numefis,lincr,s);exit(1);}
@@ -789,9 +789,13 @@ for(i=1;i<=nto;i++){
 
 *background_red=bred; *background_green=bgreen; *background_blue=bblue;
 
-len=sqrt(light->dx*light->dx+light->dy*light->dy+light->dz*light->dz);
-light->dx/=len;
-light->dy/=len;
-light->dz/=len; /*normalized light direction*/
+len=sqrt(light_dx*light_dx+light_dy*light_dy+light_dz*light_dz);
+light_dx/=len;
+light_dy/=len;
+light_dz/=len; /*normalized light direction*/
+
+set_ambient_light(light_ambient);
+set_headlight(light_headlight);
+set_directional_light(light_directional, light_dx, light_dy, light_dz);
 
 return objs;}

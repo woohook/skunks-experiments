@@ -16,15 +16,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-typedef struct _lightpr
-{REALN ambient;
-REALN headlight;
-REALN directional;
-REALN dx;
-REALN dy;
-REALN dz;
-} lightpr; /*light parameters*/
-
 void create_mesh();
 
 void add_face(int mesh_id, REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN x3, REALN y3, REALN z3);
@@ -45,6 +36,12 @@ void set_background_color(int red, int green, int blue);
 
 void display_text(char* text, int number_of_characters);
 
+void set_ambient_light(float ambient_light);
+
+void set_headlight(float headlight);
+
+void set_directional_light(float directional_light, float dx, float dy, float dz);
+
 /*functie care determina ecuatia planului cu numarul de ordine 'i'
 dupa care determina punctul de intersectie al planului cu o dreapta care trece prin
 O(0,0,0) si F(xf,yf,zf)
@@ -55,6 +52,6 @@ void findplan(REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN 
 /*function which displays the objcts which are closer than zmax
 nob - total number of objects
 cam - camera*/
-void odis(SDL_Surface *screen,sgob *objs,int nob,REALN zfog,REALN zmax,sgob *cam,lightpr *light);
+void odis(SDL_Surface *screen,sgob *objs,int nob,REALN zfog,REALN zmax,sgob *cam);
 
 void renderer_release();

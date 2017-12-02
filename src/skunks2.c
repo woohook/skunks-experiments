@@ -62,7 +62,6 @@ REALN volum[6]={0,0,0,0,0,0};
 //pixcol backcol; /*culoarea fundalului*/
 int background_red, background_green, background_blue;
 REALN  zfog,zmax; /*zfog,zmax - distanta de la care incepe ceatza, respectiv de la care nu se mai vede nimic*/
-lightpr light;
 
 sgob *objs,camera; /*objects*/
 int nob,nto,camflag=2; /*number of objects and of object types*/
@@ -114,7 +113,7 @@ dWorldSetCFM(wglob,1e-5);
 dWorldSetGravity(wglob,GRAVITY,0,0);
 
 strcpy(numefis,argv[2]);
-objs=readtrack(numefis,&nob,&nto,&background_red,&background_green,&background_blue,&light); /*read objects from file*/
+objs=readtrack(numefis,&nob,&nto,&background_red,&background_green,&background_blue); /*read objects from file*/
 set_background_color(background_red,background_green,background_blue);
 
 strcpy(numefis,argv[1]);
@@ -258,7 +257,7 @@ setcamg(&camera,&car,camflag);
 rotc+=vrotc*tframe; if(camflag==2){rotc=0; vrotc=0;}
 if(rotc){rotatx(&camera,objs[car.oid[1]].vy[0],objs[car.oid[1]].vz[0],rotc);}
 
-odis(screen,objs,nob,zfog,zmax,&camera,&light); /*display image*/
+odis(screen,objs,nob,zfog,zmax,&camera); /*display image*/
 
 dstr+=(speed*tframe);
 
@@ -373,6 +372,6 @@ fclose(repf);
 dWorldDestroy(wglob);
 dCloseODE();
 
-odis(0,0,0,0,0,0,0); /*freed static variables from odis() in "camera.h"*/
+odis(0,0,0,0,0,0); /*freed static variables from odis() in "camera.h"*/
 
 return 0;}

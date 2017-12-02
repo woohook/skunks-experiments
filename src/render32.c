@@ -47,10 +47,20 @@ REALN x3; REALN y3;
 typedef struct _trilim
 {int imin;int imax;} trilim;
 
+typedef struct _lightpr
+{REALN ambient;
+REALN headlight;
+REALN directional;
+REALN dx;
+REALN dy;
+REALN dz;
+} lightpr; /*light parameters*/
+
 struct _tria **fceglob = 0; // array with triangles and colors of object types
 int mesh_count = 0;
 int face_count = 0;
 pixcol g_backcol = {0,0,0};
+lightpr g_light = {0,0,0,0,0,0};
 
 void create_mesh()
 {
@@ -174,6 +184,24 @@ void display_text(char* text, int number_of_characters)
     memcpy(textglob, text, (MAXWLG-1)*sizeof(char));
     textglob[MAXWLG-1] = '\0';
   }
+}
+
+void set_ambient_light(float ambient_light)
+{
+  g_light.ambient = ambient_light;
+}
+
+void set_headlight(float headlight)
+{
+  g_light.headlight = headlight;
+}
+
+void set_directional_light(float directional_light, float dx, float dy, float dz)
+{
+  g_light.directional = directional_light;
+  g_light.dx = dx;
+  g_light.dy = dy;
+  g_light.dz = dz;
 }
 
 /*functie care elimina triunghiurile care sunt in plus*/
@@ -343,7 +371,7 @@ void findplan(REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN 
 }
 
 
-void displaysdl(SDL_Surface *screen,tria *face,int nrfaces,REALN *distmin,unsigned int width,unsigned int height,REALN focal,REALN zfog,REALN zmax,lightpr *light)
+void displaysdl(SDL_Surface *screen,tria *face,int nrfaces,REALN *distmin,unsigned int width,unsigned int height,REALN focal,REALN zfog,REALN zmax, lightpr* light)
 {int i,j,jmin,jmax,xcr,ycr,isp,bitd,red,green,blue,red0,green0,blue0;
 Uint8 *ptr;
 pixcol pixcb; /*culoarea pixelului curent*/
@@ -569,7 +597,7 @@ if(SDL_MUSTLOCK(screen)){SDL_UnlockSurface(screen);}
 /*function which displays the objcts which are closer than zmax
 nob - total number of objects
 cam - camera*/
-void odis(SDL_Surface *screen,sgob *objs,int nob,REALN zfog,REALN zmax,sgob *cam,lightpr *light)
+void odis(SDL_Surface *screen,sgob *objs,int nob,REALN zfog,REALN zmax,sgob *cam)
 {int i,j,focal;
 unsigned int width,height;
 unsigned long int area;
@@ -660,15 +688,15 @@ for(i=1;i<=nobdis;i++){
   obdis[i].zcen=x*kx+y*ky+z*kz; /*rotated objects*/
 }
 
-x=light->dx;
-y=light->dy;
-z=light->dz;
+x=g_light.dx;
+y=g_light.dy;
+z=g_light.dz;
 rotlight.dx=x*ix+y*iy+z*iz;
 rotlight.dy=x*jx+y*jy+z*jz;
 rotlight.dz=x*kx+y*ky+z*kz; /*rotated light*/
-rotlight.ambient=light->ambient;
-rotlight.headlight=light->headlight;
-rotlight.directional=light->directional;
+rotlight.ambient=g_light.ambient;
+rotlight.headlight=g_light.headlight;
+rotlight.directional=g_light.directional;
 
 nrfaces=0;
 crf=0;

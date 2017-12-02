@@ -52,7 +52,6 @@ SDL_Surface *screen;
 
 int background_red, background_green, background_blue;
 REALN  zfog,zmax; /*zfog,zmax - distanta de la care incepe ceatza, respectiv de la care nu se mai vede nimic*/
-lightpr light;
 
 sgob *objs,camera; /*objects*/
 int nob,nto,camflag=1; /*number of objects and of object types*/
@@ -88,7 +87,7 @@ if(!(repf=fopen(numefis1,"r"))){printf("Error: could not open '%s'\r\n",numefis1
 fscanf(repf,"%s",numefis1);
 fscanf(repf,"%s",numefis2);
 
-objs=readtrack(numefis2,&nob,&nto,&background_red,&background_green,&background_blue,&light); /*read objects from file*/
+objs=readtrack(numefis2,&nob,&nto,&background_red,&background_green,&background_blue); /*read objects from file*/
 set_background_color(background_red,background_green,background_blue);
 objs=readvehicle(numefis1,objs,&nto,&nob,&car); /*read vehicle from file*/
 
@@ -141,7 +140,7 @@ setcamg(objs,&camera,&car,camflag);
 rotc+=vrotc*tframe; if(camflag==2){rotc=0; vrotc=0;}
 if(rotc){rotatx(&camera,objs[car.oid[1]].vy[0],objs[car.oid[1]].vz[0],rotc);}
 
-odis(screen,objs,nob,zfog,zmax,&camera,&light); /*display image*/
+odis(screen,objs,nob,zfog,zmax,&camera); /*display image*/
 
 dstr+=(speed*tframe);
 
