@@ -611,7 +611,7 @@ FILE *fis;
 int i,j,
     nto=0,nob=0, /*number of object types and number of objects; nob=(*nrobt) */
     bred=130,bgreen=160,bblue=200; /*background color*/
-sgob *objs,objtmp;
+sgob *objs = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       fred=1.0,fgreen=1.0,fblue=1.0, /*color multiplication factors*/
       ix,jx,kx,
@@ -631,8 +631,6 @@ dGeomTriMeshDataBuildSimple(trid[2],vert2glob,3,indexrglob,3);
 dGeomTriMeshDataBuildSimple(trid[3],vert3glob,3,indexlglob,3);
 dGeomTriMeshDataBuildSimple(trid[4],vert4glob,3,indexrglob,3);
 /*data for triangle meshes used at curved road elements*/
-
-objs=&objtmp; /*ca sa nu "warning"*/
 
 float light_ambient=0.5;
 float light_headlight=0.3;
