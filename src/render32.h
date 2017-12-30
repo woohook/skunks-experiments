@@ -34,8 +34,6 @@ void enable_face_culling(int mesh_id, int face_id);
 
 void set_background_color(int red, int green, int blue);
 
-void display_text(char* text, int number_of_characters);
-
 void set_ambient_light(float ambient_light);
 
 void set_headlight(float headlight);

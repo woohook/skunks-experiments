@@ -39,8 +39,6 @@ void SDL_UpdateRect()
 #include "readfile.h"
 #include "game.h"
 
-char speedometer[MAXWLG];
-
 int main(int argc,char *argv[])
 {char numefis[MAXWLG];
 
@@ -235,16 +233,6 @@ for(i=1;i<=nob;i++){
 
 rdspeed(&car,&speed,&rotspeed,&dspeed);
 acc=dspeed/tframe;
-
-switch(dmode){
-  case 1: sprintf(speedometer,"%3.0f km/h",speed*3.6);
-          break;
-  case -1: sprintf(speedometer,"%3.0f km/h-R",speed*3.6);
-          break;
-  default: break;
-}
-display_text(speedometer,strlen(speedometer));
-
 
 #if SOUND==1
 volum[1]=rotspeed; if (volum[1]>200){volum[1]=200;}
