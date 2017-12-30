@@ -40,6 +40,8 @@ void set_headlight(float headlight);
 
 void set_directional_light(float directional_light, float dx, float dy, float dz);
 
+void set_width_factor(float width_factor);
+
 /*functie care determina ecuatia planului cu numarul de ordine 'i'
 dupa care determina punctul de intersectie al planului cu o dreapta care trece prin
 O(0,0,0) si F(xf,yf,zf)

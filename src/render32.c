@@ -58,6 +58,7 @@ int mesh_count = 0;
 int face_count = 0;
 pixcol g_backcol = {0,0,0};
 lightpr g_light = {0,0,0,0,0,0};
+float g_width_factor = 1.0f;
 
 void create_mesh()
 {
@@ -185,6 +186,11 @@ void set_directional_light(float directional_light, float dx, float dy, float dz
   g_light.dx = dx;
   g_light.dy = dy;
   g_light.dz = dz;
+}
+
+void set_width_factor(float width_factor)
+{
+  g_width_factor = width_factor;
 }
 
 /*functie care elimina triunghiurile care sunt in plus*/
@@ -402,9 +408,10 @@ findplan(pFace->x1,pFace->y1,pFace->z1,pFace->x2,pFace->y2,pFace->z2,pFace->x3,p
 
 aizf=a*izf; bizf=b*izf; id=1/d;
 
-#if ASPCOR==1
-  bizf/=WIDTHFACTOR;
-#endif
+if(g_width_factor != 1.0f)
+{
+  bizf/=g_width_factor;
+}
 
 /*start lighting and backface culling*/
 tmp=a*face[crf].x1+b*face[crf].y1+c*face[crf].z1;
@@ -478,10 +485,11 @@ for(i=lim.imin;i<=lim.imax;i++){
       yend=(ratio3*(xcr-ftr.x1)+ftr.y1);}
     if(yend<ystart){tmp=ystart;ystart=yend;yend=tmp;}
 
-#if ASPCOR==1
-  ystart*=WIDTHFACTOR;
-  yend*=WIDTHFACTOR;
-#endif
+    if(g_width_factor != 1.0f)
+    {
+      ystart*=g_width_factor;
+      yend*=g_width_factor;
+    }
 
     jmin=(int)(-yend+(int)(width>>1))+1; jmax=(int)(-ystart+(int)(width>>1));
     if(jmin<0){jmin=0;}
@@ -606,12 +614,11 @@ area=(width+1)*(height+1);
 tgh=(float)width/(2*(float)focal);
 tgv=(float)height/(2*(float)focal);
 
-#if ASPCOR==1
-  focal=(int)((float)focal/WIDTHFACTOR);
-  tgv*=WIDTHFACTOR;
-#elif ASPCOR!=0
-  printf("Error: ASPCOR should be set to 0 or 1 in 'src/config.h'\r\n"); exit(1);
-#endif
+if(g_width_factor != 1.0f)
+{
+  focal=(int)((float)focal/g_width_factor);
+  tgv*=g_width_factor;
+}
 
 zmin=1e-3;
 
