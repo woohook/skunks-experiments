@@ -59,6 +59,7 @@ int face_count = 0;
 pixcol g_backcol = {0,0,0};
 lightpr g_light = {0,0,0,0,0,0};
 float g_width_factor = 1.0f;
+float g_view_angle = 90.0f;
 
 void create_mesh()
 {
@@ -191,6 +192,11 @@ void set_directional_light(float directional_light, float dx, float dy, float dz
 void set_width_factor(float width_factor)
 {
   g_width_factor = width_factor;
+}
+
+void set_view_angle(float view_angle)
+{
+  g_view_angle = view_angle;
 }
 
 /*functie care elimina triunghiurile care sunt in plus*/
@@ -607,7 +613,7 @@ if(nob==0){free(face); free(facedisp); free(obdis); free(distmin); return;}
 
 width=screen->w;
 height=screen->h;
-focal=(int)(width/(2*tan(FOV*0.008726646)));
+focal=(int)(width/(2*tan(g_view_angle*0.008726646)));
 
 area=(width+1)*(height+1);
 

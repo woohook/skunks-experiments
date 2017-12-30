@@ -103,6 +103,7 @@ screen=SDL_GetWindowSurface(RGLOBwindow);
 /*SDL2^*/
 printf("Set %dx%dx%d\n",(screen->pitch)/(screen->format->BytesPerPixel),SCREENHEIGHT,screen->format->BitsPerPixel);
 
+set_view_angle(FOV);
 #if ASPCOR==1
 set_width_factor(WIDTHFACTOR);
 #endif
