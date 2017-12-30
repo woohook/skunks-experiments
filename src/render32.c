@@ -605,8 +605,8 @@ float x,y,z,ix,iy,iz,jx,jy,jz,kx,ky,kz; /*temporary variables for transformation
 if(nob==0){free(face); free(facedisp); free(obdis); free(distmin); return;}
 /*to free static variables, call odis(0,0,0,0,0,0,0)*/
 
-width=SCREENWIDTH;
-height=SCREENHEIGHT;
+width=screen->w;
+height=screen->h;
 focal=(int)(width/(2*tan(FOV*0.008726646)));
 
 area=(width+1)*(height+1);
