@@ -44,6 +44,8 @@ void set_width_factor(float width_factor);
 
 void set_view_angle(float view_angle);
 
+void set_double_pixel(int double_pixel);
+
 /*functie care determina ecuatia planului cu numarul de ordine 'i'
 dupa care determina punctul de intersectie al planului cu o dreapta care trece prin
 O(0,0,0) si F(xf,yf,zf)

@@ -60,6 +60,7 @@ pixcol g_backcol = {0,0,0};
 lightpr g_light = {0,0,0,0,0,0};
 float g_width_factor = 1.0f;
 float g_view_angle = 90.0f;
+int g_double_pixel = 0;
 
 void create_mesh()
 {
@@ -197,6 +198,11 @@ void set_width_factor(float width_factor)
 void set_view_angle(float view_angle)
 {
   g_view_angle = view_angle;
+}
+
+void set_double_pixel(int double_pixel)
+{
+  g_double_pixel = double_pixel;
 }
 
 /*functie care elimina triunghiurile care sunt in plus*/
@@ -379,11 +385,10 @@ float a,b,c,d,izf, /*izf=1/zf - pt. marit viteza; ecuatia planului este ax+by+cz
       a1,bright,redf,greenf,bluef,
       aizf,bizf,aizfxcr,id,izmax,izfog;
 
-#if DOUBLEPIX==1
+if(g_double_pixel == 1)
+{
   width/=2; height/=2; focal/=2;
-#elif DOUBLEPIX!=0
-  printf("Error: DOUBLEPIX should be set to 0 or 1 in 'src/config.h'\r\n"); exit(1);
-#endif
+}
 
 pixcol backcol = g_backcol;
 red0=backcol.red; green0=backcol.green; blue0=backcol.blue;
@@ -501,11 +506,14 @@ for(i=lim.imin;i<=lim.imax;i++){
     if(jmin<0){jmin=0;}
     if(jmax>((int)width-1)){jmax=(int)width-1;}
 
-#if DOUBLEPIX==0
-  ptr=(Uint8 *)screen->pixels+isp+jmin*bitd;
-#else
-  ptr=(Uint8 *)screen->pixels+2*isp+jmin*bitd*2;
-#endif
+    if(g_double_pixel == 0)
+    {
+      ptr=(Uint8 *)screen->pixels+isp+jmin*bitd;
+    }
+    else
+    {
+      ptr=(Uint8 *)screen->pixels+2*isp+jmin*bitd*2;
+    }
 
   idx=i*width+jmin;
 
@@ -520,11 +528,14 @@ for(i=lim.imin;i<=lim.imax;i++){
             ptr[2] = face[crf].redd;
 	  }
 
-#if DOUBLEPIX==0
-	ptr+=bitd;
-#else
-	ptr+=2*bitd;
-#endif
+    if(g_double_pixel == 0)
+    {
+      ptr+=bitd;
+    }
+    else
+    {
+      ptr+=2*bitd;
+    }
 
   }
 }
@@ -536,12 +547,15 @@ for(j=0;j<=(int)height-1;j++){
   redf=red0-tmp; greenf=green0-tmp; bluef=blue0-tmp;
   backcol.red=(int)redf; backcol.green=(int)greenf; backcol.blue=(int)bluef;
 
-#if DOUBLEPIX==0
-  ptr=(Uint8 *)screen->pixels + j*screen->pitch;
-#else
-  ptr=(Uint8 *)screen->pixels + 2*j*screen->pitch;
+  if(g_double_pixel == 0)
+  {
+    ptr=(Uint8 *)screen->pixels + j*screen->pitch;
+  }
+  else
+  {
+    ptr=(Uint8 *)screen->pixels + 2*j*screen->pitch;
+  }
   isp=screen->pitch;
-#endif
 
 for(i=0;i<=(int)width-1;i++){
 if(distmin[++crf]==izmax){
@@ -567,20 +581,24 @@ if(distmin[++crf]==izmax){
         ptr[2] = pixcb.red;
       }}
 
-#if DOUBLEPIX==0
+  if(g_double_pixel == 0)
+  {
     ptr+=bitd;
-#else
+  }
+  else
+  {
     ptr[bitd]=ptr[isp]=ptr[isp+bitd]=ptr[0];
     ptr[bitd+1]=ptr[isp+1]=ptr[isp+bitd+1]=ptr[1];
     ptr[bitd+2]=ptr[isp+2]=ptr[isp+bitd+2]=ptr[2];
     ptr+=2*bitd;
-#endif
+  }
 
 }}
 
-#if DOUBLEPIX==1
-width*=2; height*=2;
-#endif
+if(g_double_pixel == 1)
+{
+  width*=2; height*=2;
+}
 
 /*Unlock screen*/
 if(SDL_MUSTLOCK(screen)){SDL_UnlockSurface(screen);}
