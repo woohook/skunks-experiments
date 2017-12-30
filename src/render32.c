@@ -27,30 +27,30 @@ typedef struct _pixcol
 } pixcol;
 
 typedef struct _tria
-{REALN x1; REALN y1;REALN z1;
-REALN x2; REALN y2;REALN z2;
-REALN x3; REALN y3;REALN z3;
+{float x1; float y1;float z1;
+float x2; float y2;float z2;
+float x3; float y3;float z3;
 int red; int green; int blue; /*culoarea triunghiului*/
 int redd; int greend; int blued;
 unsigned char cull; /*first bit(&1):1-cull;0-no cull;second bit(&2):1-fullbright;0-usual*/
 } tria;
 
 typedef struct _tripf
-{REALN x1; REALN y1;
-REALN x2; REALN y2;
-REALN x3; REALN y3;
+{float x1; float y1;
+float x2; float y2;
+float x3; float y3;
 } tripf;
 
 typedef struct _trilim
 {int imin;int imax;} trilim;
 
 typedef struct _lightpr
-{REALN ambient;
-REALN headlight;
-REALN directional;
-REALN dx;
-REALN dy;
-REALN dz;
+{float ambient;
+float headlight;
+float directional;
+float dx;
+float dy;
+float dz;
 } lightpr; /*light parameters*/
 
 struct _tria **fceglob = 0; // array with triangles and colors of object types
@@ -74,7 +74,7 @@ void create_mesh()
   face_count = 0;
 }
 
-void add_face(int mesh_id, REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN x3, REALN y3, REALN z3)
+void add_face(int mesh_id, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3)
 {
   face_count++;
   if(face_count==1)
@@ -122,7 +122,7 @@ void set_face_fullbright(int mesh_id, int face_id)
   face[face_id].cull = ((face[face_id].cull)&1)+2;
 }
 
-void get_face_vertex(int mesh_id, int face_id, int vertex_id, REALN *x, REALN *y, REALN *z)
+void get_face_vertex(int mesh_id, int face_id, int vertex_id, float *x, float *y, float *z)
 {
   tria* face = fceglob[mesh_id];
   switch(vertex_id)
@@ -150,7 +150,7 @@ void get_face_vertex(int mesh_id, int face_id, int vertex_id, REALN *x, REALN *y
 void flip_face(int mesh_id, int face_id)
 {
   tria* face = fceglob[mesh_id];
-  REALN tmp;
+  float tmp;
   tmp = face[face_id].x1; face[face_id].x1 = face[face_id].x2; face[face_id].x2 = tmp;
   tmp = face[face_id].y1; face[face_id].y1 = face[face_id].y2; face[face_id].y2 = tmp;
   tmp = face[face_id].z1; face[face_id].z1 = face[face_id].z2; face[face_id].z2 = tmp;
@@ -188,9 +188,9 @@ void set_directional_light(float directional_light, float dx, float dy, float dz
 }
 
 /*functie care elimina triunghiurile care sunt in plus*/
-int fclip(tria *face,int nrfaces,REALN zmin,tria *facedisp,REALN zmax,REALN tgh,REALN tgv)
+int fclip(tria *face,int nrfaces,float zmin,tria *facedisp,float zmax,float tgh,float tgv)
 {int i,j,k,l,kmin,invs;
-REALN x[4],y[4],z[4],tmp,tmp2;
+float x[4],y[4],z[4],tmp,tmp2;
 j=0; /*variabila pt. numarat triunghiurile afisate*/
 for(i=1;i<=nrfaces;i++){
 
@@ -289,8 +289,8 @@ return j;}
 A(x1,y1,z1);B(x2,y2,z2);c(x3,y3,z3)
 (punctul M apartine planului ABC)
 nu se mai foloseste functia asta*/
-int vertri(REALN x1,REALN y1,REALN x2,REALN y2,REALN x3,REALN y3,REALN x,REALN y)
-{REALN l1,l2,m1,m2,p; /*p - produs vectorial*/
+int vertri(float x1,float y1,float x2,float y2,float x3,float y3,float x,float y)
+{float l1,l2,m1,m2,p; /*p - produs vectorial*/
 char s1,s2,s3; /*semnele celor 3 produse vectoriale care vor fi calculate*/
 
   l1=x2-x1;l2=x-x1;
@@ -315,10 +315,10 @@ A(x1,y1,z1);B(x2,y2,z2);c(x3,y3,z3)
 dupa care determina punctul de intersectie al planului cu o dreapta care trece prin
 O(0,0,0) si F(xf,yf,zf)
 nu se mai foloseste functia asta ci findplan()*/
-REALN ccplan(REALN x1,REALN y1,REALN z1,REALN x2,REALN y2,REALN z2,REALN x3,REALN y3,REALN z3,REALN xf,REALN yf,REALN zf)
-{REALN a1,b1,c1,a2,b2,c2,a,b,c,d;
-REALN xi,yi,zi;
-REALN dist; /*patratul distantei de la origine pana la intersectia dreptei cu planul*/
+float ccplan(float x1,float y1,float z1,float x2,float y2,float z2,float x3,float y3,float z3,float xf,float yf,float zf)
+{float a1,b1,c1,a2,b2,c2,a,b,c,d;
+float xi,yi,zi;
+float dist; /*patratul distantei de la origine pana la intersectia dreptei cu planul*/
 
   a1=x1-x2; b1=y1-y2; c1=z1-z2;
   a2=x1-x3; b2=y1-y3; c2=z1-z3;
@@ -342,8 +342,8 @@ return dist;}
 dupa care determina punctul de intersectie al planului cu o dreapta care trece prin
 O(0,0,0) si F(xf,yf,zf)
 nrfaces - numar total de triunghiuri*/
-void findplan(REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN x3, REALN y3, REALN z3, REALN *a,REALN *b,REALN *c,REALN *d)
-{REALN a1,b1,c1,a2,b2,c2;
+void findplan(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float *a,float *b,float *c,float *d)
+{float a1,b1,c1,a2,b2,c2;
 
 	a1=x1-x2; b1=y1-y2; c1=z1-z2;
 	a2=x1-x3; b2=y1-y3; c2=z1-z3;
@@ -354,16 +354,16 @@ void findplan(REALN x1, REALN y1, REALN z1, REALN x2, REALN y2, REALN z2, REALN 
 }
 
 
-void displaysdl(SDL_Surface *screen,tria *face,int nrfaces,REALN *distmin,unsigned int width,unsigned int height,REALN focal,REALN zfog,REALN zmax, lightpr* light)
+void displaysdl(SDL_Surface *screen,tria *face,int nrfaces,float *distmin,unsigned int width,unsigned int height,float focal,float zfog,float zmax, lightpr* light)
 {int i,j,jmin,jmax,xcr,ycr,isp,bitd,red,green,blue,red0,green0,blue0;
 Uint8 *ptr;
 pixcol pixcb; /*culoarea pixelului curent*/
-REALN ystart,yend,zf,dist;
+float ystart,yend,zf,dist;
 unsigned long int idx,crf,area;
-REALN tmp,ratio2,ratio3,ratio4,thres;
+float tmp,ratio2,ratio3,ratio4,thres;
 tripf ftr; /*proiectii varfuri triunghi*/
 trilim lim; /*limite triunghi pe axa y*/
-REALN a,b,c,d,izf, /*izf=1/zf - pt. marit viteza; ecuatia planului este ax+by+cz=d*/
+float a,b,c,d,izf, /*izf=1/zf - pt. marit viteza; ecuatia planului este ax+by+cz=d*/
       a1,bright,redf,greenf,bluef,
       aizf,bizf,aizfxcr,id,izmax,izfog;
 
@@ -518,7 +518,7 @@ for(i=lim.imin;i<=lim.imax;i++){
 
 crf=0; ratio2=1/(izmax-izfog);
 for(j=0;j<=(int)height-1;j++){
-  tmp=1.0-sin(3.1416*j/(REALN)height); tmp*=50;
+  tmp=1.0-sin(3.1416*j/(float)height); tmp*=50;
   redf=red0-tmp; greenf=green0-tmp; bluef=blue0-tmp;
   backcol.red=(int)redf; backcol.green=(int)greenf; backcol.blue=(int)bluef;
 
@@ -578,21 +578,21 @@ if(SDL_MUSTLOCK(screen)){SDL_UnlockSurface(screen);}
 /*function which displays the objcts which are closer than zmax
 nob - total number of objects
 cam - camera*/
-void odis(SDL_Surface *screen,sgob *objs,int nob,REALN zfog,REALN zmax,sgob *cam)
+void odis(SDL_Surface *screen,sgob *objs,int nob,float zfog,float zmax,sgob *cam)
 {int i,j,focal;
 unsigned int width,height;
 unsigned long int area;
 static int sem=0,nrfm=0; /*number of triangles for which memory has been allocated*/
 static tria *face,*facedisp; /*triangles and displayed triangles in global system*/
 static sgob *obdis; /*displayed objects (copies)*/
-static REALN *distmin; /*Zbuffer for sending to displaysdl()*/
+static float *distmin; /*Zbuffer for sending to displaysdl()*/
 int nrfaces,nrdisp,crf, /*number of triangles and of displayed triangles, current triangle*/
     nobdis=0; /*number of displayed objects*/
 
 lightpr rotlight; /*rotated light parameters*/
 
-REALN tgh,tgv,zmin;
-REALN x,y,z,ix,iy,iz,jx,jy,jz,kx,ky,kz; /*temporary variables for transformations*/
+float tgh,tgv,zmin;
+float x,y,z,ix,iy,iz,jx,jy,jz,kx,ky,kz; /*temporary variables for transformations*/
 
 if(nob==0){free(face); free(facedisp); free(obdis); free(distmin); return;}
 /*to free static variables, call odis(0,0,0,0,0,0,0)*/
@@ -603,11 +603,11 @@ focal=(int)(width/(2*tan(FOV*0.008726646)));
 
 area=(width+1)*(height+1);
 
-tgh=(REALN)width/(2*(REALN)focal);
-tgv=(REALN)height/(2*(REALN)focal);
+tgh=(float)width/(2*(float)focal);
+tgv=(float)height/(2*(float)focal);
 
 #if ASPCOR==1
-  focal=(int)((REALN)focal/WIDTHFACTOR);
+  focal=(int)((float)focal/WIDTHFACTOR);
   tgv*=WIDTHFACTOR;
 #elif ASPCOR!=0
   printf("Error: ASPCOR should be set to 0 or 1 in 'src/config.h'\r\n"); exit(1);
@@ -616,7 +616,7 @@ tgv=(REALN)height/(2*(REALN)focal);
 zmin=1e-3;
 
 if(!sem){
-  if(!(distmin=(REALN *)malloc(area*sizeof(REALN)))){printf("Out of memory");}
+  if(!(distmin=(float *)malloc(area*sizeof(float)))){printf("Out of memory");}
   if(!(face=(tria *)malloc(11*sizeof(tria)))){printf("Out of memory");}
   if(!(facedisp=(tria *)malloc(22*sizeof(tria)))){printf("Out of memory");}
   if(!(obdis=(sgob *)malloc((nob+1)*sizeof(sgob)))){printf("Out of memory");}
