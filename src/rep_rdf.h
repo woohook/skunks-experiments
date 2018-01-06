@@ -403,11 +403,11 @@ s[0]='1';while(s[0]){
 	              }
 	              objs[i].nref=refglob[objs[i].otyp].nref;
 	              objs[i].nfa=refglob[objs[i].otyp].nfa;
-	              objs[i].vx[0]=objs[i].vy[0]=objs[i].vz[0]=0;
-	              objs[i].vx[1]=objs[i].vy[2]=objs[i].vz[3]=1;
-	              objs[i].vx[2]=objs[i].vx[3]=0;
-	              objs[i].vy[1]=objs[i].vy[3]=0;
-	              objs[i].vz[1]=objs[i].vz[2]=0;
+	              objs[i].transform.vx[0]=objs[i].transform.vy[0]=objs[i].transform.vz[0]=0;
+	              objs[i].transform.vx[1]=objs[i].transform.vy[2]=objs[i].transform.vz[3]=1;
+	              objs[i].transform.vx[2]=objs[i].transform.vx[3]=0;
+	              objs[i].transform.vy[1]=objs[i].transform.vy[3]=0;
+	              objs[i].transform.vz[1]=objs[i].transform.vz[2]=0;
 	              for(j=1;j<=objs[i].nref;j++){
 	                objs[i].xref[j]=refglob[objs[i].otyp].x[j];
 	                objs[i].yref[j]=refglob[objs[i].otyp].y[j];
@@ -542,11 +542,11 @@ s[0]='1';while(s[0]){
 	              }
 	              objs[i].nref=refglob[objs[i].otyp].nref;
 	              objs[i].nfa=refglob[objs[i].otyp].nfa;
-	              objs[i].vx[0]=objs[i].vy[0]=objs[i].vz[0]=0;
-	              objs[i].vx[1]=objs[i].vy[2]=objs[i].vz[3]=1;
-	              objs[i].vx[2]=objs[i].vx[3]=0;
-	              objs[i].vy[1]=objs[i].vy[3]=0;
-	              objs[i].vz[1]=objs[i].vz[2]=0;
+	              objs[i].transform.vx[0]=objs[i].transform.vy[0]=objs[i].transform.vz[0]=0;
+	              objs[i].transform.vx[1]=objs[i].transform.vy[2]=objs[i].transform.vz[3]=1;
+	              objs[i].transform.vx[2]=objs[i].transform.vx[3]=0;
+	              objs[i].transform.vy[1]=objs[i].transform.vy[3]=0;
+	              objs[i].transform.vz[1]=objs[i].transform.vz[2]=0;
 	              for(j=1;j<=objs[i].nref;j++){
 	                objs[i].xref[j]=refglob[objs[i].otyp].x[j];
 	                objs[i].yref[j]=refglob[objs[i].otyp].y[j];

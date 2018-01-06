@@ -87,10 +87,10 @@ FILE *repf;
 zfog=80;
 zmax=120; /*visibility (m)*/
 
-camera.vx[0]=0; camera.vy[0]=0; camera.vz[0]=0;
-camera.vx[1]=1; camera.vy[1]=0; camera.vz[1]=0;
-camera.vx[2]=0; camera.vy[2]=1; camera.vz[2]=0;
-camera.vx[3]=0; camera.vy[3]=0; camera.vz[3]=1; /*set camera parameters*/
+camera.transform.vx[0]=0; camera.transform.vy[0]=0; camera.transform.vz[0]=0;
+camera.transform.vx[1]=1; camera.transform.vy[1]=0; camera.transform.vz[1]=0;
+camera.transform.vx[2]=0; camera.transform.vy[2]=1; camera.transform.vz[2]=0;
+camera.transform.vx[3]=0; camera.transform.vy[3]=0; camera.transform.vz[3]=1; /*set camera parameters*/
 
 if(argc<=2){printf("Error: Input files not specified\r\nExample: ./skunks cars/car1 tracks/track1\r\n");exit(1);}
 if(argc>=4){printf("Error: Too many arguments\r\n");exit(1);}
@@ -232,7 +232,7 @@ for(i=1;i<=nstepsf;i++){
 
 for(i=1;i<=nob;i++){
   if(objs[i].lev==3){
-    rotab(&objs[i],objs[i].vx[0],objs[i].vy[0],objs[i].vz[0],objs[i].vx[3],objs[i].vy[3],objs[i].vz[3],vrot3*tframe);
+    rotab(&objs[i],objs[i].transform.vx[0],objs[i].transform.vy[0],objs[i].transform.vz[0],objs[i].transform.vx[3],objs[i].transform.vy[3],objs[i].transform.vz[3],vrot3*tframe);
   }
 }
 
@@ -244,11 +244,10 @@ volum[1]=rotspeed; if (volum[1]>200){volum[1]=200;}
 volum[5]=acc;
 #endif
 
-
 setcamg(&camera,&car,camflag);
 
 rotc+=vrotc*tframe; if(camflag==2){rotc=0; vrotc=0;}
-if(rotc){rotatx(&camera,objs[car.oid[1]].vy[0],objs[car.oid[1]].vz[0],rotc);}
+if(rotc){rotatx(&camera,objs[car.oid[1]].transform.vy[0],objs[car.oid[1]].transform.vz[0],rotc);}
 
 odis(screen,objs,nob,zfog,zmax,&camera); /*display image*/
 

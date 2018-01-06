@@ -16,6 +16,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#include "util.h"
+
 typedef struct _refpo
 {int nref; /*number of reference points*/
 REALD x[MAXREF];
@@ -47,9 +49,7 @@ REALN zmin;
 REALN xmax;
 REALN ymax;
 REALN zmax;
-REALD vx[4];
-REALD vy[4];
-REALD vz[4]; /*directions of local axes in global coordinates - v[1]=i, v[2]=j, v[3]=k
+matrix transform; /*directions of local axes in global coordinates - v[1]=i, v[2]=j, v[3]=k
                and origin of local system, in global coord. - v[0];
                in local coord. vx[1]=1, vy[1]=0, vz[1]=0; vx[2]=0, vy[2]=1, vz[2]=0 etc.
                rotation and translation of object only affect vx, vy, vz, ref. points

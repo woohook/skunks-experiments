@@ -410,11 +410,11 @@ s[0]='1';while(s[0]){
 	              }
 	              objs[i].nref=refglob[objs[i].otyp].nref;
 	              objs[i].nfa=refglob[objs[i].otyp].nfa;
-	              objs[i].vx[0]=objs[i].vy[0]=objs[i].vz[0]=0;
-	              objs[i].vx[1]=objs[i].vy[2]=objs[i].vz[3]=1;
-	              objs[i].vx[2]=objs[i].vx[3]=0;
-	              objs[i].vy[1]=objs[i].vy[3]=0;
-	              objs[i].vz[1]=objs[i].vz[2]=0;
+	              objs[i].transform.vx[0]=objs[i].transform.vy[0]=objs[i].transform.vz[0]=0;
+	              objs[i].transform.vx[1]=objs[i].transform.vy[2]=objs[i].transform.vz[3]=1;
+	              objs[i].transform.vx[2]=objs[i].transform.vx[3]=0;
+	              objs[i].transform.vy[1]=objs[i].transform.vy[3]=0;
+	              objs[i].transform.vz[1]=objs[i].transform.vz[2]=0;
 	              for(j=1;j<=objs[i].nref;j++){
 	                objs[i].xref[j]=refglob[objs[i].otyp].x[j];
 	                objs[i].yref[j]=refglob[objs[i].otyp].y[j];
@@ -495,7 +495,7 @@ s[0]='1';while(s[0]){
 	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s); /*box lengths*/
 	                      dMassSetBoxTotal(&(car->mass[k]),len,tx,ty,tz);
 	                      dBodySetMass(car->bid[k],&(car->mass[k]));
-	                      dBodySetPosition(car->bid[k],objs[i].vx[0],objs[i].vy[0],objs[i].vz[0]);
+	                      dBodySetPosition(car->bid[k],objs[i].transform.vx[0],objs[i].transform.vy[0],objs[i].transform.vz[0]);
 	                        rotmt[0]=1; rotmt[1]=0; rotmt[2]=0; rotmt[3]=0;
                                 rotmt[4]=0; rotmt[5]=1; rotmt[6]=0; rotmt[7]=0;
                                 rotmt[8]=0; rotmt[9]=0; rotmt[10]=1; rotmt[11]=0;
@@ -506,7 +506,7 @@ s[0]='1';while(s[0]){
 	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s); /*sphere radius*/
 	                      dMassSetSphereTotal(&(car->mass[k]),len,tx);
 	                      dBodySetMass(car->bid[k],&(car->mass[k]));
-	                      dBodySetPosition(car->bid[k],objs[i].vx[0],objs[i].vy[0],objs[i].vz[0]);
+	                      dBodySetPosition(car->bid[k],objs[i].transform.vx[0],objs[i].transform.vy[0],objs[i].transform.vz[0]);
 	                        rotmt[0]=1; rotmt[1]=0; rotmt[2]=0; rotmt[3]=0;
                                 rotmt[4]=0; rotmt[5]=1; rotmt[6]=0; rotmt[7]=0;
                                 rotmt[8]=0; rotmt[9]=0; rotmt[10]=1; rotmt[11]=0;
@@ -580,7 +580,7 @@ for(i=1;i<=car->nob;i++){
       car->jfc[car->nj]=car->ofc[i];
       dJointAttach(car->jid[car->nj],car->bid[k],car->bid[i]);
       dJointAttach(car->bkm[car->nj],car->bid[k],car->bid[i]);
-      dJointSetHinge2Anchor(car->jid[car->nj],objs[car->oid[i]].vx[0],objs[car->oid[i]].vy[0],objs[car->oid[i]].vz[0]);
+      dJointSetHinge2Anchor(car->jid[car->nj],objs[car->oid[i]].transform.vx[0],objs[car->oid[i]].transform.vy[0],objs[car->oid[i]].transform.vz[0]);
       dJointSetHinge2Axis1(car->jid[car->nj],1,0,0);
       dJointSetHinge2Axis2(car->jid[car->nj],0,1,0);
         dJointSetHinge2Param(car->jid[car->nj],dParamLoStop,-0.001);
@@ -680,11 +680,11 @@ s[0]='1';while(s[0]){
 	              }
 	              objs[i].nref=refglob[objs[i].otyp].nref;
 	              objs[i].nfa=refglob[objs[i].otyp].nfa;
-	              objs[i].vx[0]=objs[i].vy[0]=objs[i].vz[0]=0;
-	              objs[i].vx[1]=objs[i].vy[2]=objs[i].vz[3]=1;
-	              objs[i].vx[2]=objs[i].vx[3]=0;
-	              objs[i].vy[1]=objs[i].vy[3]=0;
-	              objs[i].vz[1]=objs[i].vz[2]=0;
+	              objs[i].transform.vx[0]=objs[i].transform.vy[0]=objs[i].transform.vz[0]=0;
+	              objs[i].transform.vx[1]=objs[i].transform.vy[2]=objs[i].transform.vz[3]=1;
+	              objs[i].transform.vx[2]=objs[i].transform.vx[3]=0;
+	              objs[i].transform.vy[1]=objs[i].transform.vy[3]=0;
+	              objs[i].transform.vz[1]=objs[i].transform.vz[2]=0;
 	              for(j=1;j<=objs[i].nref;j++){
 	                objs[i].xref[j]=refglob[objs[i].otyp].x[j];
 	                objs[i].yref[j]=refglob[objs[i].otyp].y[j];

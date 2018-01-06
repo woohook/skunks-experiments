@@ -31,9 +31,9 @@ void translat(sgob *objs,REALD x,REALD y,REALD z)
   objs->zcen+=z;
 
   for(i=0;i<=3;i++){
-    objs->vx[i]+=x;
-    objs->vy[i]+=y;
-    objs->vz[i]+=z;
+    objs->transform.vx[i]+=x;
+    objs->transform.vy[i]+=y;
+    objs->transform.vz[i]+=z;
   }
 }
 
@@ -58,9 +58,9 @@ sintt=sin(tt);costt=cos(tt);
   objs->ycen=y+(objs->ycen-y)*costt+(xtm-x)*sintt;
 
   for(i=0;i<=3;i++){
-    xtm=objs->vx[i];
-    objs->vx[i]=x+(objs->vx[i]-x)*costt-(objs->vy[i]-y)*sintt;
-    objs->vy[i]=y+(objs->vy[i]-y)*costt+(xtm-x)*sintt;
+    xtm=objs->transform.vx[i];
+    objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*costt-(objs->transform.vy[i]-y)*sintt;
+    objs->transform.vy[i]=y+(objs->transform.vy[i]-y)*costt+(xtm-x)*sintt;
   }
 }
 
@@ -85,9 +85,9 @@ sintt=sin(tt);costt=cos(tt);
   objs->zcen=z+(objs->zcen-z)*costt-(xtm-x)*sintt;
 
   for(i=0;i<=3;i++){
-    xtm=objs->vx[i];
-    objs->vx[i]=x+(objs->vx[i]-x)*costt+(objs->vz[i]-z)*sintt;
-    objs->vz[i]=z+(objs->vz[i]-z)*costt-(xtm-x)*sintt;
+    xtm=objs->transform.vx[i];
+    objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*costt+(objs->transform.vz[i]-z)*sintt;
+    objs->transform.vz[i]=z+(objs->transform.vz[i]-z)*costt-(xtm-x)*sintt;
   }
 }
 
@@ -113,9 +113,9 @@ sintt=sin(tt);costt=cos(tt);
   objs->zcen=z+(objs->zcen-z)*costt+(ytm-y)*sintt;
 
   for(i=0;i<=3;i++){
-    ytm=objs->vy[i];
-    objs->vy[i]=y+(objs->vy[i]-y)*costt-(objs->vz[i]-z)*sintt;
-    objs->vz[i]=z+(objs->vz[i]-z)*costt+(ytm-y)*sintt;
+    ytm=objs->transform.vy[i];
+    objs->transform.vy[i]=y+(objs->transform.vy[i]-y)*costt-(objs->transform.vz[i]-z)*sintt;
+    objs->transform.vz[i]=z+(objs->transform.vz[i]-z)*costt+(ytm-y)*sintt;
   }
 }
 
@@ -154,9 +154,9 @@ sintt=sin(tt);costt=cos(tt);
   objs->ycen=y+(objs->ycen-y)*cosalf-(xtm-x)*sinalf;
 
   for(i=0;i<=3;i++){
-    xtm=objs->vx[i];
-    objs->vx[i]=x+(objs->vx[i]-x)*cosalf+(objs->vy[i]-y)*sinalf;
-    objs->vy[i]=y+(objs->vy[i]-y)*cosalf-(xtm-x)*sinalf;
+    xtm=objs->transform.vx[i];
+    objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*cosalf+(objs->transform.vy[i]-y)*sinalf;
+    objs->transform.vy[i]=y+(objs->transform.vy[i]-y)*cosalf-(xtm-x)*sinalf;
   }
   
 /*2 - rotire cu (-beta) in jurul axei y*/
@@ -171,9 +171,9 @@ sintt=sin(tt);costt=cos(tt);
   objs->zcen=z+(objs->zcen-z)*cosbt+(xtm-x)*sinbt;
 
   for(i=0;i<=3;i++){
-    xtm=objs->vx[i];
-    objs->vx[i]=x+(objs->vx[i]-x)*cosbt-(objs->vz[i]-z)*sinbt;
-    objs->vz[i]=z+(objs->vz[i]-z)*cosbt+(xtm-x)*sinbt;
+    xtm=objs->transform.vx[i];
+    objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*cosbt-(objs->transform.vz[i]-z)*sinbt;
+    objs->transform.vz[i]=z+(objs->transform.vz[i]-z)*cosbt+(xtm-x)*sinbt;
   }
 	}
 /*3 - rotire cu teta in jurul axei z*/
@@ -188,9 +188,9 @@ sintt=sin(tt);costt=cos(tt);
   objs->ycen=y+(objs->ycen-y)*costt+(xtm-x)*sintt;
 
   for(i=0;i<=3;i++){
-    xtm=objs->vx[i];
-    objs->vx[i]=x+(objs->vx[i]-x)*costt-(objs->vy[i]-y)*sintt;
-    objs->vy[i]=y+(objs->vy[i]-y)*costt+(xtm-x)*sintt;
+    xtm=objs->transform.vx[i];
+    objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*costt-(objs->transform.vy[i]-y)*sintt;
+    objs->transform.vy[i]=y+(objs->transform.vy[i]-y)*costt+(xtm-x)*sintt;
   }
 
 	if(len1>thres){
@@ -206,9 +206,9 @@ sintt=sin(tt);costt=cos(tt);
   objs->zcen=z+(objs->zcen-z)*cosbt-(xtm-x)*sinbt;
 
   for(i=0;i<=3;i++){
-    xtm=objs->vx[i];
-    objs->vx[i]=x+(objs->vx[i]-x)*cosbt+(objs->vz[i]-z)*sinbt;
-    objs->vz[i]=z+(objs->vz[i]-z)*cosbt-(xtm-x)*sinbt;
+    xtm=objs->transform.vx[i];
+    objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*cosbt+(objs->transform.vz[i]-z)*sinbt;
+    objs->transform.vz[i]=z+(objs->transform.vz[i]-z)*cosbt-(xtm-x)*sinbt;
   }
   
 /*5 - rotire cu alfa in jurul axei z*/
@@ -223,9 +223,9 @@ sintt=sin(tt);costt=cos(tt);
   objs->ycen=y+(objs->ycen-y)*cosalf+(xtm-x)*sinalf;
 
   for(i=0;i<=3;i++){
-    xtm=objs->vx[i];
-    objs->vx[i]=x+(objs->vx[i]-x)*cosalf-(objs->vy[i]-y)*sinalf;
-    objs->vy[i]=y+(objs->vy[i]-y)*cosalf+(xtm-x)*sinalf;
+    xtm=objs->transform.vx[i];
+    objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*cosalf-(objs->transform.vy[i]-y)*sinalf;
+    objs->transform.vy[i]=y+(objs->transform.vy[i]-y)*cosalf+(xtm-x)*sinalf;
   }
 	}
 }

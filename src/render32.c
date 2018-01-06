@@ -654,43 +654,43 @@ if(!sem){
   nrfm=1; sem=1;}
 
 for(i=1;i<=nob;i++){
-  if(objs[i].xcen-cam->vx[0]-objs[i].radius>(1.74*zmax)){continue;}
-  if(objs[i].xcen-cam->vx[0]+objs[i].radius<(-1.74*zmax)){continue;}
-  if(objs[i].ycen-cam->vy[0]-objs[i].radius>(1.74*zmax)){continue;}
-  if(objs[i].ycen-cam->vy[0]+objs[i].radius<(-1.74*zmax)){continue;}
-  if(objs[i].zcen-cam->vz[0]-objs[i].radius>(1.74*zmax)){continue;}
-  if(objs[i].zcen-cam->vz[0]+objs[i].radius<(-1.74*zmax)){continue;}
+  if(objs[i].xcen-cam->transform.vx[0]-objs[i].radius>(1.74*zmax)){continue;}
+  if(objs[i].xcen-cam->transform.vx[0]+objs[i].radius<(-1.74*zmax)){continue;}
+  if(objs[i].ycen-cam->transform.vy[0]-objs[i].radius>(1.74*zmax)){continue;}
+  if(objs[i].ycen-cam->transform.vy[0]+objs[i].radius<(-1.74*zmax)){continue;}
+  if(objs[i].zcen-cam->transform.vz[0]-objs[i].radius>(1.74*zmax)){continue;}
+  if(objs[i].zcen-cam->transform.vz[0]+objs[i].radius<(-1.74*zmax)){continue;}
   nobdis++;
   obdis[nobdis]=objs[i];
 } /*copied objects*/
 
-ix=cam->vx[1]-cam->vx[0];
-jx=cam->vx[2]-cam->vx[0];
-kx=cam->vx[3]-cam->vx[0];
-  iy=cam->vy[1]-cam->vy[0];
-  jy=cam->vy[2]-cam->vy[0];
-  ky=cam->vy[3]-cam->vy[0];
-    iz=cam->vz[1]-cam->vz[0];
-    jz=cam->vz[2]-cam->vz[0];
-    kz=cam->vz[3]-cam->vz[0]; /*unit vectors of the local axes of camera in global system*/
+ix=cam->transform.vx[1]-cam->transform.vx[0];
+jx=cam->transform.vx[2]-cam->transform.vx[0];
+kx=cam->transform.vx[3]-cam->transform.vx[0];
+  iy=cam->transform.vy[1]-cam->transform.vy[0];
+  jy=cam->transform.vy[2]-cam->transform.vy[0];
+  ky=cam->transform.vy[3]-cam->transform.vy[0];
+    iz=cam->transform.vz[1]-cam->transform.vz[0];
+    jz=cam->transform.vz[2]-cam->transform.vz[0];
+    kz=cam->transform.vz[3]-cam->transform.vz[0]; /*unit vectors of the local axes of camera in global system*/
 
 for(i=1;i<=nobdis;i++){
   for(j=0;j<=3;j++){
-    obdis[i].vx[j]-=cam->vx[0];
-    obdis[i].vy[j]-=cam->vy[0];
-    obdis[i].vz[j]-=cam->vz[0];
+    obdis[i].transform.vx[j]-=cam->transform.vx[0];
+    obdis[i].transform.vy[j]-=cam->transform.vy[0];
+    obdis[i].transform.vz[j]-=cam->transform.vz[0];
   }
-  obdis[i].xcen-=cam->vx[0];
-  obdis[i].ycen-=cam->vy[0];
-  obdis[i].zcen-=cam->vz[0]; /*translated object*/
+  obdis[i].xcen-=cam->transform.vx[0];
+  obdis[i].ycen-=cam->transform.vy[0];
+  obdis[i].zcen-=cam->transform.vz[0]; /*translated object*/
 
   for(j=0;j<=3;j++){
-    x=obdis[i].vx[j];
-    y=obdis[i].vy[j];
-    z=obdis[i].vz[j];
-    obdis[i].vx[j]=x*ix+y*iy+z*iz;
-    obdis[i].vy[j]=x*jx+y*jy+z*jz;
-    obdis[i].vz[j]=x*kx+y*ky+z*kz;
+    x=obdis[i].transform.vx[j];
+    y=obdis[i].transform.vy[j];
+    z=obdis[i].transform.vz[j];
+    obdis[i].transform.vx[j]=x*ix+y*iy+z*iz;
+    obdis[i].transform.vy[j]=x*jx+y*jy+z*jz;
+    obdis[i].transform.vz[j]=x*kx+y*ky+z*kz;
   }
   x=obdis[i].xcen;
   y=obdis[i].ycen;
@@ -725,36 +725,36 @@ for(i=1;i<=nobdis;i++){
       if(!(facedisp=(tria *)realloc(facedisp,(2*nrfm+20)*sizeof(tria)))){printf("Out of memory");}
     }
 
-    ix=obdis[i].vx[1]-obdis[i].vx[0];
-    jx=obdis[i].vx[2]-obdis[i].vx[0];
-    kx=obdis[i].vx[3]-obdis[i].vx[0];
-      iy=obdis[i].vy[1]-obdis[i].vy[0];
-      jy=obdis[i].vy[2]-obdis[i].vy[0];
-      ky=obdis[i].vy[3]-obdis[i].vy[0];
-        iz=obdis[i].vz[1]-obdis[i].vz[0];
-        jz=obdis[i].vz[2]-obdis[i].vz[0];
-        kz=obdis[i].vz[3]-obdis[i].vz[0]; /*unit vectors of the local axes in global system*/
+    ix=obdis[i].transform.vx[1]-obdis[i].transform.vx[0];
+    jx=obdis[i].transform.vx[2]-obdis[i].transform.vx[0];
+    kx=obdis[i].transform.vx[3]-obdis[i].transform.vx[0];
+      iy=obdis[i].transform.vy[1]-obdis[i].transform.vy[0];
+      jy=obdis[i].transform.vy[2]-obdis[i].transform.vy[0];
+      ky=obdis[i].transform.vy[3]-obdis[i].transform.vy[0];
+        iz=obdis[i].transform.vz[1]-obdis[i].transform.vz[0];
+        jz=obdis[i].transform.vz[2]-obdis[i].transform.vz[0];
+        kz=obdis[i].transform.vz[3]-obdis[i].transform.vz[0]; /*unit vectors of the local axes in global system*/
 
     for(j=1;j<=obdis[i].nfa;j++){
       face[j+crf]=fceglob[obdis[i].otyp][j]; /*added triangles*/
         x=fceglob[obdis[i].otyp][j].x1;
         y=fceglob[obdis[i].otyp][j].y1;
         z=fceglob[obdis[i].otyp][j].z1;
-      face[j+crf].x1=obdis[i].vx[0]+x*ix+y*jx+z*kx;
-      face[j+crf].y1=obdis[i].vy[0]+x*iy+y*jy+z*ky;
-      face[j+crf].z1=obdis[i].vz[0]+x*iz+y*jz+z*kz;
+      face[j+crf].x1=obdis[i].transform.vx[0]+x*ix+y*jx+z*kx;
+      face[j+crf].y1=obdis[i].transform.vy[0]+x*iy+y*jy+z*ky;
+      face[j+crf].z1=obdis[i].transform.vz[0]+x*iz+y*jz+z*kz;
         x=fceglob[obdis[i].otyp][j].x2;
         y=fceglob[obdis[i].otyp][j].y2;
         z=fceglob[obdis[i].otyp][j].z2;
-      face[j+crf].x2=obdis[i].vx[0]+x*ix+y*jx+z*kx;
-      face[j+crf].y2=obdis[i].vy[0]+x*iy+y*jy+z*ky;
-      face[j+crf].z2=obdis[i].vz[0]+x*iz+y*jz+z*kz;
+      face[j+crf].x2=obdis[i].transform.vx[0]+x*ix+y*jx+z*kx;
+      face[j+crf].y2=obdis[i].transform.vy[0]+x*iy+y*jy+z*ky;
+      face[j+crf].z2=obdis[i].transform.vz[0]+x*iz+y*jz+z*kz;
         x=fceglob[obdis[i].otyp][j].x3;
         y=fceglob[obdis[i].otyp][j].y3;
         z=fceglob[obdis[i].otyp][j].z3;
-      face[j+crf].x3=obdis[i].vx[0]+x*ix+y*jx+z*kx;
-      face[j+crf].y3=obdis[i].vy[0]+x*iy+y*jy+z*ky;
-      face[j+crf].z3=obdis[i].vz[0]+x*iz+y*jz+z*kz; /*updated positions of triangles*/
+      face[j+crf].x3=obdis[i].transform.vx[0]+x*ix+y*jx+z*kx;
+      face[j+crf].y3=obdis[i].transform.vy[0]+x*iy+y*jy+z*ky;
+      face[j+crf].z3=obdis[i].transform.vz[0]+x*iz+y*jz+z*kz; /*updated positions of triangles*/
     }
     crf=nrfaces;
   }
