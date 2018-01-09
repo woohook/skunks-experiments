@@ -361,7 +361,7 @@ objs->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 
 /*function which reads the vehicle; must be called AFTER readtrack()
 nrtyp,nrobt - number of object types and objects given by readtrack()*/
-sgob *readvehicle(char *numefis,sgob *objs,int *nrtyp,int *nrobt,vhc *car)
+sgob** readvehicle(char *numefis,sgob** objs,int *nrtyp,int *nrobt,vhc *car)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
@@ -394,26 +394,27 @@ s[0]='1';while(s[0]){
 
 	  case 2: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
 	          car->nob=atoi(s); nob+=car->nob; (*nrobt)=nob;
-	          if(!(objs=(sgob *)realloc(objs,(nob+1)*sizeof(sgob)))){printf("Out of memory");}
+	          if(!(objs=(sgob**)realloc(objs,(nob+1)*sizeof(sgob*)))){printf("Out of memory");}
 	          for(i=(nob-car->nob+1);i<=nob;i++){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
-	              objs[i].otyp=nto+atoi(s);
-	              if(objs[i].otyp>(*nrtyp)){
-	                printf("Error: there is no object type '%d'\r\n",objs[i].otyp-nto);exit(1);
+                      objs[i]=(sgob*)malloc(sizeof(sgob));
+	              objs[i]->otyp=nto+atoi(s);
+	              if(objs[i]->otyp>(*nrtyp)){
+	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp-nto);exit(1);
 	              }
-	              objs[i].nref=refglob[objs[i].otyp].nref;
-	              objs[i].nfa=refglob[objs[i].otyp].nfa;
-	              objs[i].transform.vx[0]=objs[i].transform.vy[0]=objs[i].transform.vz[0]=0;
-	              objs[i].transform.vx[1]=objs[i].transform.vy[2]=objs[i].transform.vz[3]=1;
-	              objs[i].transform.vx[2]=objs[i].transform.vx[3]=0;
-	              objs[i].transform.vy[1]=objs[i].transform.vy[3]=0;
-	              objs[i].transform.vz[1]=objs[i].transform.vz[2]=0;
-	              for(j=1;j<=objs[i].nref;j++){
-	                objs[i].xref[j]=refglob[objs[i].otyp].x[j];
-	                objs[i].yref[j]=refglob[objs[i].otyp].y[j];
-	                objs[i].zref[j]=refglob[objs[i].otyp].z[j];
+	              objs[i]->nref=refglob[objs[i]->otyp].nref;
+	              objs[i]->nfa=refglob[objs[i]->otyp].nfa;
+	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
+	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
+	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;
+	              objs[i]->transform.vy[1]=objs[i]->transform.vy[3]=0;
+	              objs[i]->transform.vz[1]=objs[i]->transform.vz[2]=0;
+	              for(j=1;j<=objs[i]->nref;j++){
+	                objs[i]->xref[j]=refglob[objs[i]->otyp].x[j];
+	                objs[i]->yref[j]=refglob[objs[i]->otyp].y[j];
+	                objs[i]->zref[j]=refglob[objs[i]->otyp].z[j];
 	              }
-	              eval_obj(objs[i].otyp,&objs[i]);
+	              eval_obj(objs[i]->otyp,objs[i]);
 
                     k=i-nob+car->nob; /*1...car->nob*/
                     car->oid[k]=i;
@@ -429,7 +430,7 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
 
-	              translat(&objs[i],tx,ty,tz);
+	              translat(objs[i],tx,ty,tz);
 
 	            if(!(err=fisgetw(fis,s,&lincr))){afermex(numefis,lincr,s,1);}
 	            switch(identcmg(s)){
@@ -482,14 +483,14 @@ return objs;}
 
 
 /*function which reads the track; nrobt - number of objects*/
-sgob *readtrack(char *numefis,int *nrobt,int *nrtyp,int* background_red, int* background_green, int* background_blue)
+sgob** readtrack(char *numefis,int *nrobt,int *nrtyp,int* background_red, int* background_green, int* background_blue)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
 int i,j,
     nto=0,nob=0, /*number of object types and number of objects; nob=(*nrobt) */
     bred=130,bgreen=160,bblue=200; /*background color*/
-sgob *objs = 0;
+sgob** objs = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       fred=1.0,fgreen=1.0,fblue=1.0, /*color multiplication factors*/
       len;
@@ -533,37 +534,38 @@ s[0]='1';while(s[0]){
 	          break;
 
 	  case 2: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); (*nrobt)=nob=atoi(s);
-	          if(!(objs=(sgob *)malloc((nob+1)*sizeof(sgob)))){printf("Out of memory");}
+	          if(!(objs=(sgob**)malloc((nob+1)*sizeof(sgob*)))){printf("Out of memory");}
 	          for(i=1;i<=nob;i++){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
-	              objs[i].otyp=atoi(s);
-	              if(objs[i].otyp>nto){
-	                printf("Error: there is no object type '%d'\r\n",objs[i].otyp);exit(1);
+                      objs[i]=(sgob*)malloc(sizeof(sgob));
+	              objs[i]->otyp=atoi(s);
+	              if(objs[i]->otyp>nto){
+	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp);exit(1);
 	              }
-	              objs[i].nref=refglob[objs[i].otyp].nref;
-	              objs[i].nfa=refglob[objs[i].otyp].nfa;
-	              objs[i].transform.vx[0]=objs[i].transform.vy[0]=objs[i].transform.vz[0]=0;
-	              objs[i].transform.vx[1]=objs[i].transform.vy[2]=objs[i].transform.vz[3]=1;
-	              objs[i].transform.vx[2]=objs[i].transform.vx[3]=0;
-	              objs[i].transform.vy[1]=objs[i].transform.vy[3]=0;
-	              objs[i].transform.vz[1]=objs[i].transform.vz[2]=0;
-	              for(j=1;j<=objs[i].nref;j++){
-	                objs[i].xref[j]=refglob[objs[i].otyp].x[j];
-	                objs[i].yref[j]=refglob[objs[i].otyp].y[j];
-	                objs[i].zref[j]=refglob[objs[i].otyp].z[j];
+	              objs[i]->nref=refglob[objs[i]->otyp].nref;
+	              objs[i]->nfa=refglob[objs[i]->otyp].nfa;
+	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
+	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
+	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;
+	              objs[i]->transform.vy[1]=objs[i]->transform.vy[3]=0;
+	              objs[i]->transform.vz[1]=objs[i]->transform.vz[2]=0;
+	              for(j=1;j<=objs[i]->nref;j++){
+	                objs[i]->xref[j]=refglob[objs[i]->otyp].x[j];
+	                objs[i]->yref[j]=refglob[objs[i]->otyp].y[j];
+	                objs[i]->zref[j]=refglob[objs[i]->otyp].z[j];
 	              }
-	              eval_obj(objs[i].otyp,&objs[i]);
+	              eval_obj(objs[i]->otyp,objs[i]);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rz=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ry=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rx=atof(s);
-	              rotatz(&objs[i],0,0,rz);
-	              rotaty(&objs[i],0,0,ry);
-	              rotatx(&objs[i],0,0,rx);
-	              translat(&objs[i],tx,ty,tz);
-	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); objs[i].lev=atoi(s);
+	              rotatz(objs[i],0,0,rz);
+	              rotaty(objs[i],0,0,ry);
+	              rotatx(objs[i],0,0,rx);
+	              translat(objs[i],tx,ty,tz);
+	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); objs[i]->lev=atoi(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2);
 
 	            /*translated and rotated object*/

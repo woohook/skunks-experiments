@@ -61,7 +61,7 @@ REALN volum[6]={0,0,0,0,0,0};
 int background_red, background_green, background_blue;
 REALN  zfog,zmax; /*zfog,zmax - distanta de la care incepe ceatza, respectiv de la care nu se mai vede nimic*/
 
-sgob *objs,camera; /*objects*/
+sgob** objs,camera; /*objects*/
 int nob,nto,camflag=2; /*number of objects and of object types*/
 
 vhc car; /*vehicle*/
@@ -231,8 +231,8 @@ for(i=1;i<=nstepsf;i++){
 
 
 for(i=1;i<=nob;i++){
-  if(objs[i].lev==3){
-    rotab(&objs[i],objs[i].transform.vx[0],objs[i].transform.vy[0],objs[i].transform.vz[0],objs[i].transform.vx[3],objs[i].transform.vy[3],objs[i].transform.vz[3],vrot3*tframe);
+  if(objs[i]->lev==3){
+    rotab(objs[i],objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0],objs[i]->transform.vx[3],objs[i]->transform.vy[3],objs[i]->transform.vz[3],vrot3*tframe);
   }
 }
 
@@ -247,7 +247,7 @@ volum[5]=acc;
 setcamg(&camera,&car,camflag);
 
 rotc+=vrotc*tframe; if(camflag==2){rotc=0; vrotc=0;}
-if(rotc){rotatx(&camera,objs[car.oid[1]].transform.vy[0],objs[car.oid[1]].transform.vz[0],rotc);}
+if(rotc){rotatx(&camera,objs[car.oid[1]]->transform.vy[0],objs[car.oid[1]]->transform.vz[0],rotc);}
 
 odis(screen,objs,nob,zfog,zmax,&camera); /*display image*/
 
@@ -353,7 +353,12 @@ free(obtained);
 #endif
 
 renderer_release();
-free (refglob); free(objs);
+free (refglob);
+for(i=1;i<=nob;i++)
+{
+  free(objs[i]);
+}
+free(objs);
 
 #if REPLAY==1
 fclose(repf);

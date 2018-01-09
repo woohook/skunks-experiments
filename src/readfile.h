@@ -361,7 +361,7 @@ objs->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 
 /*function which reads the vehicle; must be called AFTER readtrack()
 nrtyp,nrobt - number of object types and objects given by readtrack()*/
-sgob *readvehicle(char *numefis,sgob *objs,int *nrtyp,int *nrobt,vhc *car)
+sgob** readvehicle(char *numefis,sgob** objs,int *nrtyp,int *nrobt,vhc *car)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
@@ -401,26 +401,27 @@ s[0]='1';while(s[0]){
 
 	  case 2: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
 	          car->nob=atoi(s); nob+=car->nob; (*nrobt)=nob;
-	          if(!(objs=(sgob *)realloc(objs,(nob+1)*sizeof(sgob)))){printf("Out of memory");}
+	          if(!(objs=(sgob**)realloc(objs,(nob+1)*sizeof(sgob*)))){printf("Out of memory");}
 	          for(i=(nob-car->nob+1);i<=nob;i++){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
-	              objs[i].otyp=nto+atoi(s);
-	              if(objs[i].otyp>(*nrtyp)){
-	                printf("Error: there is no object type '%d'\r\n",objs[i].otyp-nto);exit(1);
+                      objs[i]=(sgob*)malloc(sizeof(sgob));
+	              objs[i]->otyp=nto+atoi(s);
+	              if(objs[i]->otyp>(*nrtyp)){
+	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp-nto);exit(1);
 	              }
-	              objs[i].nref=refglob[objs[i].otyp].nref;
-	              objs[i].nfa=refglob[objs[i].otyp].nfa;
-	              objs[i].transform.vx[0]=objs[i].transform.vy[0]=objs[i].transform.vz[0]=0;
-	              objs[i].transform.vx[1]=objs[i].transform.vy[2]=objs[i].transform.vz[3]=1;
-	              objs[i].transform.vx[2]=objs[i].transform.vx[3]=0;
-	              objs[i].transform.vy[1]=objs[i].transform.vy[3]=0;
-	              objs[i].transform.vz[1]=objs[i].transform.vz[2]=0;
-	              for(j=1;j<=objs[i].nref;j++){
-	                objs[i].xref[j]=refglob[objs[i].otyp].x[j];
-	                objs[i].yref[j]=refglob[objs[i].otyp].y[j];
-	                objs[i].zref[j]=refglob[objs[i].otyp].z[j];
+	              objs[i]->nref=refglob[objs[i]->otyp].nref;
+	              objs[i]->nfa=refglob[objs[i]->otyp].nfa;
+	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
+	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
+	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;
+	              objs[i]->transform.vy[1]=objs[i]->transform.vy[3]=0;
+	              objs[i]->transform.vz[1]=objs[i]->transform.vz[2]=0;
+	              for(j=1;j<=objs[i]->nref;j++){
+	                objs[i]->xref[j]=refglob[objs[i]->otyp].x[j];
+	                objs[i]->yref[j]=refglob[objs[i]->otyp].y[j];
+	                objs[i]->zref[j]=refglob[objs[i]->otyp].z[j];
 	              }
-	              eval_obj(objs[i].otyp,&objs[i]);
+	              eval_obj(objs[i]->otyp,objs[i]);
 
                     k=i-nob+car->nob; /*1...car->nob*/
                     car->oid[k]=i;
@@ -438,28 +439,28 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
 
-	              translat(&objs[i],tx,ty,tz);
+	              translat(objs[i],tx,ty,tz);
 
 	            /*translated and rotated object; set geometry parameters*/
-	            for(j=1;j<=(objs[i].nref/2);j++){
-	              switch(refglob[objs[i].otyp].gtip[j]){
-	                case 'b': objs[i].gid[j]=dCreateBox(0,refglob[objs[i].otyp].lx[j],refglob[objs[i].otyp].ly[j],refglob[objs[i].otyp].lz[j]);
+	            for(j=1;j<=(objs[i]->nref/2);j++){
+	              switch(refglob[objs[i]->otyp].gtip[j]){
+	                case 'b': objs[i]->gid[j]=dCreateBox(0,refglob[objs[i]->otyp].lx[j],refglob[objs[i]->otyp].ly[j],refglob[objs[i]->otyp].lz[j]);
 	                          break;
 
-	                case 'c': objs[i].gid[j]=dCreateCCylinder(0,refglob[objs[i].otyp].lx[j],refglob[objs[i].otyp].ly[j]);
+	                case 'c': objs[i]->gid[j]=dCreateCCylinder(0,refglob[objs[i]->otyp].lx[j],refglob[objs[i]->otyp].ly[j]);
 	                          break;
 
-	                case 's': objs[i].gid[j]=dCreateSphere(0,refglob[objs[i].otyp].lx[j]);
+	                case 's': objs[i]->gid[j]=dCreateSphere(0,refglob[objs[i]->otyp].lx[j]);
 	                          break;
 
-	                default: printf("Unknown geometry '%c'\r\n",refglob[objs[i].otyp].gtip[j]); exit(1);
+	                default: printf("Unknown geometry '%c'\r\n",refglob[objs[i]->otyp].gtip[j]); exit(1);
 	              }
 
-	              dGeomSetPosition(objs[i].gid[j],objs[i].xref[2*j-1],objs[i].yref[2*j-1],objs[i].zref[2*j-1]);
+	              dGeomSetPosition(objs[i]->gid[j],objs[i]->xref[2*j-1],objs[i]->yref[2*j-1],objs[i]->zref[2*j-1]);
 	
-	              kx=objs[i].xref[2*j]-objs[i].xref[2*j-1];
-	              ky=objs[i].yref[2*j]-objs[i].yref[2*j-1];
-	              kz=objs[i].zref[2*j]-objs[i].zref[2*j-1];
+	              kx=objs[i]->xref[2*j]-objs[i]->xref[2*j-1];
+	              ky=objs[i]->yref[2*j]-objs[i]->yref[2*j-1];
+	              kz=objs[i]->zref[2*j]-objs[i]->zref[2*j-1];
 	              len=sqrt(kx*kx+ky*ky+kz*kz);
 	              kx/=len; ky/=len; kz/=len;
 	              /*beam or column?*/
@@ -479,7 +480,7 @@ s[0]='1';while(s[0]){
                         rotmt[4]=iy; rotmt[5]=jy; rotmt[6]=ky; rotmt[7]=0;
                         rotmt[8]=iz; rotmt[9]=jz; rotmt[10]=kz; rotmt[11]=0;
 
-                      dGeomSetRotation(objs[i].gid[j],rotmt);
+                      dGeomSetRotation(objs[i]->gid[j],rotmt);
 	            }
 	            /*^set geometry parameters*/
 
@@ -495,7 +496,7 @@ s[0]='1';while(s[0]){
 	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s); /*box lengths*/
 	                      dMassSetBoxTotal(&(car->mass[k]),len,tx,ty,tz);
 	                      dBodySetMass(car->bid[k],&(car->mass[k]));
-	                      dBodySetPosition(car->bid[k],objs[i].transform.vx[0],objs[i].transform.vy[0],objs[i].transform.vz[0]);
+	                      dBodySetPosition(car->bid[k],objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0]);
 	                        rotmt[0]=1; rotmt[1]=0; rotmt[2]=0; rotmt[3]=0;
                                 rotmt[4]=0; rotmt[5]=1; rotmt[6]=0; rotmt[7]=0;
                                 rotmt[8]=0; rotmt[9]=0; rotmt[10]=1; rotmt[11]=0;
@@ -506,7 +507,7 @@ s[0]='1';while(s[0]){
 	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s); /*sphere radius*/
 	                      dMassSetSphereTotal(&(car->mass[k]),len,tx);
 	                      dBodySetMass(car->bid[k],&(car->mass[k]));
-	                      dBodySetPosition(car->bid[k],objs[i].transform.vx[0],objs[i].transform.vy[0],objs[i].transform.vz[0]);
+	                      dBodySetPosition(car->bid[k],objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0]);
 	                        rotmt[0]=1; rotmt[1]=0; rotmt[2]=0; rotmt[3]=0;
                                 rotmt[4]=0; rotmt[5]=1; rotmt[6]=0; rotmt[7]=0;
                                 rotmt[8]=0; rotmt[9]=0; rotmt[10]=1; rotmt[11]=0;
@@ -561,8 +562,8 @@ fclose(fis);
 /*attach geoms to bodies*/
 for(i=1;i<=car->nob;i++){
   k=car->oid[i];
-  for(j=1;j<=(objs[k].nref/2);j++){
-    dGeomSetBody(objs[k].gid[j],car->bid[i]);
+  for(j=1;j<=(objs[k]->nref/2);j++){
+    dGeomSetBody(objs[k]->gid[j],car->bid[i]);
   }
 }
 /*attached geoms to bodies*/
@@ -580,7 +581,7 @@ for(i=1;i<=car->nob;i++){
       car->jfc[car->nj]=car->ofc[i];
       dJointAttach(car->jid[car->nj],car->bid[k],car->bid[i]);
       dJointAttach(car->bkm[car->nj],car->bid[k],car->bid[i]);
-      dJointSetHinge2Anchor(car->jid[car->nj],objs[car->oid[i]].transform.vx[0],objs[car->oid[i]].transform.vy[0],objs[car->oid[i]].transform.vz[0]);
+      dJointSetHinge2Anchor(car->jid[car->nj],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0]);
       dJointSetHinge2Axis1(car->jid[car->nj],1,0,0);
       dJointSetHinge2Axis2(car->jid[car->nj],0,1,0);
         dJointSetHinge2Param(car->jid[car->nj],dParamLoStop,-0.001);
@@ -604,14 +605,14 @@ dTriIndex indexlglob[3]={0,1,2},
           indexrglob[3]={0,2,1}; /*global variables used by the function below*/
 
 /*function which reads the track; nrobt - number of objects*/
-sgob *readtrack(char *numefis,int *nrobt,int *nrtyp,int* background_red, int* background_green, int* background_blue)
+sgob** readtrack(char *numefis,int *nrobt,int *nrtyp,int* background_red, int* background_green, int* background_blue)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
 int i,j,
     nto=0,nob=0, /*number of object types and number of objects; nob=(*nrobt) */
     bred=130,bgreen=160,bblue=200; /*background color*/
-sgob *objs = 0;
+sgob** objs = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       fred=1.0,fgreen=1.0,fblue=1.0, /*color multiplication factors*/
       ix,jx,kx,
@@ -671,62 +672,63 @@ s[0]='1';while(s[0]){
 	          break;
 
 	  case 2: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); (*nrobt)=nob=atoi(s);
-	          if(!(objs=(sgob *)malloc((nob+1)*sizeof(sgob)))){printf("Out of memory");}
+	          if(!(objs=(sgob**)malloc((nob+1)*sizeof(sgob*)))){printf("Out of memory");}
 	          for(i=1;i<=nob;i++){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
-	              objs[i].otyp=atoi(s);
-	              if(objs[i].otyp>nto){
-	                printf("Error: there is no object type '%d'\r\n",objs[i].otyp);exit(1);
+                      objs[i]=(sgob*)malloc(sizeof(sgob));
+	              objs[i]->otyp=atoi(s);
+	              if(objs[i]->otyp>nto){
+	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp);exit(1);
 	              }
-	              objs[i].nref=refglob[objs[i].otyp].nref;
-	              objs[i].nfa=refglob[objs[i].otyp].nfa;
-	              objs[i].transform.vx[0]=objs[i].transform.vy[0]=objs[i].transform.vz[0]=0;
-	              objs[i].transform.vx[1]=objs[i].transform.vy[2]=objs[i].transform.vz[3]=1;
-	              objs[i].transform.vx[2]=objs[i].transform.vx[3]=0;
-	              objs[i].transform.vy[1]=objs[i].transform.vy[3]=0;
-	              objs[i].transform.vz[1]=objs[i].transform.vz[2]=0;
-	              for(j=1;j<=objs[i].nref;j++){
-	                objs[i].xref[j]=refglob[objs[i].otyp].x[j];
-	                objs[i].yref[j]=refglob[objs[i].otyp].y[j];
-	                objs[i].zref[j]=refglob[objs[i].otyp].z[j];
+	              objs[i]->nref=refglob[objs[i]->otyp].nref;
+	              objs[i]->nfa=refglob[objs[i]->otyp].nfa;
+	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
+	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
+	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;
+	              objs[i]->transform.vy[1]=objs[i]->transform.vy[3]=0;
+	              objs[i]->transform.vz[1]=objs[i]->transform.vz[2]=0;
+	              for(j=1;j<=objs[i]->nref;j++){
+	                objs[i]->xref[j]=refglob[objs[i]->otyp].x[j];
+	                objs[i]->yref[j]=refglob[objs[i]->otyp].y[j];
+	                objs[i]->zref[j]=refglob[objs[i]->otyp].z[j];
 	              }
-	              eval_obj(objs[i].otyp,&objs[i]);
+	              eval_obj(objs[i]->otyp,objs[i]);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rz=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ry=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rx=atof(s);
-	              rotatz(&objs[i],0,0,rz);
-	              rotaty(&objs[i],0,0,ry);
-	              rotatx(&objs[i],0,0,rx);
-	              translat(&objs[i],tx,ty,tz);
-	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); objs[i].lev=atoi(s);
-	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); objs[i].mu=atof(s); /*friction*/
+	              rotatz(objs[i],0,0,rz);
+	              rotaty(objs[i],0,0,ry);
+	              rotatx(objs[i],0,0,rx);
+	              translat(objs[i],tx,ty,tz);
+	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); objs[i]->lev=atoi(s);
+	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); objs[i]->mu=atof(s); /*friction*/
 
 	            /*translated and rotated object; set geometry parameters*/
-	            for(j=1;j<=(objs[i].nref/2);j++){
-	              switch(refglob[objs[i].otyp].gtip[j]){
-	                case 'b': objs[i].gid[j]=dCreateBox(0,refglob[objs[i].otyp].lx[j],refglob[objs[i].otyp].ly[j],refglob[objs[i].otyp].lz[j]);
+	            for(j=1;j<=(objs[i]->nref/2);j++){
+	              switch(refglob[objs[i]->otyp].gtip[j]){
+	                case 'b': objs[i]->gid[j]=dCreateBox(0,refglob[objs[i]->otyp].lx[j],refglob[objs[i]->otyp].ly[j],refglob[objs[i]->otyp].lz[j]);
 	                          break;
 
-	                case 'c': objs[i].gid[j]=dCreateCCylinder(0,refglob[objs[i].otyp].lx[j],refglob[objs[i].otyp].ly[j]);
+	                case 'c': objs[i]->gid[j]=dCreateCCylinder(0,refglob[objs[i]->otyp].lx[j],refglob[objs[i]->otyp].ly[j]);
 	                          break;
 
-	                case 's': objs[i].gid[j]=dCreateSphere(0,refglob[objs[i].otyp].lx[j]);
+	                case 's': objs[i]->gid[j]=dCreateSphere(0,refglob[objs[i]->otyp].lx[j]);
 	                          break;
 
-	                case 't': objs[i].gid[j]=dCreateTriMesh(0,trid[refglob[objs[i].otyp].ttip[j]],0,0,0);
+	                case 't': objs[i]->gid[j]=dCreateTriMesh(0,trid[refglob[objs[i]->otyp].ttip[j]],0,0,0);
 	                          break;
 
-	                default: printf("Unknown geometry '%c'\r\n",refglob[objs[i].otyp].gtip[j]); exit(1);
+	                default: printf("Unknown geometry '%c'\r\n",refglob[objs[i]->otyp].gtip[j]); exit(1);
 	              }
 
-	              dGeomSetPosition(objs[i].gid[j],objs[i].xref[2*j-1],objs[i].yref[2*j-1],objs[i].zref[2*j-1]);
+	              dGeomSetPosition(objs[i]->gid[j],objs[i]->xref[2*j-1],objs[i]->yref[2*j-1],objs[i]->zref[2*j-1]);
 	
-	              kx=objs[i].xref[2*j]-objs[i].xref[2*j-1];
-	              ky=objs[i].yref[2*j]-objs[i].yref[2*j-1];
-	              kz=objs[i].zref[2*j]-objs[i].zref[2*j-1];
+	              kx=objs[i]->xref[2*j]-objs[i]->xref[2*j-1];
+	              ky=objs[i]->yref[2*j]-objs[i]->yref[2*j-1];
+	              kz=objs[i]->zref[2*j]-objs[i]->zref[2*j-1];
 	              len=sqrt(kx*kx+ky*ky+kz*kz);
 	              kx/=len; ky/=len; kz/=len;
 	              /*beam or column?*/
@@ -746,7 +748,7 @@ s[0]='1';while(s[0]){
                         rotmt[4]=iy; rotmt[5]=jy; rotmt[6]=ky; rotmt[7]=0;
                         rotmt[8]=iz; rotmt[9]=jz; rotmt[10]=kz; rotmt[11]=0;
 
-                      dGeomSetRotation(objs[i].gid[j],rotmt);
+                      dGeomSetRotation(objs[i]->gid[j],rotmt);
 	            }
 	            /*^set geometry parameters*/
 	          }

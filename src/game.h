@@ -65,7 +65,7 @@ switch(flag){
 
 
 /*run 1 simulation step; tstep - time step; af, bf - acceleration and brake factors*/
-void runsim(sgob *objs,int nob,vhc *car,REALN tstep,REALN vrx,REALN af,REALN bf,FILE *repf,REALN *timp)
+void runsim(sgob** objs,int nob,vhc *car,REALN tstep,REALN vrx,REALN af,REALN bf,FILE *repf,REALN *timp)
 {int i,j,k,l,m,n,nobtr, /*nobtr-number of objects in the track*/
      bcj[21]; /*bcj[i]-vehicle object to which contact joint 'i' is attached*/
 const dReal *pos,*rot,*vel;
@@ -102,12 +102,12 @@ for(i=1;i<=car->nob;i++){
 pos=dBodyGetPosition(car->bid[1]); x0=pos[0]; y0=pos[1]; z0=pos[2];
 
 for(i=1;i<=nobtr;i++){
-  if((fabs(objs[i].transform.vx[0]-x0)<50) && (fabs(objs[i].transform.vy[0]-y0)<50) && (fabs(objs[i].transform.vz[0]-z0)<50)){
+  if((fabs(objs[i]->transform.vx[0]-x0)<50) && (fabs(objs[i]->transform.vy[0]-y0)<50) && (fabs(objs[i]->transform.vz[0]-z0)<50)){
     for(j=1;j<=car->nob;j++){
       k=car->oid[j];
-      for(l=1;l<=(objs[k].nref/2);l++){
-        for(m=1;m<=(objs[i].nref/2);m++){
-          n=dCollide(objs[k].gid[l],objs[i].gid[m],1,&dcgeom[car->ncj+1],sizeof(dContactGeom));
+      for(l=1;l<=(objs[k]->nref/2);l++){
+        for(m=1;m<=(objs[i]->nref/2);m++){
+          n=dCollide(objs[k]->gid[l],objs[i]->gid[m],1,&dcgeom[car->ncj+1],sizeof(dContactGeom));
           (car->ncj)+=n;
           if(n){bcj[car->ncj]=j;}
         }
@@ -151,7 +151,7 @@ for(i=1;i<=car->nj;i++){
 }
 
 for(i=1;i<=car->nob;i++){
-  radius=objs[car->oid[i]].radius; radius*=radius;
+  radius=objs[car->oid[i]]->radius; radius*=radius;
   vel=dBodyGetLinearVel(car->bid[i]);
   if((fabs(vel[0])+fabs(vel[1])+fabs(vel[2]))>1){
     fx=-drg*radius*vel[0]*fabs(vel[0]);
@@ -172,21 +172,21 @@ for(i=1;i<=car->nob;i++){
   pos=dBodyGetPosition(car->bid[i]);
   rot=dBodyGetRotation(car->bid[i]);
 
-  objs[j].transform.vx[0]=objs[j].xcen=pos[0];
-  objs[j].transform.vy[0]=objs[j].ycen=pos[1];
-  objs[j].transform.vz[0]=objs[j].zcen=pos[2];
+  objs[j]->transform.vx[0]=objs[j]->xcen=pos[0];
+  objs[j]->transform.vy[0]=objs[j]->ycen=pos[1];
+  objs[j]->transform.vz[0]=objs[j]->zcen=pos[2];
 
-  objs[j].transform.vx[1]=objs[j].transform.vx[0]+rot[0];
-  objs[j].transform.vy[1]=objs[j].transform.vy[0]+rot[4];
-  objs[j].transform.vz[1]=objs[j].transform.vz[0]+rot[8];
+  objs[j]->transform.vx[1]=objs[j]->transform.vx[0]+rot[0];
+  objs[j]->transform.vy[1]=objs[j]->transform.vy[0]+rot[4];
+  objs[j]->transform.vz[1]=objs[j]->transform.vz[0]+rot[8];
 
-  objs[j].transform.vx[2]=objs[j].transform.vx[0]+rot[1];
-  objs[j].transform.vy[2]=objs[j].transform.vy[0]+rot[5];
-  objs[j].transform.vz[2]=objs[j].transform.vz[0]+rot[9];
+  objs[j]->transform.vx[2]=objs[j]->transform.vx[0]+rot[1];
+  objs[j]->transform.vy[2]=objs[j]->transform.vy[0]+rot[5];
+  objs[j]->transform.vz[2]=objs[j]->transform.vz[0]+rot[9];
 
-  objs[j].transform.vx[3]=objs[j].transform.vx[0]+rot[2];
-  objs[j].transform.vy[3]=objs[j].transform.vy[0]+rot[6];
-  objs[j].transform.vz[3]=objs[j].transform.vz[0]+rot[10];
+  objs[j]->transform.vx[3]=objs[j]->transform.vx[0]+rot[2];
+  objs[j]->transform.vy[3]=objs[j]->transform.vy[0]+rot[6];
+  objs[j]->transform.vz[3]=objs[j]->transform.vz[0]+rot[10];
 }
 
 *timp+=tstep;
@@ -198,10 +198,10 @@ if(rsem>=REPSTEPS){
   fprintf(repf,"%1.3f ",*timp);
   for(i=1;i<=car->nob;i++){
     j=car->oid[i];
-    fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j].transform.vx[0],objs[j].transform.vy[0],objs[j].transform.vz[0]);
-    fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j].transform.vx[1],objs[j].transform.vy[1],objs[j].transform.vz[1]);
-    fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j].transform.vx[2],objs[j].transform.vy[2],objs[j].transform.vz[2]);
-    fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j].transform.vx[3],objs[j].transform.vy[3],objs[j].transform.vz[3]);
+    fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[0],objs[j]->transform.vy[0],objs[j]->transform.vz[0]);
+    fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[1],objs[j]->transform.vy[1],objs[j]->transform.vz[1]);
+    fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[2],objs[j]->transform.vy[2],objs[j]->transform.vz[2]);
+    fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[3],objs[j]->transform.vy[3],objs[j]->transform.vz[3]);
   }
   fprintf(repf,"\r\n");
   rsem=0;

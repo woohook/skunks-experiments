@@ -51,7 +51,7 @@ SDL_Surface *screen;
 int background_red, background_green, background_blue;
 REALN  zfog,zmax; /*zfog,zmax - distanta de la care incepe ceatza, respectiv de la care nu se mai vede nimic*/
 
-sgob *objs,camera; /*objects*/
+sgob** objs,camera; /*objects*/
 int nob,nto,camflag=1; /*number of objects and of object types*/
 
 vhc car; /*vehicle*/
@@ -128,8 +128,8 @@ runsim(objs,&car,repf,&timp,&speed,0);
 
 
 for(i=1;i<=nob;i++){
-  if(objs[i].lev==3){
-    rotab(&objs[i],objs[i].transform.vx[0],objs[i].transform.vy[0],objs[i].transform.vz[0],objs[i].transform.vx[3],objs[i].transform.vy[3],objs[i].transform.vz[3],vrot3*tframe);
+  if(objs[i]->lev==3){
+    rotab(objs[i],objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0],objs[i]->transform.vx[3],objs[i]->transform.vy[3],objs[i]->transform.vz[3],vrot3*tframe);
   }
 }
 
@@ -137,7 +137,7 @@ for(i=1;i<=nob;i++){
 setcamg(objs,&camera,&car,camflag);
 
 rotc+=vrotc*tframe; if(camflag==2){rotc=0; vrotc=0;}
-if(rotc){rotatx(&camera,objs[car.oid[1]].transform.vy[0],objs[car.oid[1]].transform.vz[0],rotc);}
+if(rotc){rotatx(&camera,objs[car.oid[1]]->transform.vy[0],objs[car.oid[1]]->transform.vz[0],rotc);}
 
 odis(screen,objs,nob,zfog,zmax,&camera); /*display image*/
 
@@ -198,7 +198,12 @@ SDL_Quit();
 
 runsim(objs,&car,repf,&timp,&speed,1); /*freed static variables from runsim()*/
 renderer_release();
-free (refglob); free(objs);
+free (refglob);
+for(i=1;i<=nob;i++)
+{
+  free(objs[i]);
+}
+free(objs);
 
 fclose(repf);
 

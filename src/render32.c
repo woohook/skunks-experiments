@@ -610,7 +610,7 @@ if(SDL_MUSTLOCK(screen)){SDL_UnlockSurface(screen);}
 /*function which displays the objcts which are closer than zmax
 nob - total number of objects
 cam - camera*/
-void odis(SDL_Surface *screen,sgob *objs,int nob,float zfog,float zmax,sgob *cam)
+void odis(SDL_Surface *screen,sgob** objs,int nob,float zfog,float zmax,sgob *cam)
 {int i,j,focal;
 unsigned int width,height;
 unsigned long int area;
@@ -654,14 +654,14 @@ if(!sem){
   nrfm=1; sem=1;}
 
 for(i=1;i<=nob;i++){
-  if(objs[i].xcen-cam->transform.vx[0]-objs[i].radius>(1.74*zmax)){continue;}
-  if(objs[i].xcen-cam->transform.vx[0]+objs[i].radius<(-1.74*zmax)){continue;}
-  if(objs[i].ycen-cam->transform.vy[0]-objs[i].radius>(1.74*zmax)){continue;}
-  if(objs[i].ycen-cam->transform.vy[0]+objs[i].radius<(-1.74*zmax)){continue;}
-  if(objs[i].zcen-cam->transform.vz[0]-objs[i].radius>(1.74*zmax)){continue;}
-  if(objs[i].zcen-cam->transform.vz[0]+objs[i].radius<(-1.74*zmax)){continue;}
+  if(objs[i]->xcen-cam->transform.vx[0]-objs[i]->radius>(1.74*zmax)){continue;}
+  if(objs[i]->xcen-cam->transform.vx[0]+objs[i]->radius<(-1.74*zmax)){continue;}
+  if(objs[i]->ycen-cam->transform.vy[0]-objs[i]->radius>(1.74*zmax)){continue;}
+  if(objs[i]->ycen-cam->transform.vy[0]+objs[i]->radius<(-1.74*zmax)){continue;}
+  if(objs[i]->zcen-cam->transform.vz[0]-objs[i]->radius>(1.74*zmax)){continue;}
+  if(objs[i]->zcen-cam->transform.vz[0]+objs[i]->radius<(-1.74*zmax)){continue;}
   nobdis++;
-  obdis[nobdis]=objs[i];
+  obdis[nobdis]=*objs[i];
 } /*copied objects*/
 
 ix=cam->transform.vx[1]-cam->transform.vx[0];
