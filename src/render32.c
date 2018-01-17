@@ -616,17 +616,16 @@ unsigned int width,height;
 unsigned long int area;
 static int sem=0,nrfm=0; /*number of triangles for which memory has been allocated*/
 static tria *face,*facedisp; /*triangles and displayed triangles in global system*/
-static sgob *obdis; /*displayed objects (copies)*/
+static sgob obdis; /* current object to transform */
 static float *distmin; /*Zbuffer for sending to displaysdl()*/
-int nrfaces,nrdisp,crf, /*number of triangles and of displayed triangles, current triangle*/
-    nobdis=0; /*number of displayed objects*/
+int nrfaces,nrdisp,crf; /*number of triangles and of displayed triangles, current triangle*/
 
 lightpr rotlight; /*rotated light parameters*/
 
 float tgh,tgv,zmin;
 float x,y,z,ix,iy,iz,jx,jy,jz,kx,ky,kz; /*temporary variables for transformations*/
 
-if(nob==0){free(face); free(facedisp); free(obdis); free(distmin); return;}
+if(nob==0){free(face); free(facedisp); free(distmin); return;}
 /*to free static variables, call odis(0,0,0,0,0,0,0)*/
 
 width=screen->w;
@@ -650,7 +649,6 @@ if(!sem){
   if(!(distmin=(float *)malloc(area*sizeof(float)))){printf("Out of memory");}
   if(!(face=(tria *)malloc(11*sizeof(tria)))){printf("Out of memory");}
   if(!(facedisp=(tria *)malloc(22*sizeof(tria)))){printf("Out of memory");}
-  if(!(obdis=(sgob *)malloc((nob+1)*sizeof(sgob)))){printf("Out of memory");}
   nrfm=1; sem=1;}
 
 ix=cam->transform.vx[1]-cam->transform.vx[0];
@@ -683,75 +681,74 @@ for(i=1;i<=nob;i++){
   if(objs[i]->ycen-cam->transform.vy[0]+objs[i]->radius<(-1.74*zmax)){continue;}
   if(objs[i]->zcen-cam->transform.vz[0]-objs[i]->radius>(1.74*zmax)){continue;}
   if(objs[i]->zcen-cam->transform.vz[0]+objs[i]->radius<(-1.74*zmax)){continue;}
-  nobdis++;
-  obdis[i]=*objs[i];
+  obdis = *objs[i];
 
   for(j=0;j<=3;j++){
-    obdis[i].transform.vx[j]-=cam->transform.vx[0];
-    obdis[i].transform.vy[j]-=cam->transform.vy[0];
-    obdis[i].transform.vz[j]-=cam->transform.vz[0];
+    obdis.transform.vx[j]-=cam->transform.vx[0];
+    obdis.transform.vy[j]-=cam->transform.vy[0];
+    obdis.transform.vz[j]-=cam->transform.vz[0];
   }
-  obdis[i].xcen-=cam->transform.vx[0];
-  obdis[i].ycen-=cam->transform.vy[0];
-  obdis[i].zcen-=cam->transform.vz[0]; /*translated object*/
+  obdis.xcen-=cam->transform.vx[0];
+  obdis.ycen-=cam->transform.vy[0];
+  obdis.zcen-=cam->transform.vz[0]; /*translated object*/
 
   for(j=0;j<=3;j++){
-    x=obdis[i].transform.vx[j];
-    y=obdis[i].transform.vy[j];
-    z=obdis[i].transform.vz[j];
-    obdis[i].transform.vx[j]=x*ix+y*iy+z*iz;
-    obdis[i].transform.vy[j]=x*jx+y*jy+z*jz;
-    obdis[i].transform.vz[j]=x*kx+y*ky+z*kz;
+    x=obdis.transform.vx[j];
+    y=obdis.transform.vy[j];
+    z=obdis.transform.vz[j];
+    obdis.transform.vx[j]=x*ix+y*iy+z*iz;
+    obdis.transform.vy[j]=x*jx+y*jy+z*jz;
+    obdis.transform.vz[j]=x*kx+y*ky+z*kz;
   }
-  x=obdis[i].xcen;
-  y=obdis[i].ycen;
-  z=obdis[i].zcen;
-  obdis[i].xcen=x*ix+y*iy+z*iz;
-  obdis[i].ycen=x*jx+y*jy+z*jz;
-  obdis[i].zcen=x*kx+y*ky+z*kz; /*rotated objects*/
+  x=obdis.xcen;
+  y=obdis.ycen;
+  z=obdis.zcen;
+  obdis.xcen=x*ix+y*iy+z*iz;
+  obdis.ycen=x*jx+y*jy+z*jz;
+  obdis.zcen=x*kx+y*ky+z*kz; /*rotated objects*/
 
-  if((obdis[i].ycen-obdis[i].radius)>(obdis[i].zcen+obdis[i].radius)*tgh){continue;}
-  if((obdis[i].ycen+obdis[i].radius)<(obdis[i].zcen+obdis[i].radius)*(-tgh)){continue;}
-  if((obdis[i].xcen-obdis[i].radius)>(obdis[i].zcen+obdis[i].radius)*tgv){continue;}
-  if((obdis[i].xcen+obdis[i].radius)<(obdis[i].zcen+obdis[i].radius)*(-tgv)){continue;}
-  if(((obdis[i].zcen-obdis[i].radius)<zmax)&&((obdis[i].zcen+obdis[i].radius)>0)){
-    nrfaces+=obdis[i].nfa;
+  if((obdis.ycen-obdis.radius)>(obdis.zcen+obdis.radius)*tgh){continue;}
+  if((obdis.ycen+obdis.radius)<(obdis.zcen+obdis.radius)*(-tgh)){continue;}
+  if((obdis.xcen-obdis.radius)>(obdis.zcen+obdis.radius)*tgv){continue;}
+  if((obdis.xcen+obdis.radius)<(obdis.zcen+obdis.radius)*(-tgv)){continue;}
+  if(((obdis.zcen-obdis.radius)<zmax)&&((obdis.zcen+obdis.radius)>0)){
+    nrfaces+=obdis.nfa;
     if(nrfaces>nrfm){
       nrfm=nrfaces;
       if(!(face=(tria *)realloc(face,(nrfm+10)*sizeof(tria)))){printf("Out of memory");}
       if(!(facedisp=(tria *)realloc(facedisp,(2*nrfm+20)*sizeof(tria)))){printf("Out of memory");}
     }
 
-    float fix=obdis[i].transform.vx[1]-obdis[i].transform.vx[0];
-    float fjx=obdis[i].transform.vx[2]-obdis[i].transform.vx[0];
-    float fkx=obdis[i].transform.vx[3]-obdis[i].transform.vx[0];
-      float fiy=obdis[i].transform.vy[1]-obdis[i].transform.vy[0];
-      float fjy=obdis[i].transform.vy[2]-obdis[i].transform.vy[0];
-      float fky=obdis[i].transform.vy[3]-obdis[i].transform.vy[0];
-        float fiz=obdis[i].transform.vz[1]-obdis[i].transform.vz[0];
-        float fjz=obdis[i].transform.vz[2]-obdis[i].transform.vz[0];
-        float fkz=obdis[i].transform.vz[3]-obdis[i].transform.vz[0]; /*unit vectors of the local axes in global system*/
+    float fix=obdis.transform.vx[1]-obdis.transform.vx[0];
+    float fjx=obdis.transform.vx[2]-obdis.transform.vx[0];
+    float fkx=obdis.transform.vx[3]-obdis.transform.vx[0];
+      float fiy=obdis.transform.vy[1]-obdis.transform.vy[0];
+      float fjy=obdis.transform.vy[2]-obdis.transform.vy[0];
+      float fky=obdis.transform.vy[3]-obdis.transform.vy[0];
+        float fiz=obdis.transform.vz[1]-obdis.transform.vz[0];
+        float fjz=obdis.transform.vz[2]-obdis.transform.vz[0];
+        float fkz=obdis.transform.vz[3]-obdis.transform.vz[0]; /*unit vectors of the local axes in global system*/
 
-    for(j=1;j<=obdis[i].nfa;j++){
-      face[j+crf]=fceglob[obdis[i].otyp][j]; /*added triangles*/
-        x=fceglob[obdis[i].otyp][j].x1;
-        y=fceglob[obdis[i].otyp][j].y1;
-        z=fceglob[obdis[i].otyp][j].z1;
-      face[j+crf].x1=obdis[i].transform.vx[0]+x*fix+y*fjx+z*fkx;
-      face[j+crf].y1=obdis[i].transform.vy[0]+x*fiy+y*fjy+z*fky;
-      face[j+crf].z1=obdis[i].transform.vz[0]+x*fiz+y*fjz+z*fkz;
-        x=fceglob[obdis[i].otyp][j].x2;
-        y=fceglob[obdis[i].otyp][j].y2;
-        z=fceglob[obdis[i].otyp][j].z2;
-      face[j+crf].x2=obdis[i].transform.vx[0]+x*fix+y*fjx+z*fkx;
-      face[j+crf].y2=obdis[i].transform.vy[0]+x*fiy+y*fjy+z*fky;
-      face[j+crf].z2=obdis[i].transform.vz[0]+x*fiz+y*fjz+z*fkz;
-        x=fceglob[obdis[i].otyp][j].x3;
-        y=fceglob[obdis[i].otyp][j].y3;
-        z=fceglob[obdis[i].otyp][j].z3;
-      face[j+crf].x3=obdis[i].transform.vx[0]+x*fix+y*fjx+z*fkx;
-      face[j+crf].y3=obdis[i].transform.vy[0]+x*fiy+y*fjy+z*fky;
-      face[j+crf].z3=obdis[i].transform.vz[0]+x*fiz+y*fjz+z*fkz; /*updated positions of triangles*/
+    for(j=1;j<=obdis.nfa;j++){
+      face[j+crf]=fceglob[obdis.otyp][j]; /*added triangles*/
+        x=fceglob[obdis.otyp][j].x1;
+        y=fceglob[obdis.otyp][j].y1;
+        z=fceglob[obdis.otyp][j].z1;
+      face[j+crf].x1=obdis.transform.vx[0]+x*fix+y*fjx+z*fkx;
+      face[j+crf].y1=obdis.transform.vy[0]+x*fiy+y*fjy+z*fky;
+      face[j+crf].z1=obdis.transform.vz[0]+x*fiz+y*fjz+z*fkz;
+        x=fceglob[obdis.otyp][j].x2;
+        y=fceglob[obdis.otyp][j].y2;
+        z=fceglob[obdis.otyp][j].z2;
+      face[j+crf].x2=obdis.transform.vx[0]+x*fix+y*fjx+z*fkx;
+      face[j+crf].y2=obdis.transform.vy[0]+x*fiy+y*fjy+z*fky;
+      face[j+crf].z2=obdis.transform.vz[0]+x*fiz+y*fjz+z*fkz;
+        x=fceglob[obdis.otyp][j].x3;
+        y=fceglob[obdis.otyp][j].y3;
+        z=fceglob[obdis.otyp][j].z3;
+      face[j+crf].x3=obdis.transform.vx[0]+x*fix+y*fjx+z*fkx;
+      face[j+crf].y3=obdis.transform.vy[0]+x*fiy+y*fjy+z*fky;
+      face[j+crf].z3=obdis.transform.vz[0]+x*fiz+y*fjz+z*fkz; /*updated positions of triangles*/
     }
     crf=nrfaces;
   }
