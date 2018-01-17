@@ -653,6 +653,29 @@ if(!sem){
   if(!(obdis=(sgob *)malloc((nob+1)*sizeof(sgob)))){printf("Out of memory");}
   nrfm=1; sem=1;}
 
+ix=cam->transform.vx[1]-cam->transform.vx[0];
+jx=cam->transform.vx[2]-cam->transform.vx[0];
+kx=cam->transform.vx[3]-cam->transform.vx[0];
+  iy=cam->transform.vy[1]-cam->transform.vy[0];
+  jy=cam->transform.vy[2]-cam->transform.vy[0];
+  ky=cam->transform.vy[3]-cam->transform.vy[0];
+    iz=cam->transform.vz[1]-cam->transform.vz[0];
+    jz=cam->transform.vz[2]-cam->transform.vz[0];
+    kz=cam->transform.vz[3]-cam->transform.vz[0]; /*unit vectors of the local axes of camera in global system*/
+
+x=g_light.dx;
+y=g_light.dy;
+z=g_light.dz;
+rotlight.dx=x*ix+y*iy+z*iz;
+rotlight.dy=x*jx+y*jy+z*jz;
+rotlight.dz=x*kx+y*ky+z*kz; /*rotated light*/
+rotlight.ambient=g_light.ambient;
+rotlight.headlight=g_light.headlight;
+rotlight.directional=g_light.directional;
+
+nrfaces=0;
+crf=0;
+
 for(i=1;i<=nob;i++){
   if(objs[i]->xcen-cam->transform.vx[0]-objs[i]->radius>(1.74*zmax)){continue;}
   if(objs[i]->xcen-cam->transform.vx[0]+objs[i]->radius<(-1.74*zmax)){continue;}
@@ -663,16 +686,6 @@ for(i=1;i<=nob;i++){
   nobdis++;
   obdis[nobdis]=*objs[i];
 } /*copied objects*/
-
-ix=cam->transform.vx[1]-cam->transform.vx[0];
-jx=cam->transform.vx[2]-cam->transform.vx[0];
-kx=cam->transform.vx[3]-cam->transform.vx[0];
-  iy=cam->transform.vy[1]-cam->transform.vy[0];
-  jy=cam->transform.vy[2]-cam->transform.vy[0];
-  ky=cam->transform.vy[3]-cam->transform.vy[0];
-    iz=cam->transform.vz[1]-cam->transform.vz[0];
-    jz=cam->transform.vz[2]-cam->transform.vz[0];
-    kz=cam->transform.vz[3]-cam->transform.vz[0]; /*unit vectors of the local axes of camera in global system*/
 
 for(i=1;i<=nobdis;i++){
   for(j=0;j<=3;j++){
@@ -700,18 +713,6 @@ for(i=1;i<=nobdis;i++){
   obdis[i].zcen=x*kx+y*ky+z*kz; /*rotated objects*/
 }
 
-x=g_light.dx;
-y=g_light.dy;
-z=g_light.dz;
-rotlight.dx=x*ix+y*iy+z*iz;
-rotlight.dy=x*jx+y*jy+z*jz;
-rotlight.dz=x*kx+y*ky+z*kz; /*rotated light*/
-rotlight.ambient=g_light.ambient;
-rotlight.headlight=g_light.headlight;
-rotlight.directional=g_light.directional;
-
-nrfaces=0;
-crf=0;
 for(i=1;i<=nobdis;i++){
   if((obdis[i].ycen-obdis[i].radius)>(obdis[i].zcen+obdis[i].radius)*tgh){continue;}
   if((obdis[i].ycen+obdis[i].radius)<(obdis[i].zcen+obdis[i].radius)*(-tgh)){continue;}
