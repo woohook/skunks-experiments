@@ -371,13 +371,23 @@ void findplan(float x1, float y1, float z1, float x2, float y2, float z2, float 
 	/*ecuatia planului este ax+by+cz=d*/
 }
 
+void clear_depth_buffer(float* depthbuffer, unsigned int width, unsigned int height, float zmax)
+{
+  int i;
+  unsigned long int area = width*height+1;
+  float izmax=1/zmax;
+  for(i=0;i<=(int)area;i++)
+  {
+    depthbuffer[i]=izmax;
+  }
+}
 
 void displaysdl(SDL_Surface *screen,tria *face,int nrfaces,float *distmin,unsigned int width,unsigned int height,float focal,float zfog,float zmax, lightpr* light)
 {int i,j,jmin,jmax,xcr,ycr,isp,bitd,red,green,blue,red0,green0,blue0;
 Uint8 *ptr;
 pixcol pixcb; /*culoarea pixelului curent*/
 float ystart,yend,zf,dist;
-unsigned long int idx,crf,area;
+unsigned long int idx,crf;
 float tmp,ratio2,ratio3,ratio4,thres;
 tripf ftr; /*proiectii varfuri triunghi*/
 trilim lim; /*limite triunghi pe axa y*/
@@ -395,15 +405,11 @@ red0=backcol.red; green0=backcol.green; blue0=backcol.blue;
 
 thres=1/(width+height);
 
-area=width*height+1;
-
 izmax=1/zmax; izfog=1/zfog;
 
 const int bits_per_pixel = 32;
 bitd=bits_per_pixel/8;
 
-/*desenare imagine*/
-for(i=0;i<=(int)area;i++){distmin[i]=izmax;}
 zf=-focal;
 izf=1/zf;
 
@@ -755,6 +761,8 @@ for(i=1;i<=nob;i++){
 }
 
 nrdisp=fclip(face,nrfaces,zmin,facedisp,zmax,tgh,tgv);
+
+clear_depth_buffer(distmin,width,height,zmax);
 
 displaysdl(screen,facedisp,nrdisp,distmin,width,height,focal,zfog,zmax,&rotlight);
 
