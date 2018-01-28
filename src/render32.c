@@ -413,11 +413,6 @@ bitd=bits_per_pixel/8;
 zf=-focal;
 izf=1/zf;
 
-/*Lock screen*/
-if(SDL_MUSTLOCK(screen)){
-  if(SDL_LockSurface(screen)<0){
-    printf("Can't lock screen: %s\n", SDL_GetError());SDL_Quit();return;}}
-
 for(crf=1;(int)crf<=nrfaces;crf++){
 
 tria* pFace = &face[crf];
@@ -606,11 +601,6 @@ if(g_double_pixel == 1)
   width*=2; height*=2;
 }
 
-/*Unlock screen*/
-if(SDL_MUSTLOCK(screen)){SDL_UnlockSurface(screen);}
-/* Update display*/
-  SDL_UpdateRect();
-/*desenat imagine*/
 }
 
 /*function which displays the objcts which are closer than zmax
@@ -762,10 +752,26 @@ for(i=1;i<=nob;i++){
 
 nrdisp=fclip(face,nrfaces,zmin,facedisp,zmax,tgh,tgv);
 
+if(SDL_MUSTLOCK(screen))
+{
+  if(SDL_LockSurface(screen)<0)
+  {
+    printf("Can't lock screen: %s\n", SDL_GetError());
+    SDL_Quit();
+    return;
+  }
+}
+
 clear_depth_buffer(distmin,width,height,zmax);
 
 displaysdl(screen,facedisp,nrdisp,distmin,width,height,focal,zfog,zmax,&rotlight);
 
+if(SDL_MUSTLOCK(screen))
+{
+  SDL_UnlockSurface(screen);
+}
+
+SDL_UpdateRect();
 }
 
 void renderer_release()
