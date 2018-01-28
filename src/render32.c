@@ -53,6 +53,8 @@ float dy;
 float dz;
 } lightpr; /*light parameters*/
 
+const int bits_per_pixel = 32;
+
 struct _tria **fceglob = 0; // array with triangles and colors of object types
 int mesh_count = 0;
 int face_count = 0;
@@ -382,32 +384,103 @@ void clear_depth_buffer(float* depthbuffer, unsigned int width, unsigned int hei
   }
 }
 
-void displaysdl(SDL_Surface *screen,tria *face,int nrfaces,float *distmin,unsigned int width,unsigned int height,float focal,float zfog,float zmax, lightpr* light)
-{int i,j,jmin,jmax,xcr,ycr,isp,bitd,red,green,blue,red0,green0,blue0;
+void finish_frame(SDL_Surface *screen, float* depthbuffer, unsigned int width, unsigned int height, float zfog, float zmax)
+{
+  int i,j;
+  unsigned long int crf=0;
+  float izmax=1/zmax;
+  float izfog=1/zfog;
+  float ratio2=1/(izmax-izfog);
+  pixcol backcol = g_backcol;
+  int red0=backcol.red;
+  int green0=backcol.green;
+  int blue0=backcol.blue;
+  int isp=screen->pitch;
+  Uint8 *ptr;
+  pixcol pixcb;
+  int bitd=bits_per_pixel/8;
+
+  for(j=0;j<=(int)height-1;j++)
+  {
+    float tmp=1.0-sin(3.1416*j/(float)height); tmp*=50;
+    float redf=red0-tmp;
+    float greenf=green0-tmp;
+    float bluef=blue0-tmp;
+    backcol.red=(int)redf; backcol.green=(int)greenf; backcol.blue=(int)bluef;
+
+    if(g_double_pixel == 0)
+    {
+      ptr=(Uint8 *)screen->pixels + j*screen->pitch;
+    }
+    else
+    {
+      ptr=(Uint8 *)screen->pixels + 2*j*screen->pitch;
+    }
+
+    for(i=0;i<=(int)width-1;i++)
+    {
+      if(depthbuffer[++crf]==izmax)
+      {
+        ptr[0]=backcol.blue;
+        ptr[1]=backcol.green;
+        ptr[2]=backcol.red;
+      }
+      else
+      {
+        if(depthbuffer[crf]<izfog)
+        {
+          pixcb.red=ptr[2];
+          pixcb.green=ptr[1];
+          pixcb.blue=ptr[0];
+
+          tmp=(depthbuffer[crf]-izfog)*ratio2;
+          //pixcb.red=(int)(pixcb.red*(1-tmp));
+          //pixcb.green=(int)(pixcb.green*(1-tmp));
+          //pixcb.blue=(int)(pixcb.blue*(1-tmp));
+          pixcb.red+=(int)(tmp*(backcol.red-pixcb.red));
+          pixcb.green+=(int)(tmp*(backcol.green-pixcb.green));
+          pixcb.blue+=(int)(tmp*(backcol.blue-pixcb.blue));
+
+	  ptr[0] = pixcb.blue;
+          ptr[1] = pixcb.green;
+          ptr[2] = pixcb.red;
+        }
+      }
+
+      if(g_double_pixel == 0)
+      {
+        ptr+=bitd;
+      }
+      else
+      {
+        ptr[bitd]=ptr[isp]=ptr[isp+bitd]=ptr[0];
+        ptr[bitd+1]=ptr[isp+1]=ptr[isp+bitd+1]=ptr[1];
+        ptr[bitd+2]=ptr[isp+2]=ptr[isp+bitd+2]=ptr[2];
+        ptr+=2*bitd;
+      }
+    }
+  }
+}
+
+void displaysdl(SDL_Surface *screen,tria *face,int nrfaces,float *distmin,unsigned int width,unsigned int height,float focal, lightpr* light)
+{int i,j,jmin,jmax,xcr,ycr,isp,bitd,red,green,blue;
 Uint8 *ptr;
-pixcol pixcb; /*culoarea pixelului curent*/
 float ystart,yend,zf,dist;
 unsigned long int idx,crf;
 float tmp,ratio2,ratio3,ratio4,thres;
 tripf ftr; /*proiectii varfuri triunghi*/
 trilim lim; /*limite triunghi pe axa y*/
 float a,b,c,d,izf, /*izf=1/zf - pt. marit viteza; ecuatia planului este ax+by+cz=d*/
-      a1,bright,redf,greenf,bluef,
-      aizf,bizf,aizfxcr,id,izmax,izfog;
+      a1,bright,
+      aizf,bizf,aizfxcr,id;
 
 if(g_double_pixel == 1)
 {
   width/=2; height/=2; focal/=2;
 }
 
-pixcol backcol = g_backcol;
-red0=backcol.red; green0=backcol.green; blue0=backcol.blue;
-
 thres=1/(width+height);
 
-izmax=1/zmax; izfog=1/zfog;
-
-const int bits_per_pixel = 32;
 bitd=bits_per_pixel/8;
 
 zf=-focal;
@@ -541,66 +614,6 @@ for(i=lim.imin;i<=lim.imax;i++){
   }
 }
 }
-
-crf=0; ratio2=1/(izmax-izfog);
-for(j=0;j<=(int)height-1;j++){
-  tmp=1.0-sin(3.1416*j/(float)height); tmp*=50;
-  redf=red0-tmp; greenf=green0-tmp; bluef=blue0-tmp;
-  backcol.red=(int)redf; backcol.green=(int)greenf; backcol.blue=(int)bluef;
-
-  if(g_double_pixel == 0)
-  {
-    ptr=(Uint8 *)screen->pixels + j*screen->pitch;
-  }
-  else
-  {
-    ptr=(Uint8 *)screen->pixels + 2*j*screen->pitch;
-  }
-  isp=screen->pitch;
-
-for(i=0;i<=(int)width-1;i++){
-if(distmin[++crf]==izmax){
-	ptr[0]=backcol.blue;
-	ptr[1]=backcol.green;
-	ptr[2]=backcol.red;}
-      else{if(distmin[crf]<izfog){
-	pixcb.red=ptr[2];
-	pixcb.green=ptr[1];
-	pixcb.blue=ptr[0];
-
-        tmp=(distmin[crf]-izfog)*ratio2;
-        /*pixcb.red=(int)(pixcb.red*(1-tmp));
-        pixcb.green=(int)(pixcb.green*(1-tmp));
-        pixcb.blue=(int)(pixcb.blue*(1-tmp));*/
-	pixcb.red+=(int)(tmp*(backcol.red-pixcb.red));
-	pixcb.green+=(int)(tmp*(backcol.green-pixcb.green));
-	pixcb.blue+=(int)(tmp*(backcol.blue-pixcb.blue));
-	
-
-	ptr[0] = pixcb.blue;
-        ptr[1] = pixcb.green;
-        ptr[2] = pixcb.red;
-      }}
-
-  if(g_double_pixel == 0)
-  {
-    ptr+=bitd;
-  }
-  else
-  {
-    ptr[bitd]=ptr[isp]=ptr[isp+bitd]=ptr[0];
-    ptr[bitd+1]=ptr[isp+1]=ptr[isp+bitd+1]=ptr[1];
-    ptr[bitd+2]=ptr[isp+2]=ptr[isp+bitd+2]=ptr[2];
-    ptr+=2*bitd;
-  }
-
-}}
-
-if(g_double_pixel == 1)
-{
-  width*=2; height*=2;
-}
-
 }
 
 /*function which displays the objcts which are closer than zmax
@@ -764,7 +777,9 @@ if(SDL_MUSTLOCK(screen))
 
 clear_depth_buffer(distmin,width,height,zmax);
 
-displaysdl(screen,facedisp,nrdisp,distmin,width,height,focal,zfog,zmax,&rotlight);
+displaysdl(screen,facedisp,nrdisp,distmin,width,height,focal,&rotlight);
+
+finish_frame(screen,distmin,width,height,zfog,zmax);
 
 if(SDL_MUSTLOCK(screen))
 {
