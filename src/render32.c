@@ -55,7 +55,12 @@ float dz;
 
 const int bits_per_pixel = 32;
 
-struct _tria **fceglob = 0; // array with triangles and colors of object types
+typedef struct _mesh
+{
+  tria* faces;
+} mesh;
+
+mesh* g_meshes = 0;
 int mesh_count = 0;
 int face_count = 0;
 pixcol g_backcol = {0,0,0};
@@ -68,12 +73,12 @@ void create_mesh()
 {
   if(mesh_count==0)
   {
-    if(!(fceglob=(tria **)malloc(2*sizeof(tria *)))){printf("Out of memory");}
+    if(!(g_meshes=(mesh*)malloc(2*sizeof(mesh)))){printf("Out of memory");}
     mesh_count = 2;
   }
   else
   {
-    if(!(fceglob=(tria **)realloc(fceglob,(mesh_count+1)*sizeof(tria *)))){printf("Out of memory");}
+    if(!(g_meshes=(mesh*)realloc(g_meshes,(mesh_count+1)*sizeof(mesh)))){printf("Out of memory");}
     mesh_count++;
   }
   face_count = 0;
@@ -85,14 +90,14 @@ void add_face(int mesh_id, float x1, float y1, float z1, float x2, float y2, flo
   if(face_count==1)
   {
     face_count = 2;
-    if(!(fceglob[mesh_id]=(tria *)malloc(face_count*sizeof(tria)))){printf("Out of memory");}
+    if(!(g_meshes[mesh_id].faces=(tria *)malloc(face_count*sizeof(tria)))){printf("Out of memory");}
   }
   else
   {
-    if(!(fceglob[mesh_id]=(tria *)realloc(fceglob[mesh_id], face_count*sizeof(tria)))){printf("Out of memory");}
+    if(!(g_meshes[mesh_id].faces=(tria *)realloc(g_meshes[mesh_id].faces, face_count*sizeof(tria)))){printf("Out of memory");}
   }
 
-  tria* face = fceglob[mesh_id];
+  tria* face = g_meshes[mesh_id].faces;
   int face_id = face_count-1;
 
   face[face_id].x1 = x1; face[face_id].y1 = y1; face[face_id].z1 = z1;
@@ -107,7 +112,7 @@ void add_face(int mesh_id, float x1, float y1, float z1, float x2, float y2, flo
 
 void set_face_color(int mesh_id, int face_id, int red, int green, int blue)
 {
-  tria* face = fceglob[mesh_id];
+  tria* face = g_meshes[mesh_id].faces;
   face[face_id].red   = red;
   face[face_id].green = green;
   face[face_id].blue  = blue;
@@ -115,7 +120,7 @@ void set_face_color(int mesh_id, int face_id, int red, int green, int blue)
 
 void get_face_color(int mesh_id, int face_id, int* red, int* green, int* blue)
 {
-  tria* face = fceglob[mesh_id];
+  tria* face = g_meshes[mesh_id].faces;
   *red   = face[face_id].red;
   *green = face[face_id].green;
   *blue  = face[face_id].blue;
@@ -123,13 +128,13 @@ void get_face_color(int mesh_id, int face_id, int* red, int* green, int* blue)
 
 void set_face_fullbright(int mesh_id, int face_id)
 {
-  tria* face = fceglob[mesh_id];
+  tria* face = g_meshes[mesh_id].faces;
   face[face_id].cull = ((face[face_id].cull)&1)+2;
 }
 
 void get_face_vertex(int mesh_id, int face_id, int vertex_id, float *x, float *y, float *z)
 {
-  tria* face = fceglob[mesh_id];
+  tria* face = g_meshes[mesh_id].faces;
   switch(vertex_id)
   {
     case 1:
@@ -154,7 +159,7 @@ void get_face_vertex(int mesh_id, int face_id, int vertex_id, float *x, float *y
 
 void flip_face(int mesh_id, int face_id)
 {
-  tria* face = fceglob[mesh_id];
+  tria* face = g_meshes[mesh_id].faces;
   float tmp;
   tmp = face[face_id].x1; face[face_id].x1 = face[face_id].x2; face[face_id].x2 = tmp;
   tmp = face[face_id].y1; face[face_id].y1 = face[face_id].y2; face[face_id].y2 = tmp;
@@ -163,7 +168,7 @@ void flip_face(int mesh_id, int face_id)
 
 void enable_face_culling(int mesh_id, int face_id)
 {
-  tria* face = fceglob[mesh_id];
+  tria* face = g_meshes[mesh_id].faces;
   face[face_id].cull = ((face[face_id].cull)&2)+1;
 }
 
@@ -739,22 +744,22 @@ for(i=1;i<=nob;i++){
         float fkz=obdis.transform.vz[3]-obdis.transform.vz[0]; /*unit vectors of the local axes in global system*/
 
     for(j=1;j<=obdis.nfa;j++){
-      face[j+crf]=fceglob[obdis.otyp][j]; /*added triangles*/
-        x=fceglob[obdis.otyp][j].x1;
-        y=fceglob[obdis.otyp][j].y1;
-        z=fceglob[obdis.otyp][j].z1;
+      face[j+crf]=g_meshes[obdis.otyp].faces[j]; /*added triangles*/
+        x=g_meshes[obdis.otyp].faces[j].x1;
+        y=g_meshes[obdis.otyp].faces[j].y1;
+        z=g_meshes[obdis.otyp].faces[j].z1;
       face[j+crf].x1=obdis.transform.vx[0]+x*fix+y*fjx+z*fkx;
       face[j+crf].y1=obdis.transform.vy[0]+x*fiy+y*fjy+z*fky;
       face[j+crf].z1=obdis.transform.vz[0]+x*fiz+y*fjz+z*fkz;
-        x=fceglob[obdis.otyp][j].x2;
-        y=fceglob[obdis.otyp][j].y2;
-        z=fceglob[obdis.otyp][j].z2;
+        x=g_meshes[obdis.otyp].faces[j].x2;
+        y=g_meshes[obdis.otyp].faces[j].y2;
+        z=g_meshes[obdis.otyp].faces[j].z2;
       face[j+crf].x2=obdis.transform.vx[0]+x*fix+y*fjx+z*fkx;
       face[j+crf].y2=obdis.transform.vy[0]+x*fiy+y*fjy+z*fky;
       face[j+crf].z2=obdis.transform.vz[0]+x*fiz+y*fjz+z*fkz;
-        x=fceglob[obdis.otyp][j].x3;
-        y=fceglob[obdis.otyp][j].y3;
-        z=fceglob[obdis.otyp][j].z3;
+        x=g_meshes[obdis.otyp].faces[j].x3;
+        y=g_meshes[obdis.otyp].faces[j].y3;
+        z=g_meshes[obdis.otyp].faces[j].z3;
       face[j+crf].x3=obdis.transform.vx[0]+x*fix+y*fjx+z*fkx;
       face[j+crf].y3=obdis.transform.vy[0]+x*fiy+y*fjy+z*fky;
       face[j+crf].z3=obdis.transform.vz[0]+x*fiz+y*fjz+z*fkz; /*updated positions of triangles*/
@@ -793,7 +798,7 @@ void renderer_release()
 {
   for(int i=1;i<mesh_count;i++)
   {
-    free(fceglob[i]);
+    free(g_meshes[i].faces);
   }
-  free(fceglob);
+  free(g_meshes);
 }
