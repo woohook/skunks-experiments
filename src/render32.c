@@ -60,9 +60,19 @@ typedef struct _mesh
   tria* faces;
 } mesh;
 
+typedef struct mesh_instance
+{
+  int iMesh;
+  sgob* object;
+} mesh_instance;
+
 mesh* g_meshes = 0;
 int mesh_count = 0;
 int face_count = 0;
+
+mesh_instance** g_instances = 0;
+int instance_count = 0;
+
 pixcol g_backcol = {0,0,0};
 lightpr g_light = {0,0,0,0,0,0};
 float g_width_factor = 1.0f;
@@ -82,6 +92,22 @@ void create_mesh()
     mesh_count++;
   }
   face_count = 0;
+}
+
+void create_mesh_instance(sgob* object)
+{
+  if(instance_count==0)
+  {
+    if(!(g_instances=(mesh_instance**)malloc(sizeof(mesh_instance*)))){printf("Out of memory");}
+  }
+  else
+  {
+    if(!(g_instances=(mesh_instance**)realloc(g_instances,(instance_count+1)*sizeof(mesh_instance*)))){printf("Out of memory");}
+  }
+  if(!(g_instances[instance_count]=(mesh_instance*)malloc(sizeof(mesh_instance)))){printf("Out of memory");}
+  g_instances[instance_count]->iMesh  = object->otyp;
+  g_instances[instance_count]->object = object;
+  instance_count++;
 }
 
 void add_face(int mesh_id, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3)
@@ -796,6 +822,12 @@ SDL_UpdateRect();
 
 void renderer_release()
 {
+  for(int i=1;i<instance_count;i++)
+  {
+    free(g_instances[i]);
+  }
+  free(g_instances);
+
   for(int i=1;i<mesh_count;i++)
   {
     free(g_meshes[i].faces);
