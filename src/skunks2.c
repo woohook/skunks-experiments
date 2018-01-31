@@ -249,7 +249,7 @@ setcamg(&camera,&car,camflag);
 rotc+=vrotc*tframe; if(camflag==2){rotc=0; vrotc=0;}
 if(rotc){rotatx(&camera,objs[car.oid[1]]->transform.vy[0],objs[car.oid[1]]->transform.vz[0],rotc);}
 
-odis(screen,objs,nob,zfog,zmax,&camera); /*display image*/
+odis(screen,zfog,zmax,&camera); /*display image*/
 
 dstr+=(speed*tframe);
 
@@ -369,6 +369,6 @@ fclose(repf);
 dWorldDestroy(wglob);
 dCloseODE();
 
-odis(0,0,0,0,0,0); /*freed static variables from odis() in "camera.h"*/
+odis(0,0,0,0); /*freed static variables from odis() in "camera.h"*/
 
 return 0;}

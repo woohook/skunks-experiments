@@ -650,7 +650,7 @@ for(i=lim.imin;i<=lim.imax;i++){
 /*function which displays the objcts which are closer than zmax
 nob - total number of objects
 cam - camera*/
-void odis(SDL_Surface *screen,sgob** objs,int nob,float zfog,float zmax,sgob *cam)
+void odis(SDL_Surface *screen,float zfog,float zmax,sgob *cam)
 {int i,j,focal;
 unsigned int width,height;
 unsigned long int area;
@@ -665,7 +665,7 @@ lightpr rotlight; /*rotated light parameters*/
 float tgh,tgv,zmin;
 float x,y,z,ix,iy,iz,jx,jy,jz,kx,ky,kz; /*temporary variables for transformations*/
 
-if(nob==0){free(face); free(facedisp); free(distmin); return;}
+if(screen==0){free(face); free(facedisp); free(distmin); return;}
 /*to free static variables, call odis(0,0,0,0,0,0,0)*/
 
 width=screen->w;
@@ -714,14 +714,15 @@ rotlight.directional=g_light.directional;
 nrfaces=0;
 crf=0;
 
-for(i=1;i<=nob;i++){
-  if(objs[i]->xcen-cam->transform.vx[0]-objs[i]->radius>(1.74*zmax)){continue;}
-  if(objs[i]->xcen-cam->transform.vx[0]+objs[i]->radius<(-1.74*zmax)){continue;}
-  if(objs[i]->ycen-cam->transform.vy[0]-objs[i]->radius>(1.74*zmax)){continue;}
-  if(objs[i]->ycen-cam->transform.vy[0]+objs[i]->radius<(-1.74*zmax)){continue;}
-  if(objs[i]->zcen-cam->transform.vz[0]-objs[i]->radius>(1.74*zmax)){continue;}
-  if(objs[i]->zcen-cam->transform.vz[0]+objs[i]->radius<(-1.74*zmax)){continue;}
-  obdis = *objs[i];
+for(i=0;i<instance_count;i++){
+  sgob* object = g_instances[i]->object;
+  if(object->xcen-cam->transform.vx[0]-object->radius>(1.74*zmax)){continue;}
+  if(object->xcen-cam->transform.vx[0]+object->radius<(-1.74*zmax)){continue;}
+  if(object->ycen-cam->transform.vy[0]-object->radius>(1.74*zmax)){continue;}
+  if(object->ycen-cam->transform.vy[0]+object->radius<(-1.74*zmax)){continue;}
+  if(object->zcen-cam->transform.vz[0]-object->radius>(1.74*zmax)){continue;}
+  if(object->zcen-cam->transform.vz[0]+object->radius<(-1.74*zmax)){continue;}
+  obdis = *object;
 
   for(j=0;j<=3;j++){
     obdis.transform.vx[j]-=cam->transform.vx[0];

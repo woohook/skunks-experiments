@@ -58,6 +58,6 @@ void findplan(float x1, float y1, float z1, float x2, float y2, float z2, float 
 /*function which displays the objcts which are closer than zmax
 nob - total number of objects
 cam - camera*/
-void odis(SDL_Surface *screen,sgob** objs,int nob,float zfog,float zmax,sgob *cam);
+void odis(SDL_Surface *screen,float zfog,float zmax,sgob *cam);
 
 void renderer_release();
