@@ -16,6 +16,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+struct _surface;
+
 void create_mesh();
 
 void create_mesh_instance(sgob* object);
@@ -58,6 +60,6 @@ void findplan(float x1, float y1, float z1, float x2, float y2, float z2, float 
 /*function which displays the objcts which are closer than zmax
 nob - total number of objects
 cam - camera*/
-void odis(SDL_Surface *screen,float zfog,float zmax,sgob *cam);
+void odis(struct _surface* pSurface,float zfog,float zmax,sgob *cam);
 
 void renderer_release();

@@ -25,14 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <time.h>
 #include "config.h"
 
-SDL_Window *RGLOBwindow; /*for SDL 2*/
-void SDL_UpdateRect()
-{
-  SDL_UpdateWindowSurface(RGLOBwindow);
-}
-
 #include "defstr.h"
 
+#include "surface.h"
 #include "render32.h"
 
 #include "trans.h"
@@ -46,7 +41,7 @@ int i,quit=0,
     t0frame; /*t0frame - moment when image starts to be displayed*/
 
 SDL_Event event;
-SDL_Surface *screen;
+struct _surface* pSurface = NULL;
 
 
 #if SOUND==1
@@ -141,14 +136,8 @@ desired->userdata=volum;
 
 /*Initialize SDL*/
 if(SDL_Init(SDL_INIT_VIDEO)<0){printf("Couldn't initialize SDL: %s\n", SDL_GetError());SDL_Quit();return 0;}
-/*Initialize display SDL2*/
-RGLOBwindow = SDL_CreateWindow("Skunks-4.2.0 SDL2",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,SCREENWIDTH,SCREENHEIGHT,SDL_WINDOW_SHOWN);
-if(RGLOBwindow==NULL){
-  printf("Couldn't create window: %s\n",SDL_GetError());SDL_Quit();return 0;
-}
-screen=SDL_GetWindowSurface(RGLOBwindow);
-/*SDL2^*/
-printf("Set %dx%dx%d\n",(screen->pitch)/(screen->format->BytesPerPixel),SCREENHEIGHT,screen->format->BitsPerPixel);
+// Initialize display
+pSurface = surface_create(SCREENWIDTH,SCREENHEIGHT);
 
 set_view_angle(FOV);
 set_double_pixel(DOUBLEPIX);
@@ -249,7 +238,7 @@ setcamg(&camera,&car,camflag);
 rotc+=vrotc*tframe; if(camflag==2){rotc=0; vrotc=0;}
 if(rotc){rotatx(&camera,objs[car.oid[1]]->transform.vy[0],objs[car.oid[1]]->transform.vz[0],rotc);}
 
-odis(screen,zfog,zmax,&camera); /*display image*/
+odis(pSurface,zfog,zmax,&camera); /*display image*/
 
 dstr+=(speed*tframe);
 

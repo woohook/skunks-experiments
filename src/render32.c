@@ -17,10 +17,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include "config.h"
-#include <SDL.h>
 #include <ode/ode.h>
 #include "defstr.h"
 #include "render32.h"
+#include "surface.h"
 
 typedef struct _pixcol
 {int red;int green;int blue; /*culoarea pixelului*/
@@ -52,8 +52,6 @@ float dx;
 float dy;
 float dz;
 } lightpr; /*light parameters*/
-
-const int bits_per_pixel = 32;
 
 typedef struct _mesh
 {
@@ -415,7 +413,7 @@ void clear_depth_buffer(float* depthbuffer, unsigned int width, unsigned int hei
   }
 }
 
-void finish_frame(SDL_Surface *screen, float* depthbuffer, unsigned int width, unsigned int height, float zfog, float zmax)
+void finish_frame(struct _surface* pSurface, float* depthbuffer, float zfog, float zmax)
 {
   int i,j;
   unsigned long int crf=0;
@@ -426,10 +424,9 @@ void finish_frame(SDL_Surface *screen, float* depthbuffer, unsigned int width, u
   int red0=backcol.red;
   int green0=backcol.green;
   int blue0=backcol.blue;
-  int isp=screen->pitch;
-  Uint8 *ptr;
   pixcol pixcb;
-  int bitd=bits_per_pixel/8;
+  int width = surface_get_width(pSurface);
+  int height = surface_get_height(pSurface);
 
   for(j=0;j<=(int)height-1;j++)
   {
@@ -439,30 +436,19 @@ void finish_frame(SDL_Surface *screen, float* depthbuffer, unsigned int width, u
     float bluef=blue0-tmp;
     backcol.red=(int)redf; backcol.green=(int)greenf; backcol.blue=(int)bluef;
 
-    if(g_double_pixel == 0)
-    {
-      ptr=(Uint8 *)screen->pixels + j*screen->pitch;
-    }
-    else
-    {
-      ptr=(Uint8 *)screen->pixels + 2*j*screen->pitch;
-    }
+    surface_set_current_pixel(pSurface,0,j);
 
     for(i=0;i<=(int)width-1;i++)
     {
       if(depthbuffer[++crf]==izmax)
       {
-        ptr[0]=backcol.blue;
-        ptr[1]=backcol.green;
-        ptr[2]=backcol.red;
+        surface_set_current_pixel_color(pSurface,backcol.red,backcol.green,backcol.blue);
       }
       else
       {
         if(depthbuffer[crf]<izfog)
         {
-          pixcb.red=ptr[2];
-          pixcb.green=ptr[1];
-          pixcb.blue=ptr[0];
+          surface_get_current_pixel_color(pSurface,&pixcb.red,&pixcb.green,&pixcb.blue);
 
           tmp=(depthbuffer[crf]-izfog)*ratio2;
           //pixcb.red=(int)(pixcb.red*(1-tmp));
@@ -472,32 +458,22 @@ void finish_frame(SDL_Surface *screen, float* depthbuffer, unsigned int width, u
           pixcb.green+=(int)(tmp*(backcol.green-pixcb.green));
           pixcb.blue+=(int)(tmp*(backcol.blue-pixcb.blue));
 
-	  ptr[0] = pixcb.blue;
-          ptr[1] = pixcb.green;
-          ptr[2] = pixcb.red;
+          surface_set_current_pixel_color(pSurface,pixcb.red,pixcb.green,pixcb.blue);
         }
       }
 
-      if(g_double_pixel == 0)
-      {
-        ptr+=bitd;
-      }
-      else
-      {
-        ptr[bitd]=ptr[isp]=ptr[isp+bitd]=ptr[0];
-        ptr[bitd+1]=ptr[isp+1]=ptr[isp+bitd+1]=ptr[1];
-        ptr[bitd+2]=ptr[isp+2]=ptr[isp+bitd+2]=ptr[2];
-        ptr+=2*bitd;
-      }
+      surface_advance_current_pixel(pSurface);
     }
   }
 }
 
-void render_triangle(SDL_Surface *screen, unsigned int width, unsigned int height, float *distmin, tria *face, float zf, float aizf, float bizf, float id, float c)
+void render_triangle(struct _surface* pSurface, float *distmin, tria *face, float zf, float aizf, float bizf, float id, float c)
 {
   float aizfxcr;
   float tmp;
   float ratio2, ratio3, ratio4;
+  int width = surface_get_width(pSurface);
+  int height = surface_get_height(pSurface);
   float thres = 1/(width+height);
   tripf ftr;    // proiectii varfuri triunghi
   trilim lim;    // limite triunghi pe axa y
@@ -505,9 +481,6 @@ void render_triangle(SDL_Surface *screen, unsigned int width, unsigned int heigh
   float dist;
   int i, j, jmin, jmax, xcr, ycr;
   unsigned long int idx;
-  int bitd = bits_per_pixel/8;
-  int isp;
-  Uint8 *ptr;
 
   // find trangle limits
   ftr.x1=face->x1*zf/face->z1;
@@ -536,9 +509,6 @@ void render_triangle(SDL_Surface *screen, unsigned int width, unsigned int heigh
 
   for(i=lim.imin;i<=lim.imax;i++)
   {
-
-    isp=i*screen->pitch;
-
     xcr=-(int)(height>>1)+i;
 
     aizfxcr=aizf*xcr;
@@ -576,14 +546,7 @@ void render_triangle(SDL_Surface *screen, unsigned int width, unsigned int heigh
       jmax=(int)width-1;
     }
 
-    if(g_double_pixel == 0)
-    {
-      ptr=(Uint8 *)screen->pixels+isp+jmin*bitd;
-    }
-    else
-    {
-      ptr=(Uint8 *)screen->pixels+2*isp+jmin*bitd*2;
-    }
+    surface_set_current_pixel(pSurface,jmin,i);
 
     idx=i*width+jmin;
 
@@ -595,24 +558,15 @@ void render_triangle(SDL_Surface *screen, unsigned int width, unsigned int heigh
       if(distmin[idx]<dist)
       {
         distmin[idx]=dist;
-        ptr[0] = face->blued;
-        ptr[1] = face->greend;
-        ptr[2] = face->redd;
+        surface_set_current_pixel_color(pSurface,face->redd,face->greend,face->blued);
       }
 
-      if(g_double_pixel == 0)
-      {
-        ptr+=bitd;
-      }
-      else
-      {
-        ptr+=2*bitd;
-      }
+      surface_advance_current_pixel(pSurface);
     }
   }
 }
 
-void displaysdl(SDL_Surface *screen,tria *face,int nrfaces,float *distmin,unsigned int width,unsigned int height,float focal, lightpr* light)
+void displaysdl(struct _surface* pSurface,tria *face,int nrfaces,float *distmin,float focal, lightpr* light)
 {
 int red,green,blue;
 float zf,dist;
@@ -621,6 +575,8 @@ float tmp;
 float a,b,c,d,izf, /*izf=1/zf - pt. marit viteza; ecuatia planului este ax+by+cz=d*/
       a1,bright,
       aizf,bizf,id;
+unsigned int width = surface_get_width(pSurface);
+unsigned int height = surface_get_height(pSurface);
 
 if(g_double_pixel == 1)
 {
@@ -674,14 +630,14 @@ face[crf].greend=green;
 face[crf].blued=blue;
 /*finished lighting and backface culling*/
 
-  render_triangle(screen, width, height, distmin, &face[crf], zf, aizf, bizf, id, c);
+  render_triangle(pSurface, distmin, &face[crf], zf, aizf, bizf, id, c);
 }
 }
 
 /*function which displays the objcts which are closer than zmax
 nob - total number of objects
 cam - camera*/
-void odis(SDL_Surface *screen,float zfog,float zmax,sgob *cam)
+void odis(struct _surface* pSurface,float zfog,float zmax,sgob *cam)
 {int i,j,focal;
 unsigned int width,height;
 unsigned long int area;
@@ -696,11 +652,11 @@ lightpr rotlight; /*rotated light parameters*/
 float tgh,tgv,zmin;
 float x,y,z,ix,iy,iz,jx,jy,jz,kx,ky,kz; /*temporary variables for transformations*/
 
-if(screen==0){free(face); free(facedisp); free(distmin); return;}
+if(pSurface==0){free(face); free(facedisp); free(distmin); return;}
 /*to free static variables, call odis(0,0,0,0,0,0,0)*/
 
-width=screen->w;
-height=screen->h;
+width=surface_get_width(pSurface);
+height=surface_get_height(pSurface);
 focal=(int)(width/(2*tan(g_view_angle*0.008726646)));
 
 area=(width+1)*(height+1);
@@ -828,28 +784,15 @@ for(i=0;i<instance_count;i++){
 
 nrdisp=fclip(face,nrfaces,zmin,facedisp,zmax,tgh,tgv);
 
-if(SDL_MUSTLOCK(screen))
-{
-  if(SDL_LockSurface(screen)<0)
-  {
-    printf("Can't lock screen: %s\n", SDL_GetError());
-    SDL_Quit();
-    return;
-  }
-}
+surface_begin_rendering(pSurface);
 
 clear_depth_buffer(distmin,width,height,zmax);
 
-displaysdl(screen,facedisp,nrdisp,distmin,width,height,focal,&rotlight);
+displaysdl(pSurface,facedisp,nrdisp,distmin,focal,&rotlight);
 
-finish_frame(screen,distmin,width,height,zfog,zmax);
+finish_frame(pSurface,distmin,zfog,zmax);
 
-if(SDL_MUSTLOCK(screen))
-{
-  SDL_UnlockSurface(screen);
-}
-
-SDL_UpdateRect();
+surface_end_rendering(pSurface);
 }
 
 void renderer_release()
