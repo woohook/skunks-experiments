@@ -1,3 +1,4 @@
+gcc -c src/surface_sdl2.c -o surface_sdl2.o `sdl2-config --cflags --libs` -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W
 gcc -c src/render32.c -o render32.o `sdl2-config --cflags --libs` -I./ODE/local/include -L./ODE/local/lib -lode -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W
 gcc src/skunks2.c render32.o -o skunks2 `sdl2-config --cflags --libs` -I./ODE/local/include -L./ODE/local/lib -lode -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W
 gcc src/replay2.c render32.o -o replay2 `sdl2-config --cflags --libs` -I./ODE/local/include -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W
