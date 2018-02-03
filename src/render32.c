@@ -493,26 +493,139 @@ void finish_frame(SDL_Surface *screen, float* depthbuffer, unsigned int width, u
   }
 }
 
+void render_triangle(SDL_Surface *screen, unsigned int width, unsigned int height, float *distmin, tria *face, float zf, float aizf, float bizf, float id, float c)
+{
+  float aizfxcr;
+  float tmp;
+  float ratio2, ratio3, ratio4;
+  float thres = 1/(width+height);
+  tripf ftr;    // proiectii varfuri triunghi
+  trilim lim;    // limite triunghi pe axa y
+  float ystart, yend;
+  float dist;
+  int i, j, jmin, jmax, xcr, ycr;
+  unsigned long int idx;
+  int bitd = bits_per_pixel/8;
+  int isp;
+  Uint8 *ptr;
+
+  // find trangle limits
+  ftr.x1=face->x1*zf/face->z1;
+  ftr.x2=face->x2*zf/face->z2;
+  ftr.x3=face->x3*zf/face->z3;
+
+  ftr.y1=face->y1*zf/face->z1;
+  ftr.y2=face->y2*zf/face->z2;
+  ftr.y3=face->y3*zf/face->z3;
+
+  if(ftr.x2>ftr.x3){tmp=ftr.y2;ftr.y2=ftr.y3;ftr.y3=tmp; tmp=ftr.x2;ftr.x2=ftr.x3;ftr.x3=tmp;}
+  if(ftr.x1>ftr.x2){{tmp=ftr.y1;ftr.y1=ftr.y2;ftr.y2=tmp; tmp=ftr.x1;ftr.x1=ftr.x2;ftr.x2=tmp;}
+  if(ftr.x2>ftr.x3){tmp=ftr.y2;ftr.y2=ftr.y3;ftr.y3=tmp; tmp=ftr.x2;ftr.x2=ftr.x3;ftr.x3=tmp;}}
+  // ordered triangle vertices
+
+  lim.imin=(int)((int)(height>>1)+ftr.x1+1);
+  lim.imax=(int)((int)(height>>1)+ftr.x3);
+
+  if(lim.imin<0){lim.imin=0;}
+  if(lim.imax>((int)height-1)){lim.imax=(int)height-1;}
+  // found triangle limits
+
+  if(fabs(ftr.x2-ftr.x1)>thres){ratio2=(ftr.y2-ftr.y1)/(ftr.x2-ftr.x1);}else{ratio2=1e5;}
+  if(fabs(ftr.x3-ftr.x1)>thres){ratio3=(ftr.y3-ftr.y1)/(ftr.x3-ftr.x1);}else{ratio3=1e5;}
+  if(fabs(ftr.x3-ftr.x2)>thres){ratio4=(ftr.y3-ftr.y2)/(ftr.x3-ftr.x2);}else{ratio4=1e5;}
+
+  for(i=lim.imin;i<=lim.imax;i++)
+  {
+
+    isp=i*screen->pitch;
+
+    xcr=-(int)(height>>1)+i;
+
+    aizfxcr=aizf*xcr;
+
+    if(xcr<ftr.x2)
+    {
+      ystart=(ratio2*(xcr-ftr.x1)+ftr.y1);
+      yend=(ratio3*(xcr-ftr.x1)+ftr.y1);
+    }
+    else
+    {
+      ystart=(ratio4*(xcr-ftr.x2)+ftr.y2);
+      yend=(ratio3*(xcr-ftr.x1)+ftr.y1);
+    }
+
+    if(yend<ystart)
+    {
+      tmp=ystart; ystart=yend; yend=tmp;
+    }
+
+    if(g_width_factor != 1.0f)
+    {
+      ystart*=g_width_factor;
+      yend*=g_width_factor;
+    }
+
+    jmin=(int)(-yend+(int)(width>>1))+1;
+    jmax=(int)(-ystart+(int)(width>>1));
+    if(jmin<0)
+    {
+      jmin=0;
+    }
+    if(jmax>((int)width-1))
+    {
+      jmax=(int)width-1;
+    }
+
+    if(g_double_pixel == 0)
+    {
+      ptr=(Uint8 *)screen->pixels+isp+jmin*bitd;
+    }
+    else
+    {
+      ptr=(Uint8 *)screen->pixels+2*isp+jmin*bitd*2;
+    }
+
+    idx=i*width+jmin;
+
+    for(j=jmin;j<=jmax;j++)
+    {
+      ycr=(int)(width>>1)-j;
+      dist=id*(aizfxcr+bizf*ycr+c);
+      idx++;
+      if(distmin[idx]<dist)
+      {
+        distmin[idx]=dist;
+        ptr[0] = face->blued;
+        ptr[1] = face->greend;
+        ptr[2] = face->redd;
+      }
+
+      if(g_double_pixel == 0)
+      {
+        ptr+=bitd;
+      }
+      else
+      {
+        ptr+=2*bitd;
+      }
+    }
+  }
+}
+
 void displaysdl(SDL_Surface *screen,tria *face,int nrfaces,float *distmin,unsigned int width,unsigned int height,float focal, lightpr* light)
-{int i,j,jmin,jmax,xcr,ycr,isp,bitd,red,green,blue;
-Uint8 *ptr;
-float ystart,yend,zf,dist;
-unsigned long int idx,crf;
-float tmp,ratio2,ratio3,ratio4,thres;
-tripf ftr; /*proiectii varfuri triunghi*/
-trilim lim; /*limite triunghi pe axa y*/
+{
+int red,green,blue;
+float zf,dist;
+unsigned long int crf;
+float tmp;
 float a,b,c,d,izf, /*izf=1/zf - pt. marit viteza; ecuatia planului este ax+by+cz=d*/
       a1,bright,
-      aizf,bizf,aizfxcr,id;
+      aizf,bizf,id;
 
 if(g_double_pixel == 1)
 {
   width/=2; height/=2; focal/=2;
 }
-
-thres=1/(width+height);
-
-bitd=bits_per_pixel/8;
 
 zf=-focal;
 izf=1/zf;
@@ -561,89 +674,7 @@ face[crf].greend=green;
 face[crf].blued=blue;
 /*finished lighting and backface culling*/
 
-	/*find trangle limits*/
-	ftr.x1=face[crf].x1*zf/face[crf].z1;
-	ftr.x2=face[crf].x2*zf/face[crf].z2;
-	ftr.x3=face[crf].x3*zf/face[crf].z3;
-
-	ftr.y1=face[crf].y1*zf/face[crf].z1;
-	ftr.y2=face[crf].y2*zf/face[crf].z2;
-	ftr.y3=face[crf].y3*zf/face[crf].z3;
-
-	if(ftr.x2>ftr.x3){tmp=ftr.y2;ftr.y2=ftr.y3;ftr.y3=tmp; tmp=ftr.x2;ftr.x2=ftr.x3;ftr.x3=tmp;}
-	if(ftr.x1>ftr.x2){{tmp=ftr.y1;ftr.y1=ftr.y2;ftr.y2=tmp; tmp=ftr.x1;ftr.x1=ftr.x2;ftr.x2=tmp;}
-	if(ftr.x2>ftr.x3){tmp=ftr.y2;ftr.y2=ftr.y3;ftr.y3=tmp; tmp=ftr.x2;ftr.x2=ftr.x3;ftr.x3=tmp;}}
-	/*ordered triangle vertices*/
-
-	lim.imax=(int)((int)(height>>1)+ftr.x3); lim.imin=(int)((int)(height>>1)+ftr.x1+1);
-
-	if(lim.imin<0){lim.imin=0;}
-	if(lim.imax>((int)height-1)){lim.imax=(int)height-1;}
-	/*found triangle limits*/
-
-    if(fabs(ftr.x2-ftr.x1)>thres){ratio2=(ftr.y2-ftr.y1)/(ftr.x2-ftr.x1);}else{ratio2=1e5;}
-    if(fabs(ftr.x3-ftr.x1)>thres){ratio3=(ftr.y3-ftr.y1)/(ftr.x3-ftr.x1);}else{ratio3=1e5;}
-    if(fabs(ftr.x3-ftr.x2)>thres){ratio4=(ftr.y3-ftr.y2)/(ftr.x3-ftr.x2);}else{ratio4=1e5;}
-
-for(i=lim.imin;i<=lim.imax;i++){
-
-    isp=i*screen->pitch;
-
-    xcr=-(int)(height>>1)+i;
-
-    aizfxcr=aizf*xcr;
-
-    if(xcr<ftr.x2){
-      ystart=(ratio2*(xcr-ftr.x1)+ftr.y1);
-      yend=(ratio3*(xcr-ftr.x1)+ftr.y1);}
-    else{
-      ystart=(ratio4*(xcr-ftr.x2)+ftr.y2);
-      yend=(ratio3*(xcr-ftr.x1)+ftr.y1);}
-    if(yend<ystart){tmp=ystart;ystart=yend;yend=tmp;}
-
-    if(g_width_factor != 1.0f)
-    {
-      ystart*=g_width_factor;
-      yend*=g_width_factor;
-    }
-
-    jmin=(int)(-yend+(int)(width>>1))+1; jmax=(int)(-ystart+(int)(width>>1));
-    if(jmin<0){jmin=0;}
-    if(jmax>((int)width-1)){jmax=(int)width-1;}
-
-    if(g_double_pixel == 0)
-    {
-      ptr=(Uint8 *)screen->pixels+isp+jmin*bitd;
-    }
-    else
-    {
-      ptr=(Uint8 *)screen->pixels+2*isp+jmin*bitd*2;
-    }
-
-  idx=i*width+jmin;
-
-  for(j=jmin;j<=jmax;j++){
-    ycr=(int)(width>>1)-j;
-      dist=id*(aizfxcr+bizf*ycr+c);
-        idx++;
-	  if(distmin[idx]<dist){
-	    distmin[idx]=dist;
-	    ptr[0] = face[crf].blued;
-            ptr[1] = face[crf].greend;
-            ptr[2] = face[crf].redd;
-	  }
-
-    if(g_double_pixel == 0)
-    {
-      ptr+=bitd;
-    }
-    else
-    {
-      ptr+=2*bitd;
-    }
-
-  }
-}
+  render_triangle(screen, width, height, distmin, &face[crf], zf, aizf, bizf, id, c);
 }
 }
 
