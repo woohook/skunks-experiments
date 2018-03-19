@@ -705,6 +705,7 @@ lightpr rotlight; /*rotated light parameters*/
 
 float tgh,tgv,zmin;
 float x,y,z,ix,iy,iz,jx,jy,jz,kx,ky,kz; /*temporary variables for transformations*/
+float xcen,ycen,zcen,radius;
 
 if(pSurface==0){free(face); free(facedisp); free(distmin); return;}
 /*to free static variables, call odis(0,0,0,0,0,0,0)*/
@@ -757,49 +758,8 @@ crf=0;
 
 for(i=0;i<instance_count;i++){
   sgob* object = g_instances[i]->object;
-  if(object->xcen-cam->transform.vx[0]-object->radius>(1.74*zmax)){continue;}
-  if(object->xcen-cam->transform.vx[0]+object->radius<(-1.74*zmax)){continue;}
-  if(object->ycen-cam->transform.vy[0]-object->radius>(1.74*zmax)){continue;}
-  if(object->ycen-cam->transform.vy[0]+object->radius<(-1.74*zmax)){continue;}
-  if(object->zcen-cam->transform.vz[0]-object->radius>(1.74*zmax)){continue;}
-  if(object->zcen-cam->transform.vz[0]+object->radius<(-1.74*zmax)){continue;}
+
   obdis = *object;
-
-  for(j=0;j<=3;j++){
-    obdis.transform.vx[j]-=cam->transform.vx[0];
-    obdis.transform.vy[j]-=cam->transform.vy[0];
-    obdis.transform.vz[j]-=cam->transform.vz[0];
-  }
-  obdis.xcen-=cam->transform.vx[0];
-  obdis.ycen-=cam->transform.vy[0];
-  obdis.zcen-=cam->transform.vz[0]; /*translated object*/
-
-  for(j=0;j<=3;j++){
-    x=obdis.transform.vx[j];
-    y=obdis.transform.vy[j];
-    z=obdis.transform.vz[j];
-    obdis.transform.vx[j]=x*ix+y*iy+z*iz;
-    obdis.transform.vy[j]=x*jx+y*jy+z*jz;
-    obdis.transform.vz[j]=x*kx+y*ky+z*kz;
-  }
-  x=obdis.xcen;
-  y=obdis.ycen;
-  z=obdis.zcen;
-  obdis.xcen=x*ix+y*iy+z*iz;
-  obdis.ycen=x*jx+y*jy+z*jz;
-  obdis.zcen=x*kx+y*ky+z*kz; /*rotated objects*/
-
-  if((obdis.ycen-obdis.radius)>(obdis.zcen+obdis.radius)*tgh){continue;}
-  if((obdis.ycen+obdis.radius)<(obdis.zcen+obdis.radius)*(-tgh)){continue;}
-  if((obdis.xcen-obdis.radius)>(obdis.zcen+obdis.radius)*tgv){continue;}
-  if((obdis.xcen+obdis.radius)<(obdis.zcen+obdis.radius)*(-tgv)){continue;}
-  if(((obdis.zcen-obdis.radius)<zmax)&&((obdis.zcen+obdis.radius)>0)){
-    nrfaces+=obdis.nfa;
-    if(nrfaces>nrfm){
-      nrfm=nrfaces;
-      if(!(face=(tria *)realloc(face,(nrfm+10)*sizeof(tria)))){printf("Out of memory");}
-      if(!(facedisp=(tria *)realloc(facedisp,(2*nrfm+20)*sizeof(tria)))){printf("Out of memory");}
-    }
 
     float fix=obdis.transform.vx[1]-obdis.transform.vx[0];
     float fjx=obdis.transform.vx[2]-obdis.transform.vx[0];
@@ -810,6 +770,70 @@ for(i=0;i<instance_count;i++){
         float fiz=obdis.transform.vz[1]-obdis.transform.vz[0];
         float fjz=obdis.transform.vz[2]-obdis.transform.vz[0];
         float fkz=obdis.transform.vz[3]-obdis.transform.vz[0]; /*unit vectors of the local axes in global system*/
+
+  xcen=g_meshes[g_instances[i]->iMesh].xcen;
+  ycen=g_meshes[g_instances[i]->iMesh].ycen;
+  zcen=g_meshes[g_instances[i]->iMesh].zcen;
+  radius=g_meshes[g_instances[i]->iMesh].radius;
+  x=xcen;
+  y=ycen;
+  z=zcen;
+  xcen=obdis.transform.vx[0]-xcen+x*fix+y*fjx+z*fkx;
+  ycen=obdis.transform.vy[0]-ycen+x*fiy+y*fjy+z*fky;
+  zcen=obdis.transform.vz[0]-zcen+x*fiz+y*fjz+z*fkz;
+
+  if(xcen-cam->transform.vx[0]-radius>(1.74*zmax)){continue;}
+  if(xcen-cam->transform.vx[0]+radius<(-1.74*zmax)){continue;}
+  if(ycen-cam->transform.vy[0]-radius>(1.74*zmax)){continue;}
+  if(ycen-cam->transform.vy[0]+radius<(-1.74*zmax)){continue;}
+  if(zcen-cam->transform.vz[0]-radius>(1.74*zmax)){continue;}
+  if(zcen-cam->transform.vz[0]+radius<(-1.74*zmax)){continue;}
+
+  for(j=0;j<=3;j++){
+    obdis.transform.vx[j]-=cam->transform.vx[0];
+    obdis.transform.vy[j]-=cam->transform.vy[0];
+    obdis.transform.vz[j]-=cam->transform.vz[0];
+  }
+  xcen-=cam->transform.vx[0];
+  ycen-=cam->transform.vy[0];
+  zcen-=cam->transform.vz[0]; /*translated object*/
+
+  for(j=0;j<=3;j++){
+    x=obdis.transform.vx[j];
+    y=obdis.transform.vy[j];
+    z=obdis.transform.vz[j];
+    obdis.transform.vx[j]=x*ix+y*iy+z*iz;
+    obdis.transform.vy[j]=x*jx+y*jy+z*jz;
+    obdis.transform.vz[j]=x*kx+y*ky+z*kz;
+  }
+  x=xcen;
+  y=ycen;
+  z=zcen;
+  xcen=x*ix+y*iy+z*iz;
+  ycen=x*jx+y*jy+z*jz;
+  zcen=x*kx+y*ky+z*kz; /*rotated objects*/
+
+  if((ycen-radius)>(zcen+radius)*tgh){continue;}
+  if((ycen+radius)<(zcen+radius)*(-tgh)){continue;}
+  if((xcen-radius)>(zcen+radius)*tgv){continue;}
+  if((xcen+radius)<(zcen+radius)*(-tgv)){continue;}
+  if(((zcen-radius)<zmax)&&((zcen+radius)>0)){
+    nrfaces+=obdis.nfa;
+    if(nrfaces>nrfm){
+      nrfm=nrfaces;
+      if(!(face=(tria *)realloc(face,(nrfm+10)*sizeof(tria)))){printf("Out of memory");}
+      if(!(facedisp=(tria *)realloc(facedisp,(2*nrfm+20)*sizeof(tria)))){printf("Out of memory");}
+    }
+
+    fix=obdis.transform.vx[1]-obdis.transform.vx[0];
+    fjx=obdis.transform.vx[2]-obdis.transform.vx[0];
+    fkx=obdis.transform.vx[3]-obdis.transform.vx[0];
+      fiy=obdis.transform.vy[1]-obdis.transform.vy[0];
+      fjy=obdis.transform.vy[2]-obdis.transform.vy[0];
+      fky=obdis.transform.vy[3]-obdis.transform.vy[0];
+        fiz=obdis.transform.vz[1]-obdis.transform.vz[0];
+        fjz=obdis.transform.vz[2]-obdis.transform.vz[0];
+        fkz=obdis.transform.vz[3]-obdis.transform.vz[0]; /*unit vectors of the local axes in global system*/
 
     for(j=1;j<=obdis.nfa;j++){
       face[j+crf]=g_meshes[obdis.otyp].faces[j]; /*added triangles*/
