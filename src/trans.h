@@ -26,10 +26,6 @@ void translat(sgob *objs,REALD x,REALD y,REALD z)
     objs->zref[i]+=z;
   }
 
-  objs->xcen+=x;
-  objs->ycen+=y;
-  objs->zcen+=z;
-
   for(i=0;i<=3;i++){
     objs->transform.vx[i]+=x;
     objs->transform.vy[i]+=y;
@@ -52,10 +48,6 @@ sintt=sin(tt);costt=cos(tt);
     objs->xref[i]=x+(objs->xref[i]-x)*costt-(objs->yref[i]-y)*sintt;
     objs->yref[i]=y+(objs->yref[i]-y)*costt+(xtm-x)*sintt;
   }
-
-  xtm=objs->xcen;
-  objs->xcen=x+(objs->xcen-x)*costt-(objs->ycen-y)*sintt;
-  objs->ycen=y+(objs->ycen-y)*costt+(xtm-x)*sintt;
 
   for(i=0;i<=3;i++){
     xtm=objs->transform.vx[i];
@@ -80,10 +72,6 @@ sintt=sin(tt);costt=cos(tt);
     objs->zref[i]=z+(objs->zref[i]-z)*costt-(xtm-x)*sintt;
   }
 
-  xtm=objs->xcen;
-  objs->xcen=x+(objs->xcen-x)*costt+(objs->zcen-z)*sintt;
-  objs->zcen=z+(objs->zcen-z)*costt-(xtm-x)*sintt;
-
   for(i=0;i<=3;i++){
     xtm=objs->transform.vx[i];
     objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*costt+(objs->transform.vz[i]-z)*sintt;
@@ -107,10 +95,6 @@ sintt=sin(tt);costt=cos(tt);
     objs->yref[i]=y+(objs->yref[i]-y)*costt-(objs->zref[i]-z)*sintt;
     objs->zref[i]=z+(objs->zref[i]-z)*costt+(ytm-y)*sintt;
   }
-
-  ytm=objs->ycen;
-  objs->ycen=y+(objs->ycen-y)*costt-(objs->zcen-z)*sintt;
-  objs->zcen=z+(objs->zcen-z)*costt+(ytm-y)*sintt;
 
   for(i=0;i<=3;i++){
     ytm=objs->transform.vy[i];
@@ -149,10 +133,6 @@ sintt=sin(tt);costt=cos(tt);
     objs->yref[i]=y+(objs->yref[i]-y)*cosalf-(xtm-x)*sinalf;
   }
 
-  xtm=objs->xcen;
-  objs->xcen=x+(objs->xcen-x)*cosalf+(objs->ycen-y)*sinalf;
-  objs->ycen=y+(objs->ycen-y)*cosalf-(xtm-x)*sinalf;
-
   for(i=0;i<=3;i++){
     xtm=objs->transform.vx[i];
     objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*cosalf+(objs->transform.vy[i]-y)*sinalf;
@@ -166,10 +146,6 @@ sintt=sin(tt);costt=cos(tt);
     objs->zref[i]=z+(objs->zref[i]-z)*cosbt+(xtm-x)*sinbt;
   }
 
-  xtm=objs->xcen;
-  objs->xcen=x+(objs->xcen-x)*cosbt-(objs->zcen-z)*sinbt;
-  objs->zcen=z+(objs->zcen-z)*cosbt+(xtm-x)*sinbt;
-
   for(i=0;i<=3;i++){
     xtm=objs->transform.vx[i];
     objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*cosbt-(objs->transform.vz[i]-z)*sinbt;
@@ -182,10 +158,6 @@ sintt=sin(tt);costt=cos(tt);
     objs->xref[i]=x+(objs->xref[i]-x)*costt-(objs->yref[i]-y)*sintt;
     objs->yref[i]=y+(objs->yref[i]-y)*costt+(xtm-x)*sintt;
   }
-
-  xtm=objs->xcen;
-  objs->xcen=x+(objs->xcen-x)*costt-(objs->ycen-y)*sintt;
-  objs->ycen=y+(objs->ycen-y)*costt+(xtm-x)*sintt;
 
   for(i=0;i<=3;i++){
     xtm=objs->transform.vx[i];
@@ -201,10 +173,6 @@ sintt=sin(tt);costt=cos(tt);
     objs->zref[i]=z+(objs->zref[i]-z)*cosbt-(xtm-x)*sinbt;
   }
 
-  xtm=objs->xcen;
-  objs->xcen=x+(objs->xcen-x)*cosbt+(objs->zcen-z)*sinbt;
-  objs->zcen=z+(objs->zcen-z)*cosbt-(xtm-x)*sinbt;
-
   for(i=0;i<=3;i++){
     xtm=objs->transform.vx[i];
     objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*cosbt+(objs->transform.vz[i]-z)*sinbt;
@@ -217,10 +185,6 @@ sintt=sin(tt);costt=cos(tt);
     objs->xref[i]=x+(objs->xref[i]-x)*cosalf-(objs->yref[i]-y)*sinalf;
     objs->yref[i]=y+(objs->yref[i]-y)*cosalf+(xtm-x)*sinalf;
   }
-
-  xtm=objs->xcen;
-  objs->xcen=x+(objs->xcen-x)*cosalf-(objs->ycen-y)*sinalf;
-  objs->ycen=y+(objs->ycen-y)*cosalf+(xtm-x)*sinalf;
 
   for(i=0;i<=3;i++){
     xtm=objs->transform.vx[i];

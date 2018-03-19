@@ -352,9 +352,6 @@ if(zmax<z3){zmax=z3;}
 lenx=xmax-xmin;
 leny=ymax-ymin;
 lenz=zmax-zmin;
-objs->xcen=(xmax+xmin)/2;
-objs->ycen=(ymax+ymin)/2;
-objs->zcen=(zmax+zmin)/2;
 objs->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 }
 

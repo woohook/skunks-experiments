@@ -172,9 +172,9 @@ for(i=1;i<=car->nob;i++){
   pos=dBodyGetPosition(car->bid[i]);
   rot=dBodyGetRotation(car->bid[i]);
 
-  objs[j]->transform.vx[0]=objs[j]->xcen=pos[0];
-  objs[j]->transform.vy[0]=objs[j]->ycen=pos[1];
-  objs[j]->transform.vz[0]=objs[j]->zcen=pos[2];
+  objs[j]->transform.vx[0]=pos[0];
+  objs[j]->transform.vy[0]=pos[1];
+  objs[j]->transform.vz[0]=pos[2];
 
   objs[j]->transform.vx[1]=objs[j]->transform.vx[0]+rot[0];
   objs[j]->transform.vy[1]=objs[j]->transform.vy[0]+rot[4];

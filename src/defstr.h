@@ -40,9 +40,6 @@ typedef struct _sgob
 REALD xref[MAXREF];
 REALD yref[MAXREF];
 REALD zref[MAXREF]; /*coordinates of the reference points in global coordinates*/
-REALD xcen;
-REALD ycen;
-REALD zcen; /*coordinates of the object's centre in global coordinates*/
 REALN xmin;
 REALN ymin;
 REALN zmin;

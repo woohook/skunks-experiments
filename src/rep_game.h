@@ -132,9 +132,6 @@ for(i=1;i<=car->nob;i++){
         objs[j]->transform.vz[k]=objs[j]->transform.vz[0]+vz1[(i-1)*4+k]-vz1[(i-1)*4+0];
       }
     }
-    objs[j]->xcen=objs[j]->transform.vx[0];
-    objs[j]->ycen=objs[j]->transform.vy[0];
-    objs[j]->zcen=objs[j]->transform.vz[0];
   }
 
 if((rtim2-rtim1)<1e-5){
