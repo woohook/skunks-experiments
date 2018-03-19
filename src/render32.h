@@ -21,7 +21,7 @@ struct _surface;
 void create_mesh();
 
 void create_mesh_instance(sgob* object);
-
+void complete_mesh();
 void add_face(int mesh_id, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3);
 
 void set_face_color(int mesh_id, int face_id, int red, int green, int blue);

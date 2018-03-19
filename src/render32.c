@@ -56,6 +56,7 @@ float dz;
 typedef struct _mesh
 {
   tria* faces;
+  float xcen, ycen, zcen, radius;
 } mesh;
 
 typedef struct mesh_instance
@@ -106,6 +107,59 @@ void create_mesh_instance(sgob* object)
   g_instances[instance_count]->iMesh  = object->otyp;
   g_instances[instance_count]->object = object;
   instance_count++;
+}
+
+// function which finds the center and size of the current mesh
+void complete_mesh()
+{
+  int i;
+  REALD xmin,xmax,ymin,ymax,zmin,zmax,lenx,leny,lenz;
+  REALN x1,y1,z1, x2,y2,z2, x3,y3,z3;
+
+  tria* face = g_meshes[mesh_count-1].faces;
+  x1 = face[1].x1; y1 = face[1].y1; z1 = face[1].z1;
+  x2 = face[1].x2; y2 = face[1].y2; z2 = face[1].z2;
+  x3 = face[1].x3; y3 = face[1].y3; z3 = face[1].z3;
+  xmin=xmax=x1;
+  ymin=ymax=y1;
+  zmin=zmax=z1;
+
+  for(i=1;i<face_count;i++)
+  {
+
+    x1 = face[i].x1; y1 = face[i].y1; z1 = face[i].z1;
+    x2 = face[i].x2; y2 = face[i].y2; z2 = face[i].z2;
+    x3 = face[i].x3; y3 = face[i].y3; z3 = face[i].z3;
+
+    if(xmin>x1){xmin=x1;}
+    if(xmin>x2){xmin=x2;}
+    if(xmin>x3){xmin=x3;}
+    if(xmax<x1){xmax=x1;}
+    if(xmax<x2){xmax=x2;}
+    if(xmax<x3){xmax=x3;}
+
+    if(ymin>y1){ymin=y1;}
+    if(ymin>y2){ymin=y2;}
+    if(ymin>y3){ymin=y3;}
+    if(ymax<y1){ymax=y1;}
+    if(ymax<y2){ymax=y2;}
+    if(ymax<y3){ymax=y3;}
+
+    if(zmin>z1){zmin=z1;}
+    if(zmin>z2){zmin=z2;}
+    if(zmin>z3){zmin=z3;}
+    if(zmax<z1){zmax=z1;}
+    if(zmax<z2){zmax=z2;}
+    if(zmax<z3){zmax=z3;}
+  }
+
+  lenx=xmax-xmin;
+  leny=ymax-ymin;
+  lenz=zmax-zmin;
+  g_meshes[mesh_count-1].xcen=(xmax+xmin)/2;
+  g_meshes[mesh_count-1].ycen=(ymax+ymin)/2;
+  g_meshes[mesh_count-1].zcen=(zmax+zmin)/2;
+  g_meshes[mesh_count-1].radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 }
 
 void add_face(int mesh_id, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3)
