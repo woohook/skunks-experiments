@@ -55,6 +55,7 @@ float dz;
 
 typedef struct _mesh
 {
+  int face_count;
   tria* faces;
   float xcen, ycen, zcen, radius;
 } mesh;
@@ -67,7 +68,6 @@ typedef struct mesh_instance
 
 mesh* g_meshes = 0;
 int mesh_count = 0;
-int face_count = 0;
 
 mesh_instance** g_instances = 0;
 int instance_count = 0;
@@ -90,7 +90,7 @@ void create_mesh()
     if(!(g_meshes=(mesh*)realloc(g_meshes,(mesh_count+1)*sizeof(mesh)))){printf("Out of memory");}
     mesh_count++;
   }
-  face_count = 0;
+  g_meshes[mesh_count-1].face_count = 0;
 }
 
 void create_mesh_instance(sgob* object)
@@ -124,7 +124,7 @@ void complete_mesh()
   ymin=ymax=y1;
   zmin=zmax=z1;
 
-  for(i=1;i<face_count;i++)
+  for(i=1;i<g_meshes[mesh_count-1].face_count;i++)
   {
 
     x1 = face[i].x1; y1 = face[i].y1; z1 = face[i].z1;
@@ -164,19 +164,19 @@ void complete_mesh()
 
 void add_face(int mesh_id, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3)
 {
-  face_count++;
-  if(face_count==1)
+  g_meshes[mesh_id].face_count++;
+  if(g_meshes[mesh_id].face_count==1)
   {
-    face_count = 2;
-    if(!(g_meshes[mesh_id].faces=(tria *)malloc(face_count*sizeof(tria)))){printf("Out of memory");}
+    g_meshes[mesh_id].face_count = 2;
+    if(!(g_meshes[mesh_id].faces=(tria *)malloc(g_meshes[mesh_id].face_count*sizeof(tria)))){printf("Out of memory");}
   }
   else
   {
-    if(!(g_meshes[mesh_id].faces=(tria *)realloc(g_meshes[mesh_id].faces, face_count*sizeof(tria)))){printf("Out of memory");}
+    if(!(g_meshes[mesh_id].faces=(tria *)realloc(g_meshes[mesh_id].faces, g_meshes[mesh_id].face_count*sizeof(tria)))){printf("Out of memory");}
   }
 
   tria* face = g_meshes[mesh_id].faces;
-  int face_id = face_count-1;
+  int face_id = g_meshes[mesh_id].face_count-1;
 
   face[face_id].x1 = x1; face[face_id].y1 = y1; face[face_id].z1 = z1;
   face[face_id].x2 = x2; face[face_id].y2 = y2; face[face_id].z2 = z2;
