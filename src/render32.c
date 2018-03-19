@@ -819,7 +819,7 @@ for(i=0;i<instance_count;i++){
   if((xcen-radius)>(zcen+radius)*tgv){continue;}
   if((xcen+radius)<(zcen+radius)*(-tgv)){continue;}
   if(((zcen-radius)<zmax)&&((zcen+radius)>0)){
-    nrfaces+=obdis.nfa;
+    nrfaces+=g_meshes[mesh_id].face_count-1;
     if(nrfaces>nrfm){
       nrfm=nrfaces;
       if(!(face=(tria *)realloc(face,(nrfm+10)*sizeof(tria)))){printf("Out of memory");}
@@ -836,7 +836,7 @@ for(i=0;i<instance_count;i++){
         fjz=obdis.transform.vz[2]-obdis.transform.vz[0];
         fkz=obdis.transform.vz[3]-obdis.transform.vz[0]; /*unit vectors of the local axes in global system*/
 
-    for(j=1;j<=obdis.nfa;j++){
+    for(j=1;j<=g_meshes[mesh_id].face_count-1;j++){
       face[j+crf]=g_meshes[mesh_id].faces[j]; /*added triangles*/
         x=g_meshes[mesh_id].faces[j].x1;
         y=g_meshes[mesh_id].faces[j].y1;
