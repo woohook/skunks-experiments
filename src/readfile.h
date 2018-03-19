@@ -396,6 +396,7 @@ s[0]='1';while(s[0]){
 	            readref(&refglob[i],s);
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
 	              ordercl(i,s);
+                    complete_mesh();
 	          }
 	          break;
 
@@ -669,6 +670,7 @@ s[0]='1';while(s[0]){
 	            readref(&refglob[i],s);
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
 	              ordercl(i,s);
+                    complete_mesh();
 	          }
 	          break;
 
