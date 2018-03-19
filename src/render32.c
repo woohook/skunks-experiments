@@ -758,6 +758,7 @@ crf=0;
 
 for(i=0;i<instance_count;i++){
   sgob* object = g_instances[i]->object;
+  int mesh_id = g_instances[i]->iMesh;
 
   obdis = *object;
 
@@ -771,10 +772,10 @@ for(i=0;i<instance_count;i++){
         float fjz=obdis.transform.vz[2]-obdis.transform.vz[0];
         float fkz=obdis.transform.vz[3]-obdis.transform.vz[0]; /*unit vectors of the local axes in global system*/
 
-  xcen=g_meshes[g_instances[i]->iMesh].xcen;
-  ycen=g_meshes[g_instances[i]->iMesh].ycen;
-  zcen=g_meshes[g_instances[i]->iMesh].zcen;
-  radius=g_meshes[g_instances[i]->iMesh].radius;
+  xcen=g_meshes[mesh_id].xcen;
+  ycen=g_meshes[mesh_id].ycen;
+  zcen=g_meshes[mesh_id].zcen;
+  radius=g_meshes[mesh_id].radius;
   x=xcen;
   y=ycen;
   z=zcen;
@@ -836,22 +837,22 @@ for(i=0;i<instance_count;i++){
         fkz=obdis.transform.vz[3]-obdis.transform.vz[0]; /*unit vectors of the local axes in global system*/
 
     for(j=1;j<=obdis.nfa;j++){
-      face[j+crf]=g_meshes[obdis.otyp].faces[j]; /*added triangles*/
-        x=g_meshes[obdis.otyp].faces[j].x1;
-        y=g_meshes[obdis.otyp].faces[j].y1;
-        z=g_meshes[obdis.otyp].faces[j].z1;
+      face[j+crf]=g_meshes[mesh_id].faces[j]; /*added triangles*/
+        x=g_meshes[mesh_id].faces[j].x1;
+        y=g_meshes[mesh_id].faces[j].y1;
+        z=g_meshes[mesh_id].faces[j].z1;
       face[j+crf].x1=obdis.transform.vx[0]+x*fix+y*fjx+z*fkx;
       face[j+crf].y1=obdis.transform.vy[0]+x*fiy+y*fjy+z*fky;
       face[j+crf].z1=obdis.transform.vz[0]+x*fiz+y*fjz+z*fkz;
-        x=g_meshes[obdis.otyp].faces[j].x2;
-        y=g_meshes[obdis.otyp].faces[j].y2;
-        z=g_meshes[obdis.otyp].faces[j].z2;
+        x=g_meshes[mesh_id].faces[j].x2;
+        y=g_meshes[mesh_id].faces[j].y2;
+        z=g_meshes[mesh_id].faces[j].z2;
       face[j+crf].x2=obdis.transform.vx[0]+x*fix+y*fjx+z*fkx;
       face[j+crf].y2=obdis.transform.vy[0]+x*fiy+y*fjy+z*fky;
       face[j+crf].z2=obdis.transform.vz[0]+x*fiz+y*fjz+z*fkz;
-        x=g_meshes[obdis.otyp].faces[j].x3;
-        y=g_meshes[obdis.otyp].faces[j].y3;
-        z=g_meshes[obdis.otyp].faces[j].z3;
+        x=g_meshes[mesh_id].faces[j].x3;
+        y=g_meshes[mesh_id].faces[j].y3;
+        z=g_meshes[mesh_id].faces[j].z3;
       face[j+crf].x3=obdis.transform.vx[0]+x*fix+y*fjx+z*fkx;
       face[j+crf].y3=obdis.transform.vy[0]+x*fiy+y*fjy+z*fky;
       face[j+crf].z3=obdis.transform.vz[0]+x*fiz+y*fjz+z*fkz; /*updated positions of triangles*/
