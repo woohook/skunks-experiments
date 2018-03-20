@@ -63,7 +63,7 @@ typedef struct _mesh
 typedef struct mesh_instance
 {
   int iMesh;
-  sgob* object;
+  matrix* transform;
 } mesh_instance;
 
 mesh* g_meshes = 0;
@@ -105,7 +105,7 @@ void create_mesh_instance(sgob* object)
   }
   if(!(g_instances[instance_count]=(mesh_instance*)malloc(sizeof(mesh_instance)))){printf("Out of memory");}
   g_instances[instance_count]->iMesh  = object->otyp;
-  g_instances[instance_count]->object = object;
+  g_instances[instance_count]->transform = &object->transform;
   instance_count++;
 }
 
@@ -697,7 +697,7 @@ unsigned int width,height;
 unsigned long int area;
 static int sem=0,nrfm=0; /*number of triangles for which memory has been allocated*/
 static tria *face,*facedisp; /*triangles and displayed triangles in global system*/
-static sgob obdis; /* current object to transform */
+static matrix transform; /* current object's world transformation */
 static float *distmin; /*Zbuffer for sending to displaysdl()*/
 int nrfaces,nrdisp,crf; /*number of triangles and of displayed triangles, current triangle*/
 
@@ -757,20 +757,18 @@ nrfaces=0;
 crf=0;
 
 for(i=0;i<instance_count;i++){
-  sgob* object = g_instances[i]->object;
   int mesh_id = g_instances[i]->iMesh;
+  transform = *g_instances[i]->transform;
 
-  obdis = *object;
-
-    float fix=obdis.transform.vx[1]-obdis.transform.vx[0];
-    float fjx=obdis.transform.vx[2]-obdis.transform.vx[0];
-    float fkx=obdis.transform.vx[3]-obdis.transform.vx[0];
-      float fiy=obdis.transform.vy[1]-obdis.transform.vy[0];
-      float fjy=obdis.transform.vy[2]-obdis.transform.vy[0];
-      float fky=obdis.transform.vy[3]-obdis.transform.vy[0];
-        float fiz=obdis.transform.vz[1]-obdis.transform.vz[0];
-        float fjz=obdis.transform.vz[2]-obdis.transform.vz[0];
-        float fkz=obdis.transform.vz[3]-obdis.transform.vz[0]; /*unit vectors of the local axes in global system*/
+    float fix=transform.vx[1]-transform.vx[0];
+    float fjx=transform.vx[2]-transform.vx[0];
+    float fkx=transform.vx[3]-transform.vx[0];
+      float fiy=transform.vy[1]-transform.vy[0];
+      float fjy=transform.vy[2]-transform.vy[0];
+      float fky=transform.vy[3]-transform.vy[0];
+        float fiz=transform.vz[1]-transform.vz[0];
+        float fjz=transform.vz[2]-transform.vz[0];
+        float fkz=transform.vz[3]-transform.vz[0]; /*unit vectors of the local axes in global system*/
 
   xcen=g_meshes[mesh_id].xcen;
   ycen=g_meshes[mesh_id].ycen;
@@ -779,9 +777,9 @@ for(i=0;i<instance_count;i++){
   x=xcen;
   y=ycen;
   z=zcen;
-  xcen=obdis.transform.vx[0]-xcen+x*fix+y*fjx+z*fkx;
-  ycen=obdis.transform.vy[0]-ycen+x*fiy+y*fjy+z*fky;
-  zcen=obdis.transform.vz[0]-zcen+x*fiz+y*fjz+z*fkz;
+  xcen=transform.vx[0]-xcen+x*fix+y*fjx+z*fkx;
+  ycen=transform.vy[0]-ycen+x*fiy+y*fjy+z*fky;
+  zcen=transform.vz[0]-zcen+x*fiz+y*fjz+z*fkz;
 
   if(xcen-cam->transform.vx[0]-radius>(1.74*zmax)){continue;}
   if(xcen-cam->transform.vx[0]+radius<(-1.74*zmax)){continue;}
@@ -791,21 +789,21 @@ for(i=0;i<instance_count;i++){
   if(zcen-cam->transform.vz[0]+radius<(-1.74*zmax)){continue;}
 
   for(j=0;j<=3;j++){
-    obdis.transform.vx[j]-=cam->transform.vx[0];
-    obdis.transform.vy[j]-=cam->transform.vy[0];
-    obdis.transform.vz[j]-=cam->transform.vz[0];
+    transform.vx[j]-=cam->transform.vx[0];
+    transform.vy[j]-=cam->transform.vy[0];
+    transform.vz[j]-=cam->transform.vz[0];
   }
   xcen-=cam->transform.vx[0];
   ycen-=cam->transform.vy[0];
   zcen-=cam->transform.vz[0]; /*translated object*/
 
   for(j=0;j<=3;j++){
-    x=obdis.transform.vx[j];
-    y=obdis.transform.vy[j];
-    z=obdis.transform.vz[j];
-    obdis.transform.vx[j]=x*ix+y*iy+z*iz;
-    obdis.transform.vy[j]=x*jx+y*jy+z*jz;
-    obdis.transform.vz[j]=x*kx+y*ky+z*kz;
+    x=transform.vx[j];
+    y=transform.vy[j];
+    z=transform.vz[j];
+    transform.vx[j]=x*ix+y*iy+z*iz;
+    transform.vy[j]=x*jx+y*jy+z*jz;
+    transform.vz[j]=x*kx+y*ky+z*kz;
   }
   x=xcen;
   y=ycen;
@@ -826,36 +824,36 @@ for(i=0;i<instance_count;i++){
       if(!(facedisp=(tria *)realloc(facedisp,(2*nrfm+20)*sizeof(tria)))){printf("Out of memory");}
     }
 
-    fix=obdis.transform.vx[1]-obdis.transform.vx[0];
-    fjx=obdis.transform.vx[2]-obdis.transform.vx[0];
-    fkx=obdis.transform.vx[3]-obdis.transform.vx[0];
-      fiy=obdis.transform.vy[1]-obdis.transform.vy[0];
-      fjy=obdis.transform.vy[2]-obdis.transform.vy[0];
-      fky=obdis.transform.vy[3]-obdis.transform.vy[0];
-        fiz=obdis.transform.vz[1]-obdis.transform.vz[0];
-        fjz=obdis.transform.vz[2]-obdis.transform.vz[0];
-        fkz=obdis.transform.vz[3]-obdis.transform.vz[0]; /*unit vectors of the local axes in global system*/
+    fix=transform.vx[1]-transform.vx[0];
+    fjx=transform.vx[2]-transform.vx[0];
+    fkx=transform.vx[3]-transform.vx[0];
+      fiy=transform.vy[1]-transform.vy[0];
+      fjy=transform.vy[2]-transform.vy[0];
+      fky=transform.vy[3]-transform.vy[0];
+        fiz=transform.vz[1]-transform.vz[0];
+        fjz=transform.vz[2]-transform.vz[0];
+        fkz=transform.vz[3]-transform.vz[0]; /*unit vectors of the local axes in global system*/
 
     for(j=1;j<=g_meshes[mesh_id].face_count-1;j++){
       face[j+crf]=g_meshes[mesh_id].faces[j]; /*added triangles*/
         x=g_meshes[mesh_id].faces[j].x1;
         y=g_meshes[mesh_id].faces[j].y1;
         z=g_meshes[mesh_id].faces[j].z1;
-      face[j+crf].x1=obdis.transform.vx[0]+x*fix+y*fjx+z*fkx;
-      face[j+crf].y1=obdis.transform.vy[0]+x*fiy+y*fjy+z*fky;
-      face[j+crf].z1=obdis.transform.vz[0]+x*fiz+y*fjz+z*fkz;
+      face[j+crf].x1=transform.vx[0]+x*fix+y*fjx+z*fkx;
+      face[j+crf].y1=transform.vy[0]+x*fiy+y*fjy+z*fky;
+      face[j+crf].z1=transform.vz[0]+x*fiz+y*fjz+z*fkz;
         x=g_meshes[mesh_id].faces[j].x2;
         y=g_meshes[mesh_id].faces[j].y2;
         z=g_meshes[mesh_id].faces[j].z2;
-      face[j+crf].x2=obdis.transform.vx[0]+x*fix+y*fjx+z*fkx;
-      face[j+crf].y2=obdis.transform.vy[0]+x*fiy+y*fjy+z*fky;
-      face[j+crf].z2=obdis.transform.vz[0]+x*fiz+y*fjz+z*fkz;
+      face[j+crf].x2=transform.vx[0]+x*fix+y*fjx+z*fkx;
+      face[j+crf].y2=transform.vy[0]+x*fiy+y*fjy+z*fky;
+      face[j+crf].z2=transform.vz[0]+x*fiz+y*fjz+z*fkz;
         x=g_meshes[mesh_id].faces[j].x3;
         y=g_meshes[mesh_id].faces[j].y3;
         z=g_meshes[mesh_id].faces[j].z3;
-      face[j+crf].x3=obdis.transform.vx[0]+x*fix+y*fjx+z*fkx;
-      face[j+crf].y3=obdis.transform.vy[0]+x*fiy+y*fjy+z*fky;
-      face[j+crf].z3=obdis.transform.vz[0]+x*fiz+y*fjz+z*fkz; /*updated positions of triangles*/
+      face[j+crf].x3=transform.vx[0]+x*fix+y*fjx+z*fkx;
+      face[j+crf].y3=transform.vy[0]+x*fiy+y*fjy+z*fky;
+      face[j+crf].z3=transform.vz[0]+x*fiz+y*fjz+z*fkz; /*updated positions of triangles*/
     }
     crf=nrfaces;
   }
