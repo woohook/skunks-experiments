@@ -93,7 +93,7 @@ void create_mesh()
   g_meshes[mesh_count-1].face_count = 0;
 }
 
-void create_mesh_instance(sgob* object)
+void create_mesh_instance(int mesh_id, matrix* transform)
 {
   if(instance_count==0)
   {
@@ -104,8 +104,8 @@ void create_mesh_instance(sgob* object)
     if(!(g_instances=(mesh_instance**)realloc(g_instances,(instance_count+1)*sizeof(mesh_instance*)))){printf("Out of memory");}
   }
   if(!(g_instances[instance_count]=(mesh_instance*)malloc(sizeof(mesh_instance)))){printf("Out of memory");}
-  g_instances[instance_count]->iMesh  = object->otyp;
-  g_instances[instance_count]->transform = &object->transform;
+  g_instances[instance_count]->iMesh = mesh_id;
+  g_instances[instance_count]->transform = transform;
   instance_count++;
 }
 

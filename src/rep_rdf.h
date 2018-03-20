@@ -397,7 +397,7 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
                       objs[i]=(sgob*)malloc(sizeof(sgob));
 	              objs[i]->otyp=nto+atoi(s);
-                      create_mesh_instance(objs[i]);
+                      create_mesh_instance(objs[i]->otyp, &objs[i]->transform);
 	              if(objs[i]->otyp>(*nrtyp)){
 	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp-nto);exit(1);
 	              }
@@ -539,7 +539,7 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
                       objs[i]=(sgob*)malloc(sizeof(sgob));
 	              objs[i]->otyp=atoi(s);
-                      create_mesh_instance(objs[i]);
+                      create_mesh_instance(objs[i]->otyp, &objs[i]->transform);
 	              if(objs[i]->otyp>nto){
 	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp);exit(1);
 	              }
