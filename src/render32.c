@@ -16,11 +16,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "config.h"
-#include <ode/ode.h>
-#include "defstr.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
 #include "render32.h"
 #include "surface.h"
+#include "util.h"
 
 typedef struct _pixcol
 {int red;int green;int blue; /*culoarea pixelului*/
@@ -113,8 +115,8 @@ void create_mesh_instance(int mesh_id, matrix* transform)
 void complete_mesh()
 {
   int i;
-  REALD xmin,xmax,ymin,ymax,zmin,zmax,lenx,leny,lenz;
-  REALN x1,y1,z1, x2,y2,z2, x3,y3,z3;
+  float xmin,xmax,ymin,ymax,zmin,zmax,lenx,leny,lenz;
+  float x1,y1,z1, x2,y2,z2, x3,y3,z3;
 
   tria* face = g_meshes[mesh_count-1].faces;
   x1 = face[1].x1; y1 = face[1].y1; z1 = face[1].z1;
