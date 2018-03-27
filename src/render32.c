@@ -691,7 +691,7 @@ face[crf].blued=blue;
 /*function which displays the objcts which are closer than zmax
 nob - total number of objects
 cam - camera*/
-void odis(struct _surface* pSurface,float zfog,float zmax,sgob *cam)
+void odis(struct _surface* pSurface,float zfog,float zmax, struct _matrix* view_transform)
 {int i,j,focal;
 unsigned int width,height;
 unsigned long int area;
@@ -733,15 +733,15 @@ if(!sem){
   if(!(facedisp=(tria *)malloc(22*sizeof(tria)))){printf("Out of memory");}
   nrfm=1; sem=1;}
 
-ix=cam->transform.vx[1]-cam->transform.vx[0];
-jx=cam->transform.vx[2]-cam->transform.vx[0];
-kx=cam->transform.vx[3]-cam->transform.vx[0];
-  iy=cam->transform.vy[1]-cam->transform.vy[0];
-  jy=cam->transform.vy[2]-cam->transform.vy[0];
-  ky=cam->transform.vy[3]-cam->transform.vy[0];
-    iz=cam->transform.vz[1]-cam->transform.vz[0];
-    jz=cam->transform.vz[2]-cam->transform.vz[0];
-    kz=cam->transform.vz[3]-cam->transform.vz[0]; /*unit vectors of the local axes of camera in global system*/
+ix=view_transform->vx[1]-view_transform->vx[0];
+jx=view_transform->vx[2]-view_transform->vx[0];
+kx=view_transform->vx[3]-view_transform->vx[0];
+  iy=view_transform->vy[1]-view_transform->vy[0];
+  jy=view_transform->vy[2]-view_transform->vy[0];
+  ky=view_transform->vy[3]-view_transform->vy[0];
+    iz=view_transform->vz[1]-view_transform->vz[0];
+    jz=view_transform->vz[2]-view_transform->vz[0];
+    kz=view_transform->vz[3]-view_transform->vz[0]; /*unit vectors of the local axes of camera in global system*/
 
 x=g_light.dx;
 y=g_light.dy;
@@ -781,21 +781,21 @@ for(i=0;i<instance_count;i++){
   ycen=transform.vy[0]-ycen+x*fiy+y*fjy+z*fky;
   zcen=transform.vz[0]-zcen+x*fiz+y*fjz+z*fkz;
 
-  if(xcen-cam->transform.vx[0]-radius>(1.74*zmax)){continue;}
-  if(xcen-cam->transform.vx[0]+radius<(-1.74*zmax)){continue;}
-  if(ycen-cam->transform.vy[0]-radius>(1.74*zmax)){continue;}
-  if(ycen-cam->transform.vy[0]+radius<(-1.74*zmax)){continue;}
-  if(zcen-cam->transform.vz[0]-radius>(1.74*zmax)){continue;}
-  if(zcen-cam->transform.vz[0]+radius<(-1.74*zmax)){continue;}
+  if(xcen-view_transform->vx[0]-radius>(1.74*zmax)){continue;}
+  if(xcen-view_transform->vx[0]+radius<(-1.74*zmax)){continue;}
+  if(ycen-view_transform->vy[0]-radius>(1.74*zmax)){continue;}
+  if(ycen-view_transform->vy[0]+radius<(-1.74*zmax)){continue;}
+  if(zcen-view_transform->vz[0]-radius>(1.74*zmax)){continue;}
+  if(zcen-view_transform->vz[0]+radius<(-1.74*zmax)){continue;}
 
   for(j=0;j<=3;j++){
-    transform.vx[j]-=cam->transform.vx[0];
-    transform.vy[j]-=cam->transform.vy[0];
-    transform.vz[j]-=cam->transform.vz[0];
+    transform.vx[j]-=view_transform->vx[0];
+    transform.vy[j]-=view_transform->vy[0];
+    transform.vz[j]-=view_transform->vz[0];
   }
-  xcen-=cam->transform.vx[0];
-  ycen-=cam->transform.vy[0];
-  zcen-=cam->transform.vz[0]; /*translated object*/
+  xcen-=view_transform->vx[0];
+  ycen-=view_transform->vy[0];
+  zcen-=view_transform->vz[0]; /*translated object*/
 
   for(j=0;j<=3;j++){
     x=transform.vx[j];

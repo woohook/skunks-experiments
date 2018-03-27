@@ -128,7 +128,7 @@ setcamg(objs,&camera,&car,camflag);
 rotc+=vrotc*tframe; if(camflag==2){rotc=0; vrotc=0;}
 if(rotc){rotatx(&camera,objs[car.oid[1]]->transform.vy[0],objs[car.oid[1]]->transform.vz[0],rotc);}
 
-odis(pSurface,zfog,zmax,&camera); /*display image*/
+odis(pSurface,zfog,zmax,&camera.transform); /*display image*/
 
 dstr+=(speed*tframe);
 
