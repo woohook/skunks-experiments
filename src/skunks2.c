@@ -25,17 +25,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <time.h>
 #include "config.h"
 
-SDL_Window *RGLOBwindow; /*for SDL 2*/
-void SDL_UpdateRect()
-{
-  SDL_UpdateWindowSurface(RGLOBwindow);
-}
+#include "defstr.h"
 
+#include "surface.h"
 #include "render32.h"
 
-#include "defstr.h"
 #include "trans.h"
-#include "camera.h"
 #include "readfile.h"
 #include "game.h"
 
@@ -46,7 +41,7 @@ int i,quit=0,
     t0frame; /*t0frame - moment when image starts to be displayed*/
 
 SDL_Event event;
-SDL_Surface *screen;
+struct _surface* pSurface = NULL;
 
 
 #if SOUND==1
@@ -57,11 +52,11 @@ REALN volum[6]={0,0,0,0,0,0};
 #endif
 
 
-pixcol backcol; /*culoarea fundalului*/
+//pixcol backcol; /*culoarea fundalului*/
+int background_red, background_green, background_blue;
 REALN  zfog,zmax; /*zfog,zmax - distanta de la care incepe ceatza, respectiv de la care nu se mai vede nimic*/
-lightpr light;
 
-sgob *objs,camera; /*objects*/
+sgob** objs,camera; /*objects*/
 int nob,nto,camflag=2; /*number of objects and of object types*/
 
 vhc car; /*vehicle*/
@@ -87,10 +82,10 @@ FILE *repf;
 zfog=80;
 zmax=120; /*visibility (m)*/
 
-camera.vx[0]=0; camera.vy[0]=0; camera.vz[0]=0;
-camera.vx[1]=1; camera.vy[1]=0; camera.vz[1]=0;
-camera.vx[2]=0; camera.vy[2]=1; camera.vz[2]=0;
-camera.vx[3]=0; camera.vy[3]=0; camera.vz[3]=1; /*set camera parameters*/
+camera.transform.vx[0]=0; camera.transform.vy[0]=0; camera.transform.vz[0]=0;
+camera.transform.vx[1]=1; camera.transform.vy[1]=0; camera.transform.vz[1]=0;
+camera.transform.vx[2]=0; camera.transform.vy[2]=1; camera.transform.vz[2]=0;
+camera.transform.vx[3]=0; camera.transform.vy[3]=0; camera.transform.vz[3]=1; /*set camera parameters*/
 
 if(argc<=2){printf("Error: Input files not specified\r\nExample: ./skunks cars/car1 tracks/track1\r\n");exit(1);}
 if(argc>=4){printf("Error: Too many arguments\r\n");exit(1);}
@@ -111,7 +106,8 @@ dWorldSetCFM(wglob,1e-5);
 dWorldSetGravity(wglob,GRAVITY,0,0);
 
 strcpy(numefis,argv[2]);
-objs=readtrack(numefis,&nob,&nto,&backcol,&light); /*read objects from file*/
+objs=readtrack(numefis,&nob,&nto,&background_red,&background_green,&background_blue); /*read objects from file*/
+set_background_color(background_red,background_green,background_blue);
 
 strcpy(numefis,argv[1]);
 objs=readvehicle(numefis,objs,&nto,&nob,&car); /*read vehicle from file*/
@@ -140,15 +136,14 @@ desired->userdata=volum;
 
 /*Initialize SDL*/
 if(SDL_Init(SDL_INIT_VIDEO)<0){printf("Couldn't initialize SDL: %s\n", SDL_GetError());SDL_Quit();return 0;}
-/*Initialize display SDL2*/
-RGLOBwindow = SDL_CreateWindow("Skunks-4.2.0 SDL2",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,SCREENWIDTH,SCREENHEIGHT,SDL_WINDOW_SHOWN);
-if(RGLOBwindow==NULL){
-  printf("Couldn't create window: %s\n",SDL_GetError());SDL_Quit();return 0;
-}
-screen=SDL_GetWindowSurface(RGLOBwindow);
-/*SDL2^*/
-printf("Set %dx%dx%d\n",(screen->pitch)/(screen->format->BytesPerPixel),SCREENHEIGHT,screen->format->BitsPerPixel);
+// Initialize display
+pSurface = surface_create(SCREENWIDTH,SCREENHEIGHT);
 
+set_view_angle(FOV);
+set_double_pixel(DOUBLEPIX);
+#if ASPCOR==1
+set_width_factor(WIDTHFACTOR);
+#endif
 
 #if SOUND==1
 /* Open the audio device */
@@ -225,35 +220,25 @@ for(i=1;i<=nstepsf;i++){
 
 
 for(i=1;i<=nob;i++){
-  if(objs[i].lev==3){
-    rotab(&objs[i],objs[i].vx[0],objs[i].vy[0],objs[i].vz[0],objs[i].vx[3],objs[i].vy[3],objs[i].vz[3],vrot3*tframe);
+  if(objs[i]->lev==3){
+    rotab(objs[i],objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0],objs[i]->transform.vx[3],objs[i]->transform.vy[3],objs[i]->transform.vz[3],vrot3*tframe);
   }
 }
 
 rdspeed(&car,&speed,&rotspeed,&dspeed);
 acc=dspeed/tframe;
 
-switch(dmode){
-  case 1: sprintf(textglob,"%3.0f km/h",speed*3.6);
-          break;
-  case -1: sprintf(textglob,"%3.0f km/h-R",speed*3.6);
-          break;
-  default: break;
-}
-
-
 #if SOUND==1
 volum[1]=rotspeed; if (volum[1]>200){volum[1]=200;}
 volum[5]=acc;
 #endif
 
-
 setcamg(&camera,&car,camflag);
 
 rotc+=vrotc*tframe; if(camflag==2){rotc=0; vrotc=0;}
-if(rotc){rotatx(&camera,objs[car.oid[1]].vy[0],objs[car.oid[1]].vz[0],rotc);}
+if(rotc){rotatx(&camera,objs[car.oid[1]]->transform.vy[0],objs[car.oid[1]]->transform.vz[0],rotc);}
 
-odis(screen,objs,nob,backcol,zfog,zmax,&camera,&light); /*display image*/
+odis(pSurface,zfog,zmax,&camera.transform); /*display image*/
 
 dstr+=(speed*tframe);
 
@@ -356,8 +341,13 @@ SDL_Quit();
 free(obtained);
 #endif
 
-for(i=1;i<=nto;i++){free(fceglob[i]);}
-free(fceglob); free (refglob); free(objs);
+renderer_release();
+free (refglob);
+for(i=1;i<=nob;i++)
+{
+  free(objs[i]);
+}
+free(objs);
 
 #if REPLAY==1
 fclose(repf);
@@ -368,6 +358,6 @@ fclose(repf);
 dWorldDestroy(wglob);
 dCloseODE();
 
-odis(0,0,0,backcol,0,0,0,0); /*freed static variables from odis() in "camera.h"*/
+odis(0,0,0,0); /*freed static variables from odis() in "camera.h"*/
 
 return 0;}

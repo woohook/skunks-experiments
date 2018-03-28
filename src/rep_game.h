@@ -18,45 +18,45 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
 /*set camera*/
-void setcamg(sgob *objs,sgob *camera,vhc *car,int flag)
+void setcamg(sgob** objs,sgob *camera,vhc *car,int flag)
 {REALN x0,y0,z0,a,h,d,pos[4],rot[12];
 int j;
 
 j=car->oid[1];
 
-pos[0]=objs[j].vx[0];
-pos[1]=objs[j].vy[0];
-pos[2]=objs[j].vz[0];
+pos[0]=objs[j]->transform.vx[0];
+pos[1]=objs[j]->transform.vy[0];
+pos[2]=objs[j]->transform.vz[0];
 
-rot[0]=objs[j].vx[1]-objs[j].vx[0];
-rot[4]=objs[j].vy[1]-objs[j].vy[0];
-rot[8]=objs[j].vz[1]-objs[j].vz[0];
+rot[0]=objs[j]->transform.vx[1]-objs[j]->transform.vx[0];
+rot[4]=objs[j]->transform.vy[1]-objs[j]->transform.vy[0];
+rot[8]=objs[j]->transform.vz[1]-objs[j]->transform.vz[0];
 
-rot[1]=objs[j].vx[2]-objs[j].vx[0];
-rot[5]=objs[j].vy[2]-objs[j].vy[0];
-rot[9]=objs[j].vz[2]-objs[j].vz[0];
+rot[1]=objs[j]->transform.vx[2]-objs[j]->transform.vx[0];
+rot[5]=objs[j]->transform.vy[2]-objs[j]->transform.vy[0];
+rot[9]=objs[j]->transform.vz[2]-objs[j]->transform.vz[0];
 
-rot[2]=objs[j].vx[3]-objs[j].vx[0];
-rot[6]=objs[j].vy[3]-objs[j].vy[0];
-rot[10]=objs[j].vz[3]-objs[j].vz[0];
+rot[2]=objs[j]->transform.vx[3]-objs[j]->transform.vx[0];
+rot[6]=objs[j]->transform.vy[3]-objs[j]->transform.vy[0];
+rot[10]=objs[j]->transform.vz[3]-objs[j]->transform.vz[0];
 
 camera->nref=0;
 
 switch(flag){
   case 1: a=0.57;
           x0=pos[0]+12.0; y0=pos[1]; z0=pos[2]-12.0;
-          camera->vx[0]=x0; camera->vy[0]=y0; camera->vz[0]=z0;
-          camera->vx[1]=x0+cos(a); camera->vy[1]=y0; camera->vz[1]=z0+sin(a);
-          camera->vx[2]=x0; camera->vy[2]=y0+1; camera->vz[2]=z0;
-          camera->vx[3]=x0-sin(a); camera->vy[3]=y0; camera->vz[3]=z0+cos(a);
+          camera->transform.vx[0]=x0; camera->transform.vy[0]=y0; camera->transform.vz[0]=z0;
+          camera->transform.vx[1]=x0+cos(a); camera->transform.vy[1]=y0; camera->transform.vz[1]=z0+sin(a);
+          camera->transform.vx[2]=x0; camera->transform.vy[2]=y0+1; camera->transform.vz[2]=z0;
+          camera->transform.vx[3]=x0-sin(a); camera->transform.vy[3]=y0; camera->transform.vz[3]=z0+cos(a);
           break;
 
   case 2: h=car->camh; d=car->camd;
           x0=pos[0]; y0=pos[1]; z0=pos[2];
-          camera->vx[0]=x0; camera->vy[0]=y0; camera->vz[0]=z0;
-          camera->vx[1]=x0+rot[0]; camera->vy[1]=y0+rot[4]; camera->vz[1]=z0+rot[8];
-          camera->vx[2]=x0+rot[1]; camera->vy[2]=y0+rot[5]; camera->vz[2]=z0+rot[9];
-          camera->vx[3]=x0+rot[2]; camera->vy[3]=y0+rot[6]; camera->vz[3]=z0+rot[10];
+          camera->transform.vx[0]=x0; camera->transform.vy[0]=y0; camera->transform.vz[0]=z0;
+          camera->transform.vx[1]=x0+rot[0]; camera->transform.vy[1]=y0+rot[4]; camera->transform.vz[1]=z0+rot[8];
+          camera->transform.vx[2]=x0+rot[1]; camera->transform.vy[2]=y0+rot[5]; camera->transform.vz[2]=z0+rot[9];
+          camera->transform.vx[3]=x0+rot[2]; camera->transform.vy[3]=y0+rot[6]; camera->transform.vz[3]=z0+rot[10];
           translat(camera,h*rot[0]+d*rot[2],h*rot[4]+d*rot[6],h*rot[8]+d*rot[10]);
           break;
 
@@ -66,7 +66,7 @@ switch(flag){
 
 
 /*run 1 simulation step; tstep - time step; af, bf - acceleration and brake factors*/
-void runsim(sgob *objs,vhc *car,FILE *repf,REALN *timp,REALN *speed,int ff)
+void runsim(sgob** objs,vhc *car,FILE *repf,REALN *timp,REALN *speed,int ff)
 {int i,j,k,cnob;
 REALN tmp,rap,spd[3];
 static REALN rtim1=0,rtim2=0,*vx1,*vx2,*vy1,*vy2,*vz1,*vz2;
@@ -116,25 +116,22 @@ rap=(*timp-rtim1)/(rtim2-rtim1);
 
 for(i=1;i<=car->nob;i++){
   j=car->oid[i];
-  objs[j].vx[0]=vx1[(i-1)*4+0]+rap*(vx2[(i-1)*4+0]-vx1[(i-1)*4+0]);
-  objs[j].vy[0]=vy1[(i-1)*4+0]+rap*(vy2[(i-1)*4+0]-vy1[(i-1)*4+0]);
-  objs[j].vz[0]=vz1[(i-1)*4+0]+rap*(vz2[(i-1)*4+0]-vz1[(i-1)*4+0]);
+  objs[j]->transform.vx[0]=vx1[(i-1)*4+0]+rap*(vx2[(i-1)*4+0]-vx1[(i-1)*4+0]);
+  objs[j]->transform.vy[0]=vy1[(i-1)*4+0]+rap*(vy2[(i-1)*4+0]-vy1[(i-1)*4+0]);
+  objs[j]->transform.vz[0]=vz1[(i-1)*4+0]+rap*(vz2[(i-1)*4+0]-vz1[(i-1)*4+0]);
     if((*timp-rtim1)>(rtim2-*timp)){
       for(k=1;k<=3;k++){
-        objs[j].vx[k]=objs[j].vx[0]+vx2[(i-1)*4+k]-vx2[(i-1)*4+0];
-        objs[j].vy[k]=objs[j].vy[0]+vy2[(i-1)*4+k]-vy2[(i-1)*4+0];
-        objs[j].vz[k]=objs[j].vz[0]+vz2[(i-1)*4+k]-vz2[(i-1)*4+0];
+        objs[j]->transform.vx[k]=objs[j]->transform.vx[0]+vx2[(i-1)*4+k]-vx2[(i-1)*4+0];
+        objs[j]->transform.vy[k]=objs[j]->transform.vy[0]+vy2[(i-1)*4+k]-vy2[(i-1)*4+0];
+        objs[j]->transform.vz[k]=objs[j]->transform.vz[0]+vz2[(i-1)*4+k]-vz2[(i-1)*4+0];
       }
     }else{
       for(k=1;k<=3;k++){
-        objs[j].vx[k]=objs[j].vx[0]+vx1[(i-1)*4+k]-vx1[(i-1)*4+0];
-        objs[j].vy[k]=objs[j].vy[0]+vy1[(i-1)*4+k]-vy1[(i-1)*4+0];
-        objs[j].vz[k]=objs[j].vz[0]+vz1[(i-1)*4+k]-vz1[(i-1)*4+0];
+        objs[j]->transform.vx[k]=objs[j]->transform.vx[0]+vx1[(i-1)*4+k]-vx1[(i-1)*4+0];
+        objs[j]->transform.vy[k]=objs[j]->transform.vy[0]+vy1[(i-1)*4+k]-vy1[(i-1)*4+0];
+        objs[j]->transform.vz[k]=objs[j]->transform.vz[0]+vz1[(i-1)*4+k]-vz1[(i-1)*4+0];
       }
     }
-    objs[j].xcen=objs[j].vx[0];
-    objs[j].ycen=objs[j].vy[0];
-    objs[j].zcen=objs[j].vz[0];
   }
 
 if((rtim2-rtim1)<1e-5){

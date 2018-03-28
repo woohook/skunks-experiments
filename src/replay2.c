@@ -21,20 +21,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <math.h>
 #include <string.h>
 #include <SDL.h>
+#include <ode/ode.h>
 #include <time.h>
 #include "config.h"
 
-SDL_Window *RGLOBwindow; /*for SDL 2*/
-void SDL_UpdateRect()
-{
-  SDL_UpdateWindowSurface(RGLOBwindow);
-}
+#include "defstr.h"
 
+#include "surface.h"
 #include "render32.h"
 
-#include "rep_dfst.h"
 #include "trans.h"
-#include "camera.h"
 #include "rep_rdf.h"
 #include "rep_game.h"
 
@@ -45,13 +41,12 @@ int i,quit=0,
     t0frame; /*t0frame - moment when image starts to be displayed*/
 
 SDL_Event event;
-SDL_Surface *screen;
+struct _surface* pSurface;
 
-pixcol backcol; /*culoarea fundalului*/
+int background_red, background_green, background_blue;
 REALN  zfog,zmax; /*zfog,zmax - distanta de la care incepe ceatza, respectiv de la care nu se mai vede nimic*/
-lightpr light;
 
-sgob *objs,camera; /*objects*/
+sgob** objs,camera; /*objects*/
 int nob,nto,camflag=1; /*number of objects and of object types*/
 
 vhc car; /*vehicle*/
@@ -70,10 +65,10 @@ FILE *repf;
 zfog=80;
 zmax=120; /*visibility (m)*/
 
-camera.vx[0]=0; camera.vy[0]=0; camera.vz[0]=0;
-camera.vx[1]=1; camera.vy[1]=0; camera.vz[1]=0;
-camera.vx[2]=0; camera.vy[2]=1; camera.vz[2]=0;
-camera.vx[3]=0; camera.vy[3]=0; camera.vz[3]=1; /*set camera parameters*/
+camera.transform.vx[0]=0; camera.transform.vy[0]=0; camera.transform.vz[0]=0;
+camera.transform.vx[1]=1; camera.transform.vy[1]=0; camera.transform.vz[1]=0;
+camera.transform.vx[2]=0; camera.transform.vy[2]=1; camera.transform.vz[2]=0;
+camera.transform.vx[3]=0; camera.transform.vy[3]=0; camera.transform.vz[3]=1; /*set camera parameters*/
 
 if(argc<=1){printf("Error: Input files not specified\r\nExample: ./replay replays/rep2\r\n");exit(1);}
 if(argc>=3){printf("Error: Too many arguments\r\n");exit(1);}
@@ -85,7 +80,8 @@ if(!(repf=fopen(numefis1,"r"))){printf("Error: could not open '%s'\r\n",numefis1
 fscanf(repf,"%s",numefis1);
 fscanf(repf,"%s",numefis2);
 
-objs=readtrack(numefis2,&nob,&nto,&backcol,&light); /*read objects from file*/
+objs=readtrack(numefis2,&nob,&nto,&background_red,&background_green,&background_blue); /*read objects from file*/
+set_background_color(background_red,background_green,background_blue);
 objs=readvehicle(numefis1,objs,&nto,&nob,&car); /*read vehicle from file*/
 
 printf("\r\n");
@@ -93,15 +89,14 @@ printf("\r\n");
 
 /*Initialize SDL*/
 if(SDL_Init(SDL_INIT_VIDEO)<0){printf("Couldn't initialize SDL: %s\n", SDL_GetError());SDL_Quit();return 0;}
-/*Initialize display SDL2*/
-RGLOBwindow = SDL_CreateWindow("Skunks-4.2.0 SDL2 replay",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,SCREENWIDTH,SCREENHEIGHT,SDL_WINDOW_SHOWN);
-if(RGLOBwindow==NULL){
-  printf("Couldn't create window: %s\n",SDL_GetError());SDL_Quit();return 0;
-}
-screen=SDL_GetWindowSurface(RGLOBwindow);
-/*SDL2^*/
-printf("Set %dx%dx%d\n",(screen->pitch)/(screen->format->BytesPerPixel),SCREENHEIGHT,screen->format->BitsPerPixel);
+// Initialize display
+pSurface = surface_create(SCREENWIDTH,SCREENHEIGHT);
 
+set_view_angle(FOV);
+set_double_pixel(DOUBLEPIX);
+#if ASPCOR==1
+set_width_factor(WIDTHFACTOR);
+#endif
 
 speed=0;
 
@@ -122,22 +117,18 @@ runsim(objs,&car,repf,&timp,&speed,0);
 
 
 for(i=1;i<=nob;i++){
-  if(objs[i].lev==3){
-    rotab(&objs[i],objs[i].vx[0],objs[i].vy[0],objs[i].vz[0],objs[i].vx[3],objs[i].vy[3],objs[i].vz[3],vrot3*tframe);
+  if(objs[i]->lev==3){
+    rotab(objs[i],objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0],objs[i]->transform.vx[3],objs[i]->transform.vy[3],objs[i]->transform.vz[3],vrot3*tframe);
   }
 }
-
-
-sprintf(textglob,"%3.0f km/h",speed*3.6);
-
 
 
 setcamg(objs,&camera,&car,camflag);
 
 rotc+=vrotc*tframe; if(camflag==2){rotc=0; vrotc=0;}
-if(rotc){rotatx(&camera,objs[car.oid[1]].vy[0],objs[car.oid[1]].vz[0],rotc);}
+if(rotc){rotatx(&camera,objs[car.oid[1]]->transform.vy[0],objs[car.oid[1]]->transform.vz[0],rotc);}
 
-odis(screen,objs,nob,backcol,zfog,zmax,&camera,&light); /*display image*/
+odis(pSurface,zfog,zmax,&camera.transform); /*display image*/
 
 dstr+=(speed*tframe);
 
@@ -195,8 +186,13 @@ SDL_Quit();
 
 
 runsim(objs,&car,repf,&timp,&speed,1); /*freed static variables from runsim()*/
-for(i=1;i<=nto;i++){free(fceglob[i]);}
-free(fceglob); free (refglob); free(objs);
+renderer_release();
+free (refglob);
+for(i=1;i<=nob;i++)
+{
+  free(objs[i]);
+}
+free(objs);
 
 fclose(repf);
 

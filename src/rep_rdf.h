@@ -131,8 +131,8 @@ return nrfaces;}
 
 
 /*functie care afla coordonatele varfurilor triunghiurilor*/
-void faces(tria *face,char *numefis)
-{int lincr=0,i,j,nrfaces,nvert;
+void faces(int mesh_id, char *numefis)
+{int lincr=0,i,j,k,l,nrfaces,nvert;
 FILE *fis;
 REALN *x,*y,*z;
 char s[MAXWLG];
@@ -154,18 +154,8 @@ for(i=1;i<=nvert;i++){
 
 for(i=1;i<=nrfaces;i++){
   fisgetw(fis,s,&lincr); /*sarit peste "f"*/
-  fscanf(fis,"%d",&j);
-    face[i].x1=x[j];face[i].y1=y[j];face[i].z1=z[j];
-  fscanf(fis,"%d",&j);
-    face[i].x2=x[j];face[i].y2=y[j];face[i].z2=z[j];
-  fscanf(fis,"%d",&j);
-    face[i].x3=x[j];face[i].y3=y[j];face[i].z3=z[j];
-
-  face[i].red=255;
-  face[i].green=200;
-  face[i].blue=0;
-
-  face[i].cull=0; /*no culling if not specified*/
+  fscanf(fis,"%d %d %d", &j, &k, &l);
+  add_face(mesh_id, x[j], y[j], z[j], x[k], y[k], z[k], x[l], y[l], z[l]);
 }
 
 free(x);free(y);free(z);
@@ -174,7 +164,7 @@ fclose(fis);}
 
 /*functie care coloreaza triunghiurile
 *bred,*bgreen,*bblue - culoarea fundalului*/
-void readcolor(tria *face,int nrfaces,char *numefis)
+void readcolor(int mesh_id,char *numefis)
 {int i,j,colors,fstart,fend,fred,fgreen,fblue; /*colors - numar de culori*/
 /*fstart si fend - primul, respectiv ultimul triunghi cu culoarea(fred,fgreen,fblue)*/
 FILE *fis;
@@ -184,14 +174,11 @@ if(!(fis=fopen(numefis,"r"))){printf("File '%s' could not be open\r\n",numefis);
 
 fscanf(fis,"%d",&colors); /*aflat numar de culori*/
 
-for(i=1;i<=nrfaces;i++){face[i].red=255;face[i].green=255;face[i].blue=255;}
-
 for(j=1;j<=colors;j++){
 fscanf(fis,"%d %d %d %d %d",&fstart,&fend,&fred,&fgreen,&fblue);
-  for(i=fstart;i<=fend;i++){
-    face[i].red=fred;
-    face[i].green=fgreen;
-    face[i].blue=fblue;
+  for(i=fstart;i<=fend;i++)
+  {
+    set_face_color(mesh_id, i, fred, fgreen, fblue);
   }
 }
 
@@ -201,7 +188,7 @@ if(identcom(s)==16){ /*fullbright*/
   for(j=1;j<=colors;j++){
     fscanf(fis,"%d %d",&fstart,&fend);
     for(i=fstart;i<=fend;i++){
-      face[i].cull=((face[i].cull)&1)+2;
+      set_face_fullbright(mesh_id, i);
     }
   }
 }
@@ -279,9 +266,10 @@ fclose(fis);
 
 
 /*order vertices, so triangles can be culled correctly*/
-void ordercl(tria *face,char *numefis)
+void ordercl(int mesh_id,char *numefis)
 {int i,j,nrcmd,nf1,nf2;
-REALN x,y,z,dx,dy,dz,a,b,c,d,prodscal,tmp;
+REALN x,y,z,dx,dy,dz,a,b,c,d,prodscal;
+REALN x1,y1,z1, x2,y2,z2, x3,y3,z3;
 char vis; /*'v'-visible from (x,y,z); 'i'-not visible*/
 FILE *fis;
 
@@ -293,24 +281,23 @@ for(i=1;i<=nrcmd;i++){
   fscanf(fis,"%d %d %c %f %f %f",&nf1,&nf2,&vis,&x,&y,&z);
 
   for(j=nf1;j<=nf2;j++){
-    findplan(face,j,&a,&b,&c,&d);
-     dx=face[j].x1-x;
-     dy=face[j].y1-y;
-     dz=face[j].z1-z;
+    get_face_vertex(mesh_id,j,1,&x1,&y1,&z1);
+    get_face_vertex(mesh_id,j,2,&x2,&y2,&z2);
+    get_face_vertex(mesh_id,j,3,&x3,&y3,&z3);
+    findplan(x1,y1,z1,x2,y2,z2,x3,y3,z3,&a,&b,&c,&d);
+     dx=x1-x;
+     dy=y1-y;
+     dz=z1-z;
     prodscal=a*dx+b*dy+c*dz;
     switch(vis){
-      case 'v': face[j].cull=((face[j].cull)&2)+1;
+      case 'v': enable_face_culling(mesh_id,j);
         if(prodscal<0){
-          tmp=face[j].x1; face[j].x1=face[j].x2; face[j].x2=tmp;
-          tmp=face[j].y1; face[j].y1=face[j].y2; face[j].y2=tmp;
-          tmp=face[j].z1; face[j].z1=face[j].z2; face[j].z2=tmp;
+          flip_face(mesh_id,j);
         } break;
 
-      case 'i': face[j].cull=((face[j].cull)&2)+1;
+      case 'i': enable_face_culling(mesh_id,j);
         if(prodscal>=0){
-          tmp=face[j].x1; face[j].x1=face[j].x2; face[j].x2=tmp;
-          tmp=face[j].y1; face[j].y1=face[j].y2; face[j].y2=tmp;
-          tmp=face[j].z1; face[j].z1=face[j].z2; face[j].z2=tmp;
+          flip_face(mesh_id,j);
         } break;
 
       default: break;
@@ -323,52 +310,55 @@ fclose(fis);
 
 
 /*function which finds the center and size of the object*/
-void eval_obj(tria *face,sgob *objs)
+void eval_obj(int mesh_id,sgob *objs)
 {int i,nrfaces;
 REALD xmin,xmax,ymin,ymax,zmin,zmax,lenx,leny,lenz;
+REALN x1,y1,z1, x2,y2,z2, x3,y3,z3;
 
 nrfaces=objs->nfa;
 
-xmin=xmax=face[1].x1;
-ymin=ymax=face[1].y1;
-zmin=zmax=face[1].z1;
+get_face_vertex(mesh_id,1,1,&x1,&y1,&z1);
+xmin=xmax=x1;
+ymin=ymax=y1;
+zmin=zmax=z1;
 
 for(i=1;i<=nrfaces;i++){
-if(xmin>face[i].x1){xmin=face[i].x1;}
-if(xmin>face[i].x2){xmin=face[i].x2;}
-if(xmin>face[i].x3){xmin=face[i].x3;}
-if(xmax<face[i].x1){xmax=face[i].x1;}
-if(xmax<face[i].x2){xmax=face[i].x2;}
-if(xmax<face[i].x3){xmax=face[i].x3;}
+get_face_vertex(mesh_id,i,1,&x1,&y1,&z1);
+get_face_vertex(mesh_id,i,2,&x2,&y2,&z2);
+get_face_vertex(mesh_id,i,3,&x3,&y3,&z3);
 
-if(ymin>face[i].y1){ymin=face[i].y1;}
-if(ymin>face[i].y2){ymin=face[i].y2;}
-if(ymin>face[i].y3){ymin=face[i].y3;}
-if(ymax<face[i].y1){ymax=face[i].y1;}
-if(ymax<face[i].y2){ymax=face[i].y2;}
-if(ymax<face[i].y3){ymax=face[i].y3;}
+if(xmin>x1){xmin=x1;}
+if(xmin>x2){xmin=x2;}
+if(xmin>x3){xmin=x3;}
+if(xmax<x1){xmax=x1;}
+if(xmax<x2){xmax=x2;}
+if(xmax<x3){xmax=x3;}
 
-if(zmin>face[i].z1){zmin=face[i].z1;}
-if(zmin>face[i].z2){zmin=face[i].z2;}
-if(zmin>face[i].z3){zmin=face[i].z3;}
-if(zmax<face[i].z1){zmax=face[i].z1;}
-if(zmax<face[i].z2){zmax=face[i].z2;}
-if(zmax<face[i].z3){zmax=face[i].z3;}
+if(ymin>y1){ymin=y1;}
+if(ymin>y2){ymin=y2;}
+if(ymin>y3){ymin=y3;}
+if(ymax<y1){ymax=y1;}
+if(ymax<y2){ymax=y2;}
+if(ymax<y3){ymax=y3;}
+
+if(zmin>z1){zmin=z1;}
+if(zmin>z2){zmin=z2;}
+if(zmin>z3){zmin=z3;}
+if(zmax<z1){zmax=z1;}
+if(zmax<z2){zmax=z2;}
+if(zmax<z3){zmax=z3;}
 }
 
 lenx=xmax-xmin;
 leny=ymax-ymin;
 lenz=zmax-zmin;
-objs->xcen=(xmax+xmin)/2;
-objs->ycen=(ymax+ymin)/2;
-objs->zcen=(zmax+zmin)/2;
 objs->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 }
 
 
 /*function which reads the vehicle; must be called AFTER readtrack()
 nrtyp,nrobt - number of object types and objects given by readtrack()*/
-sgob *readvehicle(char *numefis,sgob *objs,int *nrtyp,int *nrobt,vhc *car)
+sgob** readvehicle(char *numefis,sgob** objs,int *nrtyp,int *nrobt,vhc *car)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
@@ -384,44 +374,46 @@ s[0]='1';while(s[0]){
 
 	switch(identcom(s)){
 	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); (*nrtyp)+=atoi(s);
-	          if(!(fceglob=(tria **)realloc(fceglob,((*nrtyp)+1)*sizeof(tria *)))){printf("Out of memory");}
 	          if(!(refglob=(refpo *)realloc(refglob,((*nrtyp)+1)*sizeof(refpo)))){printf("Out of memory");}
 	          for(i=nto+1;i<=(*nrtyp);i++){
+                    create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
 	            refglob[i].nfa=findnf(s);
-	            if(!(fceglob[i]=(tria *)malloc((refglob[i].nfa+1)*sizeof(tria)))){printf("Out of memory");}
-	            faces(fceglob[i],s);
+	            faces(i,s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
-	              readcolor(fceglob[i],refglob[i].nfa,s);
+	              readcolor(i,s);
 	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
 	            readref(&refglob[i],s);
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
-	              ordercl(fceglob[i],s);
+	              ordercl(i,s);
+                    complete_mesh();
 	          }
 	          break;
 
 	  case 2: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
 	          car->nob=atoi(s); nob+=car->nob; (*nrobt)=nob;
-	          if(!(objs=(sgob *)realloc(objs,(nob+1)*sizeof(sgob)))){printf("Out of memory");}
+	          if(!(objs=(sgob**)realloc(objs,(nob+1)*sizeof(sgob*)))){printf("Out of memory");}
 	          for(i=(nob-car->nob+1);i<=nob;i++){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
-	              objs[i].otyp=nto+atoi(s);
-	              if(objs[i].otyp>(*nrtyp)){
-	                printf("Error: there is no object type '%d'\r\n",objs[i].otyp-nto);exit(1);
+                      objs[i]=(sgob*)malloc(sizeof(sgob));
+	              objs[i]->otyp=nto+atoi(s);
+                      create_mesh_instance(objs[i]->otyp, &objs[i]->transform);
+	              if(objs[i]->otyp>(*nrtyp)){
+	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp-nto);exit(1);
 	              }
-	              objs[i].nref=refglob[objs[i].otyp].nref;
-	              objs[i].nfa=refglob[objs[i].otyp].nfa;
-	              objs[i].vx[0]=objs[i].vy[0]=objs[i].vz[0]=0;
-	              objs[i].vx[1]=objs[i].vy[2]=objs[i].vz[3]=1;
-	              objs[i].vx[2]=objs[i].vx[3]=0;
-	              objs[i].vy[1]=objs[i].vy[3]=0;
-	              objs[i].vz[1]=objs[i].vz[2]=0;
-	              for(j=1;j<=objs[i].nref;j++){
-	                objs[i].xref[j]=refglob[objs[i].otyp].x[j];
-	                objs[i].yref[j]=refglob[objs[i].otyp].y[j];
-	                objs[i].zref[j]=refglob[objs[i].otyp].z[j];
+	              objs[i]->nref=refglob[objs[i]->otyp].nref;
+	              objs[i]->nfa=refglob[objs[i]->otyp].nfa;
+	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
+	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
+	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;
+	              objs[i]->transform.vy[1]=objs[i]->transform.vy[3]=0;
+	              objs[i]->transform.vz[1]=objs[i]->transform.vz[2]=0;
+	              for(j=1;j<=objs[i]->nref;j++){
+	                objs[i]->xref[j]=refglob[objs[i]->otyp].x[j];
+	                objs[i]->yref[j]=refglob[objs[i]->otyp].y[j];
+	                objs[i]->zref[j]=refglob[objs[i]->otyp].z[j];
 	              }
-	              eval_obj(fceglob[objs[i].otyp],&objs[i]);
+	              eval_obj(objs[i]->otyp,objs[i]);
 
                     k=i-nob+car->nob; /*1...car->nob*/
                     car->oid[k]=i;
@@ -437,7 +429,7 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
 
-	              translat(&objs[i],tx,ty,tz);
+	              translat(objs[i],tx,ty,tz);
 
 	            if(!(err=fisgetw(fis,s,&lincr))){afermex(numefis,lincr,s,1);}
 	            switch(identcmg(s)){
@@ -490,26 +482,24 @@ return objs;}
 
 
 /*function which reads the track; nrobt - number of objects*/
-sgob *readtrack(char *numefis,int *nrobt,int *nrtyp,pixcol *backcol,lightpr *light)
+sgob** readtrack(char *numefis,int *nrobt,int *nrtyp,int* background_red, int* background_green, int* background_blue)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
 int i,j,
     nto=0,nob=0, /*number of object types and number of objects; nob=(*nrobt) */
     bred=130,bgreen=160,bblue=200; /*background color*/
-sgob *objs,objtmp;
+sgob** objs = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       fred=1.0,fgreen=1.0,fblue=1.0, /*color multiplication factors*/
       len;
 
-objs=&objtmp; /*ca sa nu "warning"*/
-
-light->ambient=0.5;
-light->headlight=0.3;
-light->directional=0.5;
-light->dx=-0.5;
-light->dy=1;
-light->dz=1; /*set default values for the light*/
+float light_ambient=0.5;
+float light_headlight=0.3;
+float light_directional=0.5;
+float light_dx=-0.5;
+float light_dy=1;
+float light_dz=1; /*set default values for the light*/
 
   if(!(fis=fopen(numefis,"r"))){printf("Error: File %s could not be open\r\n",numefis);exit(1);}
 s[0]='1';while(s[0]){
@@ -527,69 +517,71 @@ s[0]='1';while(s[0]){
 	          break;
 
 	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); (*nrtyp)=nto=atoi(s);
-	          if(!(fceglob=(tria **)malloc((nto+1)*sizeof(tria *)))){printf("Out of memory");}
 	          if(!(refglob=(refpo *)malloc((nto+1)*sizeof(refpo)))){printf("Out of memory");}
 	          for(i=1;i<=nto;i++){
+                    create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
 	            refglob[i].nfa=findnf(s);
-	            if(!(fceglob[i]=(tria *)malloc((refglob[i].nfa+1)*sizeof(tria)))){printf("Out of memory");}
-	            faces(fceglob[i],s);
+	            faces(i,s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
-	              readcolor(fceglob[i],refglob[i].nfa,s);
+	              readcolor(i,s);
 	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
 	            readref(&refglob[i],s);
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
-	              ordercl(fceglob[i],s);
+	              ordercl(i,s);
+                    complete_mesh();
 	          }
 	          break;
 
 	  case 2: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); (*nrobt)=nob=atoi(s);
-	          if(!(objs=(sgob *)malloc((nob+1)*sizeof(sgob)))){printf("Out of memory");}
+	          if(!(objs=(sgob**)malloc((nob+1)*sizeof(sgob*)))){printf("Out of memory");}
 	          for(i=1;i<=nob;i++){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
-	              objs[i].otyp=atoi(s);
-	              if(objs[i].otyp>nto){
-	                printf("Error: there is no object type '%d'\r\n",objs[i].otyp);exit(1);
+                      objs[i]=(sgob*)malloc(sizeof(sgob));
+	              objs[i]->otyp=atoi(s);
+                      create_mesh_instance(objs[i]->otyp, &objs[i]->transform);
+	              if(objs[i]->otyp>nto){
+	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp);exit(1);
 	              }
-	              objs[i].nref=refglob[objs[i].otyp].nref;
-	              objs[i].nfa=refglob[objs[i].otyp].nfa;
-	              objs[i].vx[0]=objs[i].vy[0]=objs[i].vz[0]=0;
-	              objs[i].vx[1]=objs[i].vy[2]=objs[i].vz[3]=1;
-	              objs[i].vx[2]=objs[i].vx[3]=0;
-	              objs[i].vy[1]=objs[i].vy[3]=0;
-	              objs[i].vz[1]=objs[i].vz[2]=0;
-	              for(j=1;j<=objs[i].nref;j++){
-	                objs[i].xref[j]=refglob[objs[i].otyp].x[j];
-	                objs[i].yref[j]=refglob[objs[i].otyp].y[j];
-	                objs[i].zref[j]=refglob[objs[i].otyp].z[j];
+	              objs[i]->nref=refglob[objs[i]->otyp].nref;
+	              objs[i]->nfa=refglob[objs[i]->otyp].nfa;
+	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
+	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
+	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;
+	              objs[i]->transform.vy[1]=objs[i]->transform.vy[3]=0;
+	              objs[i]->transform.vz[1]=objs[i]->transform.vz[2]=0;
+	              for(j=1;j<=objs[i]->nref;j++){
+	                objs[i]->xref[j]=refglob[objs[i]->otyp].x[j];
+	                objs[i]->yref[j]=refglob[objs[i]->otyp].y[j];
+	                objs[i]->zref[j]=refglob[objs[i]->otyp].z[j];
 	              }
-	              eval_obj(fceglob[objs[i].otyp],&objs[i]);
+	              eval_obj(objs[i]->otyp,objs[i]);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rz=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ry=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rx=atof(s);
-	              rotatz(&objs[i],0,0,rz);
-	              rotaty(&objs[i],0,0,ry);
-	              rotatx(&objs[i],0,0,rx);
-	              translat(&objs[i],tx,ty,tz);
-	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); objs[i].lev=atoi(s);
+	              rotatz(objs[i],0,0,rz);
+	              rotaty(objs[i],0,0,ry);
+	              rotatx(objs[i],0,0,rx);
+	              translat(objs[i],tx,ty,tz);
+	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); objs[i]->lev=atoi(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2);
 
 	            /*translated and rotated object*/
 	          }
 	          break;
 
-	  case 12: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light->ambient=atof(s); break;
+	  case 12: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_ambient=atof(s); break;
 
-	  case 13: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light->headlight=atof(s); break;
+	  case 13: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_headlight=atof(s); break;
 
-	  case 14: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light->directional=atof(s); break;
+	  case 14: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_directional=atof(s); break;
 
-	  case 15: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light->dx=atof(s);
-	           err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light->dy=atof(s);
-	           err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light->dz=atof(s);
+	  case 15: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_dx=atof(s);
+	           err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_dy=atof(s);
+	           err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_dz=atof(s);
 	           break;
 	
 	  default: if(s[0]){printf("Error: '%s' line %d - word '%s' not recognized\r\n",numefis,lincr,s);exit(1);}
@@ -599,20 +591,30 @@ fclose(fis);
 
 for(i=1;i<=nto;i++){
   for(j=1;j<=refglob[i].nfa;j++){
-    len=fceglob[i][j].red*fred;
-    fceglob[i][j].red=(int)len; if(fceglob[i][j].red>255){fceglob[i][j].red=255;}
-    len=fceglob[i][j].green*fgreen;
-    fceglob[i][j].green=(int)len; if(fceglob[i][j].green>255){fceglob[i][j].green=255;}
-    len=fceglob[i][j].blue*fblue;
-    fceglob[i][j].blue=(int)len; if(fceglob[i][j].blue>255){fceglob[i][j].blue=255;}
+    int red, green, blue;
+    get_face_color(i,j,&red,&green,&blue);
+    len=red*fred;
+    if(len>255){len=255;}
+    red=(int)len;
+    len=green*fgreen;
+    if(len>255){len=255;}
+    green=(int)len;
+    len=blue*fblue;
+    if(len>255){len=255;}
+    blue=(int)len;
+    set_face_color(i,j,red,green,blue);
   }
 }
 
-backcol->red=bred; backcol->green=bgreen; backcol->blue=bblue;
+*background_red=bred; *background_green=bgreen; *background_blue=bblue;
 
-len=sqrt(light->dx*light->dx+light->dy*light->dy+light->dz*light->dz);
-light->dx/=len;
-light->dy/=len;
-light->dz/=len; /*normalized light direction*/
+len=sqrt(light_dx*light_dx+light_dy*light_dy+light_dz*light_dz);
+light_dx/=len;
+light_dy/=len;
+light_dz/=len; /*normalized light direction*/
+
+set_ambient_light(light_ambient);
+set_headlight(light_headlight);
+set_directional_light(light_directional, light_dx, light_dy, light_dz);
 
 return objs;}
