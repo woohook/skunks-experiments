@@ -28,14 +28,12 @@ int ttip[MAXGEOM]; /*type of triangle mesh - 1-left 45; 2-right 45; 3-left 22.5;
 REALN lx[MAXGEOM]; /*geometry parameters; for cyl. - lx = radius, ly = length;*/
 REALN ly[MAXGEOM]; /*for sphere - lx = radius; for box - lx = lx, ly = ly, lz = lz.*/
 REALN lz[MAXGEOM];
-int nfa; /*number of triangles (for rendering)*/
 } refpo; /*reference points of an object type*/
 
 
 typedef struct _sgob
 {int otyp; /*number of object type in the global array*/
  int nref; /*number of reference points - max. MAXREF*/
- int nfa; /*number of triangles*/
  REALN radius; /*radius of sphere in which the object is included*/
 REALD xref[MAXREF];
 REALD yref[MAXREF];

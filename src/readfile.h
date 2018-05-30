@@ -315,7 +315,7 @@ void eval_obj(int mesh_id,sgob *objs)
 REALD xmin,xmax,ymin,ymax,zmin,zmax,lenx,leny,lenz;
 REALN x1,y1,z1, x2,y2,z2, x3,y3,z3;
 
-nrfaces=objs->nfa;
+nrfaces=get_face_count(mesh_id);
 
 get_face_vertex(mesh_id,1,1,&x1,&y1,&z1);
 xmin=xmax=x1;
@@ -385,7 +385,6 @@ s[0]='1';while(s[0]){
 	          for(i=nto+1;i<=(*nrtyp);i++){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
-	            refglob[i].nfa=findnf(s);
 	            faces(i,s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
 	              readcolor(i,s);
@@ -409,7 +408,6 @@ s[0]='1';while(s[0]){
 	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp-nto);exit(1);
 	              }
 	              objs[i]->nref=refglob[objs[i]->otyp].nref;
-	              objs[i]->nfa=refglob[objs[i]->otyp].nfa;
 	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
 	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
 	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;
@@ -659,7 +657,6 @@ s[0]='1';while(s[0]){
 	          for(i=1;i<=nto;i++){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
-	            refglob[i].nfa=findnf(s);
 	            faces(i,s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
 	              readcolor(i,s);
@@ -682,7 +679,6 @@ s[0]='1';while(s[0]){
 	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp);exit(1);
 	              }
 	              objs[i]->nref=refglob[objs[i]->otyp].nref;
-	              objs[i]->nfa=refglob[objs[i]->otyp].nfa;
 	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
 	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
 	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;
@@ -772,7 +768,7 @@ s[0]='1';while(s[0]){
 fclose(fis);
 
 for(i=1;i<=nto;i++){
-  for(j=1;j<=refglob[i].nfa;j++){
+  for(j=1;j<=get_face_count(i);j++){
     int red, green, blue;
     get_face_color(i,j,&red,&green,&blue);
     len=red*fred;
