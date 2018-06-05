@@ -29,11 +29,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "surface.h"
 #include "render32.h"
+#include "physics.h"
 
 #include "trans.h"
 #include "readfile.h"
 #include "game.h"
-#include "physics.h"
 
 int main(int argc,char *argv[])
 {char numefis[MAXWLG];
@@ -99,12 +99,10 @@ fprintf(repf,"%s\r\n%s\r\n",argv[1],argv[2]);
 repf=NULL;
 #endif
 
-
-dInitODE();
-wglob=dWorldCreate();
-dWorldSetERP(wglob,0.2);
-dWorldSetCFM(wglob,1e-5);
-dWorldSetGravity(wglob,GRAVITY,0,0);
+physics_init();
+physics_setERP(0.2);
+physics_setCFM(1e-5);
+physics_setGravity(GRAVITY);
 
 strcpy(numefis,argv[2]);
 objs=readtrack(numefis,&nob,&nto,&background_red,&background_green,&background_blue); /*read objects from file*/
@@ -356,8 +354,7 @@ fclose(repf);
 
 /* printf("Press ENTER: ");getchar();printf("\r\n"); */
 
-dWorldDestroy(wglob);
-dCloseODE();
+physics_release();
 
 odis(0,0,0,0); /*freed static variables from odis() in "camera.h"*/
 

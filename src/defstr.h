@@ -87,4 +87,3 @@ REALN camd; /*camera position*/
 
 
 refpo *refglob; /*array with reference points of object types*/
-dWorldID wglob; /*world for ODE*/

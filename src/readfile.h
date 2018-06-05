@@ -481,7 +481,7 @@ s[0]='1';while(s[0]){
 	            }
 	            /*^set geometry parameters*/
 
-	            car->bid[k]=dBodyCreate(wglob);
+	            car->bid[k]=physics_createBody();
 
 	            if((car->ofc[k])>=2){dBodySetFiniteRotationMode(car->bid[k],1);} /*for wheels*/
 
@@ -538,7 +538,7 @@ s[0]='1';while(s[0]){
                    if(car->ofc[2]!=2){printf("Error: '%s' line %d - trailer joint without trailer\r\n",numefis,lincr);exit(1);}
                    if(car->tjflag==1){printf("Error: '%s' line %d - only one such joint allowed\r\n",numefis,lincr);exit(1);}
                    car->tjflag=1;
-                   car->tjid=dJointCreateUniversal(wglob,0);
+                   car->tjid=physics_createUniversalJoint();
                    dJointAttach(car->tjid,car->bid[1],car->bid[2]);
                    dJointSetUniversalAnchor(car->tjid,tx,ty,tz);
                    dJointSetUniversalAxis1(car->tjid,1.0,0.0,0.0);
@@ -573,8 +573,8 @@ for(i=1;i<=car->nob;i++){
       k=1; if(car->ofc[i]==7){k=2;}
 
       (car->nj)++;
-      car->jid[car->nj]=dJointCreateHinge2(wglob,0);
-      car->bkm[car->nj]=dJointCreateAMotor(wglob,0); /*brake motor*/
+      car->jid[car->nj]=physics_createHinge2();
+      car->bkm[car->nj]=physics_createAMotor(); // brake motor
       car->jfc[car->nj]=car->ofc[i];
       dJointAttach(car->jid[car->nj],car->bid[k],car->bid[i]);
       dJointAttach(car->bkm[car->nj],car->bid[k],car->bid[i]);

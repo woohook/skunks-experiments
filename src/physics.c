@@ -3,6 +3,55 @@
 #include "defstr.h"
 #include "physics.h"
 
+dWorldID wglob; // world for ODE
+
+void physics_init()
+{
+  dInitODE();
+  wglob=dWorldCreate();
+}
+
+void physics_release()
+{
+  dWorldDestroy(wglob);
+  dCloseODE();
+}
+
+void physics_setERP(float erp)
+{
+  dWorldSetERP(wglob,erp);
+}
+
+void physics_setCFM(float cfm)
+{
+  dWorldSetCFM(wglob,cfm);
+}
+
+void physics_setGravity(float gravity)
+{
+  dWorldSetGravity(wglob,gravity,0,0);
+}
+
+dBodyID physics_createBody()
+{
+  return dBodyCreate(wglob);
+}
+
+dJointID physics_createUniversalJoint()
+{
+  return dJointCreateUniversal(wglob,0);
+}
+
+dJointID physics_createHinge2()
+{
+  return dJointCreateHinge2(wglob,0);
+}
+
+dJointID physics_createAMotor()
+{
+  return dJointCreateAMotor(wglob,0);
+}
+
 /*run 1 simulation step; tstep - time step; af, bf - acceleration and brake factors*/
 void runsim(sgob** objs,int nob,vhc *car,float tstep,float vrx,float af,float bf,FILE *repf,float *timp)
 {int i,j,k,l,m,n,nobtr, /*nobtr-number of objects in the track*/
