@@ -97,8 +97,7 @@ int identcom(char *s)
  if(strcmp(s,"fullbright")==0){return 16;}
  return 0;}
 
-
-/*for readref()*/
+/*for readvehicle()*/
 int identcmg(char *s)
 {if(strcmp(s,"box")==0){return 1;}
  if(strcmp(s,"cyl")==0){return 2;} /*cylinder*/
@@ -191,74 +190,6 @@ if(identcom(s)==16){ /*fullbright*/
       set_face_fullbright(mesh_id, i);
     }
   }
-}
-
-fclose(fis);
-}
-
-
-/*function which reads the reference points and geom types of an object*/
-void readref(refpo *rep,char *numefis)
-{int i,err,lincr,ngeom; /*number of geoms*/
-char s[MAXWLG];
-FILE *fis;
-
-if(!(fis=fopen(numefis,"r"))){printf("File '%s' could not be open\r\n",numefis);exit(1);}
-
-fscanf(fis,"%d",&ngeom);
-if(ngeom>=(MAXGEOM-1)){printf("File '%s' - too many geoms\r\n",numefis);exit(1);}
-
-rep->nref=2*ngeom; /*number of reference points*/
-
-for(i=1;i<=ngeom;i++){
-	if(!(err=fisgetw(fis,s,&lincr))){afermex(numefis,lincr,s,1);}
-
-	switch(identcmg(s)){
-	  case 1: rep->gtip[i]='b'; /*box*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->lx[i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->ly[i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->lz[i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i]=atof(s);
-	          break;
-
-          case 2: rep->gtip[i]='c'; /*cylinder*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->lx[i]=atof(s); /*radius*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->ly[i]=atof(s); /*length*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i]=atof(s);
-	          break;
-
-          case 3: rep->gtip[i]='s'; /*sphere*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->lx[i]=atof(s); /*radius*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i]=atof(s);
-	          break;
-
-	  case 4: rep->gtip[i]='t'; /*triangle mesh*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->ttip[i]=atoi(s); /*type*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i]=atof(s);
-	          break;
-
-	  default: if(s[0]){printf("Error: '%s' line %d - word '%s' not recognized\r\n",numefis,lincr,s);exit(1);}
-	}
 }
 
 fclose(fis);
@@ -362,7 +293,7 @@ sgob** readvehicle(char *numefis,sgob** objs,int *nrtyp,int *nrobt,vhc *car)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
-int i,j,k,nto,nob; /*number of object types and number of objects*/
+int i,k,nto,nob; /*number of object types and number of objects*/
 REALN tx,ty,tz; /*initial translations*/
 
 nto=*nrtyp;
@@ -374,15 +305,13 @@ s[0]='1';while(s[0]){
 
 	switch(identcom(s)){
 	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); (*nrtyp)+=atoi(s);
-	          if(!(refglob=(refpo *)realloc(refglob,((*nrtyp)+1)*sizeof(refpo)))){printf("Out of memory");}
 	          for(i=nto+1;i<=(*nrtyp);i++){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
 	            faces(i,s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
 	              readcolor(i,s);
-	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
-	            readref(&refglob[i],s);
+	            err=fisgetw(fis,s,&lincr);   // skip file with reference points
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
 	              ordercl(i,s);
                     complete_mesh();
@@ -400,17 +329,11 @@ s[0]='1';while(s[0]){
 	              if(objs[i]->otyp>(*nrtyp)){
 	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp-nto);exit(1);
 	              }
-	              objs[i]->nref=refglob[objs[i]->otyp].nref;
 	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
 	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
 	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;
 	              objs[i]->transform.vy[1]=objs[i]->transform.vy[3]=0;
 	              objs[i]->transform.vz[1]=objs[i]->transform.vz[2]=0;
-	              for(j=1;j<=objs[i]->nref;j++){
-	                objs[i]->xref[j]=refglob[objs[i]->otyp].x[j];
-	                objs[i]->yref[j]=refglob[objs[i]->otyp].y[j];
-	                objs[i]->zref[j]=refglob[objs[i]->otyp].z[j];
-	              }
 	              eval_obj(objs[i]->otyp,objs[i]);
 
                     k=i-nob+car->nob; /*1...car->nob*/
@@ -515,15 +438,13 @@ s[0]='1';while(s[0]){
 	          break;
 
 	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); (*nrtyp)=nto=atoi(s);
-	          if(!(refglob=(refpo *)malloc((nto+1)*sizeof(refpo)))){printf("Out of memory");}
 	          for(i=1;i<=nto;i++){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
 	            faces(i,s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
 	              readcolor(i,s);
-	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
-	            readref(&refglob[i],s);
+	            err=fisgetw(fis,s,&lincr);   // skip file with reference points
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
 	              ordercl(i,s);
                     complete_mesh();
@@ -540,17 +461,11 @@ s[0]='1';while(s[0]){
 	              if(objs[i]->otyp>nto){
 	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp);exit(1);
 	              }
-	              objs[i]->nref=refglob[objs[i]->otyp].nref;
 	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
 	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
 	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;
 	              objs[i]->transform.vy[1]=objs[i]->transform.vy[3]=0;
 	              objs[i]->transform.vz[1]=objs[i]->transform.vz[2]=0;
-	              for(j=1;j<=objs[i]->nref;j++){
-	                objs[i]->xref[j]=refglob[objs[i]->otyp].x[j];
-	                objs[i]->yref[j]=refglob[objs[i]->otyp].y[j];
-	                objs[i]->zref[j]=refglob[objs[i]->otyp].z[j];
-	              }
 	              eval_obj(objs[i]->otyp,objs[i]);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
