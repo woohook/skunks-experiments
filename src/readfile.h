@@ -436,7 +436,11 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
 
-	              translat(objs[i],tx,ty,tz);
+ 	              translat(objs[i],tx,ty,tz);
+	              for(j=1;j<=objs[i]->nref;j++)
+	              {
+	                translate_vector(&objs[i]->xref[j], &objs[i]->yref[j], &objs[i]->zref[j], tx, ty, tz);
+	              }
 
 	            /*translated and rotated object; set geometry parameters*/
 	            for(j=1;j<=(objs[i]->nref/2);j++){
@@ -700,6 +704,13 @@ s[0]='1';while(s[0]){
 	              rotaty(objs[i],0,0,ry);
 	              rotatx(objs[i],0,0,rx);
 	              translat(objs[i],tx,ty,tz);
+	              for(j=1;j<=objs[i]->nref;j++)
+	              {
+                        rotate_vector_z(&objs[i]->xref[j],&objs[i]->yref[j],0,0,rz);
+                        rotate_vector_y(&objs[i]->xref[j],&objs[i]->zref[j],0,0,ry);
+                        rotate_vector_x(&objs[i]->yref[j],&objs[i]->zref[j],0,0,rx);
+	                translate_vector(&objs[i]->xref[j], &objs[i]->yref[j], &objs[i]->zref[j], tx, ty, tz);
+	              }
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); objs[i]->lev=atoi(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); objs[i]->mu=atof(s); /*friction*/
 
