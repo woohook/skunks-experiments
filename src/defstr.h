@@ -35,9 +35,6 @@ typedef struct _sgob
 {int otyp; /*number of object type in the global array*/
  int nref; /*number of reference points - max. MAXREF*/
  REALN radius; /*radius of sphere in which the object is included*/
-REALD xref[MAXREF];
-REALD yref[MAXREF];
-REALD zref[MAXREF]; /*coordinates of the reference points in global coordinates*/
 REALN xmin;
 REALN ymin;
 REALN zmin;

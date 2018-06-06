@@ -370,6 +370,8 @@ REALN tx,ty,tz, /*initial translations*/
       len;
 dMatrix3 rotmt; /*also rotation matrix*/
 
+REALD xref1, yref1, zref1, xref2, yref2, zref2;
+
 nto=*nrtyp;
 nob=*nrobt;
 
@@ -413,11 +415,6 @@ s[0]='1';while(s[0]){
 	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;
 	              objs[i]->transform.vy[1]=objs[i]->transform.vy[3]=0;
 	              objs[i]->transform.vz[1]=objs[i]->transform.vz[2]=0;
-	              for(j=1;j<=objs[i]->nref;j++){
-	                objs[i]->xref[j]=refglob[objs[i]->otyp].x[j];
-	                objs[i]->yref[j]=refglob[objs[i]->otyp].y[j];
-	                objs[i]->zref[j]=refglob[objs[i]->otyp].z[j];
-	              }
 	              eval_obj(objs[i]->otyp,objs[i]);
 
                     k=i-nob+car->nob; /*1...car->nob*/
@@ -437,13 +434,17 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
 
  	              translat(objs[i],tx,ty,tz);
-	              for(j=1;j<=objs[i]->nref;j++)
-	              {
-	                translate_vector(&objs[i]->xref[j], &objs[i]->yref[j], &objs[i]->zref[j], tx, ty, tz);
-	              }
 
 	            /*translated and rotated object; set geometry parameters*/
 	            for(j=1;j<=(objs[i]->nref/2);j++){
+	              xref1=refglob[objs[i]->otyp].x[2*j-1];
+	              yref1=refglob[objs[i]->otyp].y[2*j-1];
+	              zref1=refglob[objs[i]->otyp].z[2*j-1];
+	              xref2=refglob[objs[i]->otyp].x[2*j];
+	              yref2=refglob[objs[i]->otyp].y[2*j];
+	              zref2=refglob[objs[i]->otyp].z[2*j];
+	              translate_vector(&xref1, &yref1, &zref1, tx, ty, tz);
+	              translate_vector(&xref2, &yref2, &zref2, tx, ty, tz);
 	              switch(refglob[objs[i]->otyp].gtip[j]){
 	                case 'b': objs[i]->gid[j]=dCreateBox(0,refglob[objs[i]->otyp].lx[j],refglob[objs[i]->otyp].ly[j],refglob[objs[i]->otyp].lz[j]);
 	                          break;
@@ -457,11 +458,11 @@ s[0]='1';while(s[0]){
 	                default: printf("Unknown geometry '%c'\r\n",refglob[objs[i]->otyp].gtip[j]); exit(1);
 	              }
 
-	              dGeomSetPosition(objs[i]->gid[j],objs[i]->xref[2*j-1],objs[i]->yref[2*j-1],objs[i]->zref[2*j-1]);
+	              dGeomSetPosition(objs[i]->gid[j],xref1,yref1,zref1);
 	
-	              kx=objs[i]->xref[2*j]-objs[i]->xref[2*j-1];
-	              ky=objs[i]->yref[2*j]-objs[i]->yref[2*j-1];
-	              kz=objs[i]->zref[2*j]-objs[i]->zref[2*j-1];
+	              kx=xref2-xref1;
+	              ky=yref2-yref1;
+	              kz=zref2-zref1;
 	              len=sqrt(kx*kx+ky*ky+kz*kz);
 	              kx/=len; ky/=len; kz/=len;
 	              /*beam or column?*/
@@ -622,6 +623,8 @@ REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       len;
 dMatrix3 rotmt; /*also rotation matrix*/
 
+REALD xref1, yref1, zref1, xref2, yref2, zref2;
+
 dTriMeshDataID trid[5];
 
 trid[1]=dGeomTriMeshDataCreate();
@@ -688,11 +691,6 @@ s[0]='1';while(s[0]){
 	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;
 	              objs[i]->transform.vy[1]=objs[i]->transform.vy[3]=0;
 	              objs[i]->transform.vz[1]=objs[i]->transform.vz[2]=0;
-	              for(j=1;j<=objs[i]->nref;j++){
-	                objs[i]->xref[j]=refglob[objs[i]->otyp].x[j];
-	                objs[i]->yref[j]=refglob[objs[i]->otyp].y[j];
-	                objs[i]->zref[j]=refglob[objs[i]->otyp].z[j];
-	              }
 	              eval_obj(objs[i]->otyp,objs[i]);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
@@ -704,18 +702,25 @@ s[0]='1';while(s[0]){
 	              rotaty(objs[i],0,0,ry);
 	              rotatx(objs[i],0,0,rx);
 	              translat(objs[i],tx,ty,tz);
-	              for(j=1;j<=objs[i]->nref;j++)
-	              {
-                        rotate_vector_z(&objs[i]->xref[j],&objs[i]->yref[j],0,0,rz);
-                        rotate_vector_y(&objs[i]->xref[j],&objs[i]->zref[j],0,0,ry);
-                        rotate_vector_x(&objs[i]->yref[j],&objs[i]->zref[j],0,0,rx);
-	                translate_vector(&objs[i]->xref[j], &objs[i]->yref[j], &objs[i]->zref[j], tx, ty, tz);
-	              }
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); objs[i]->lev=atoi(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); objs[i]->mu=atof(s); /*friction*/
 
 	            /*translated and rotated object; set geometry parameters*/
 	            for(j=1;j<=(objs[i]->nref/2);j++){
+	              xref1 = refglob[objs[i]->otyp].x[2*j-1];
+	              yref1 = refglob[objs[i]->otyp].y[2*j-1];
+	              zref1 = refglob[objs[i]->otyp].z[2*j-1];
+	              xref2 = refglob[objs[i]->otyp].x[2*j];
+	              yref2 = refglob[objs[i]->otyp].y[2*j];
+	              zref2 = refglob[objs[i]->otyp].z[2*j];
+                      rotate_vector_z(&xref1,&yref1,0,0,rz);
+                      rotate_vector_y(&xref1,&zref1,0,0,ry);
+                      rotate_vector_x(&yref1,&zref1,0,0,rx);
+	              translate_vector(&xref1, &yref1, &zref1, tx, ty, tz);
+                      rotate_vector_z(&xref2,&yref2,0,0,rz);
+                      rotate_vector_y(&xref2,&zref2,0,0,ry);
+                      rotate_vector_x(&yref2,&zref2,0,0,rx);
+	              translate_vector(&xref2, &yref2, &zref2, tx, ty, tz);
 	              switch(refglob[objs[i]->otyp].gtip[j]){
 	                case 'b': objs[i]->gid[j]=dCreateBox(0,refglob[objs[i]->otyp].lx[j],refglob[objs[i]->otyp].ly[j],refglob[objs[i]->otyp].lz[j]);
 	                          break;
@@ -732,11 +737,11 @@ s[0]='1';while(s[0]){
 	                default: printf("Unknown geometry '%c'\r\n",refglob[objs[i]->otyp].gtip[j]); exit(1);
 	              }
 
-	              dGeomSetPosition(objs[i]->gid[j],objs[i]->xref[2*j-1],objs[i]->yref[2*j-1],objs[i]->zref[2*j-1]);
+	              dGeomSetPosition(objs[i]->gid[j],xref1,yref1,zref1);
 	
-	              kx=objs[i]->xref[2*j]-objs[i]->xref[2*j-1];
-	              ky=objs[i]->yref[2*j]-objs[i]->yref[2*j-1];
-	              kz=objs[i]->zref[2*j]-objs[i]->zref[2*j-1];
+	              kx=xref2-xref1;
+	              ky=yref2-yref1;
+	              kz=zref2-zref1;
 	              len=sqrt(kx*kx+ky*ky+kz*kz);
 	              kx/=len; ky/=len; kz/=len;
 	              /*beam or column?*/
