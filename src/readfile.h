@@ -383,13 +383,13 @@ s[0]='1';while(s[0]){
 
 	switch(identcom(s)){
 	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); (*nrtyp)+=atoi(s);
-	          if(!(refglob=(refpo *)realloc(refglob,((*nrtyp)+1)*sizeof(refpo)))){printf("Out of memory");}
 	          for(i=nto+1;i<=(*nrtyp);i++){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
 	            faces(i,s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
 	              readcolor(i,s);
+                    create_collision_geometry();
 	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
 	            readref(&refglob[i],s);
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
@@ -660,13 +660,13 @@ s[0]='1';while(s[0]){
 	          break;
 
 	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); (*nrtyp)=nto=atoi(s);
-	          if(!(refglob=(refpo *)malloc((nto+1)*sizeof(refpo)))){printf("Out of memory");}
 	          for(i=1;i<=nto;i++){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
 	            faces(i,s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
 	              readcolor(i,s);
+                    create_collision_geometry();
 	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
 	            readref(&refglob[i],s);
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/

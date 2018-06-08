@@ -5,6 +5,7 @@
 
 dWorldID wglob; // world for ODE
 refpo *refglob; // array with reference points of object types
+int refcount = 0;
 
 void physics_init()
 {
@@ -52,6 +53,15 @@ dJointID physics_createHinge2()
 dJointID physics_createAMotor()
 {
   return dJointCreateAMotor(wglob,0);
+}
+
+void create_collision_geometry()
+{
+  refcount++;
+  if(!(refglob=(refpo *)realloc(refglob,(refcount+1)*sizeof(refpo))))
+  {
+    printf("Out of memory");
+  }
 }
 
 /*run 1 simulation step; tstep - time step; af, bf - acceleration and brake factors*/
