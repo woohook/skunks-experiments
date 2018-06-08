@@ -187,7 +187,7 @@ SDL_Quit();
 
 runsim(objs,&car,repf,&timp,&speed,1); /*freed static variables from runsim()*/
 renderer_release();
-free (refglob);
+
 for(i=1;i<=nob;i++)
 {
   free(objs[i]);
