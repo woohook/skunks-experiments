@@ -18,19 +18,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "util.h"
 
-typedef struct _refpo
-{int nref; /*number of reference points*/
-REALD x[MAXREF];
-REALD y[MAXREF];
-REALD z[MAXREF]; /*coordinates of the reference points*/
-char gtip[MAXGEOM]; /*type of geom - 'b', 'c', 's', 't' (box, cylinder, sphere, triangle mesh)*/
-int ttip[MAXGEOM]; /*type of triangle mesh - 1-left 45; 2-right 45; 3-left 22.5; 4-right 22.5*/
-REALN lx[MAXGEOM]; /*geometry parameters; for cyl. - lx = radius, ly = length;*/
-REALN ly[MAXGEOM]; /*for sphere - lx = radius; for box - lx = lx, ly = ly, lz = lz.*/
-REALN lz[MAXGEOM];
-} refpo; /*reference points of an object type*/
-
-
 typedef struct _sgob
 {int otyp; /*number of object type in the global array*/
  int nref; /*number of reference points - max. MAXREF*/
@@ -81,6 +68,3 @@ REALN mu; /*friction*/
 REALN camh;
 REALN camd; /*camera position*/
 } vhc; /*vehicle*/
-
-
-refpo *refglob; /*array with reference points of object types*/

@@ -4,6 +4,7 @@
 #include "physics.h"
 
 dWorldID wglob; // world for ODE
+refpo *refglob; // array with reference points of object types
 
 void physics_init()
 {
