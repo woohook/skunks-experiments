@@ -198,63 +198,67 @@ fclose(fis);
 
 
 /*function which reads the reference points and geom types of an object*/
-void readref(refpo *rep,char *numefis)
+void readref(char *numefis)
 {int i,err,lincr,ngeom; /*number of geoms*/
 char s[MAXWLG];
 FILE *fis;
+float x1, y1, z1, x2, y2, z2, lx, ly, lz;
+int ttip;
 
 if(!(fis=fopen(numefis,"r"))){printf("File '%s' could not be open\r\n",numefis);exit(1);}
 
 fscanf(fis,"%d",&ngeom);
 if(ngeom>=(MAXGEOM-1)){printf("File '%s' - too many geoms\r\n",numefis);exit(1);}
 
-rep->nref=2*ngeom; /*number of reference points*/
-
 for(i=1;i<=ngeom;i++){
 	if(!(err=fisgetw(fis,s,&lincr))){afermex(numefis,lincr,s,1);}
 
 	switch(identcmg(s)){
-	  case 1: rep->gtip[i]='b'; /*box*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->lx[i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->ly[i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->lz[i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i]=atof(s);
+	  case 1: // box
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); lx=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ly=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); lz=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x2=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y2=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z2=atof(s);
+                  create_collision_box(x1,y1,z1,x2,y2,z2,lx,ly,lz);
 	          break;
 
-          case 2: rep->gtip[i]='c'; /*cylinder*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->lx[i]=atof(s); /*radius*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->ly[i]=atof(s); /*length*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i]=atof(s);
+          case 2: // cylinder
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); lx=atof(s); // radius
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ly=atof(s); // length
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x2=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y2=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z2=atof(s);
+                  create_collision_cylinder(x1,y1,z1,x2,y2,z2,lx,ly);
 	          break;
 
-          case 3: rep->gtip[i]='s'; /*sphere*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->lx[i]=atof(s); /*radius*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i]=atof(s);
+          case 3: // sphere
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); lx=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x2=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y2=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z2=atof(s);
+                  create_collision_sphere(x1,y1,z1,x2,y2,z2,lx);
 	          break;
 
-	  case 4: rep->gtip[i]='t'; /*triangle mesh*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->ttip[i]=atoi(s); /*type*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i]=atof(s);
+	  case 4: // triangle mesh
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ttip=atoi(s); // type
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x2=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y2=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z2=atof(s);
+                  create_collision_mesh(x1,y1,z1,x2,y2,z2,ttip);
 	          break;
 
 	  default: if(s[0]){printf("Error: '%s' line %d - word '%s' not recognized\r\n",numefis,lincr,s);exit(1);}
@@ -391,7 +395,7 @@ s[0]='1';while(s[0]){
 	              readcolor(i,s);
                     create_collision_geometry();
 	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
-	            readref(&refglob[i],s);
+	            readref(s);
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
 	              ordercl(i,s);
                     complete_mesh();
@@ -668,7 +672,7 @@ s[0]='1';while(s[0]){
 	              readcolor(i,s);
                     create_collision_geometry();
 	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
-	            readref(&refglob[i],s);
+	            readref(s);
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
 	              ordercl(i,s);
                     complete_mesh();
