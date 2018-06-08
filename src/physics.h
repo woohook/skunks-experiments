@@ -26,6 +26,10 @@ dJointID physics_createHinge2();
 dJointID physics_createAMotor();
 
 void create_collision_geometry();
+void create_collision_box(float x1, float y1, float z1, float x2, float y2, float z2, float lx, float ly, float lz);
+void create_collision_cylinder(float x1, float y1, float z1, float x2, float y2, float z2, float radius, float height);
+void create_collision_sphere(float x1, float y1, float z1, float x2, float y2, float z2, float radius);
+void create_collision_mesh(float x1, float y1, float z1, float x2, float y2, float z2, int ttip);
 
 void runsim(sgob** objs,int nob,vhc *car,float tstep,float vrx,float af,float bf,FILE *repf,float *timp);
 

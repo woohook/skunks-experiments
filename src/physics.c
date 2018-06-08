@@ -58,10 +58,77 @@ dJointID physics_createAMotor()
 void create_collision_geometry()
 {
   refcount++;
-  if(!(refglob=(refpo *)realloc(refglob,(refcount+1)*sizeof(refpo))))
+  if(0!=(refglob=(refpo *)realloc(refglob,(refcount+1)*sizeof(refpo))))
+  {
+    refglob[refcount].nref = 0;
+  }
+  else
   {
     printf("Out of memory");
   }
+}
+
+void create_collision_box(float x1, float y1, float z1, float x2, float y2, float z2, float lx, float ly, float lz)
+{
+  refpo* geom = &refglob[refcount];
+  geom->nref++;
+  geom->x[geom->nref] = x1;
+  geom->y[geom->nref] = y1;
+  geom->z[geom->nref] = z1;
+  geom->nref++;
+  geom->x[geom->nref] = x2;
+  geom->y[geom->nref] = y2;
+  geom->z[geom->nref] = z2;
+  geom->gtip[geom->nref/2] = 'b';
+  geom->lx[geom->nref/2] = lx;
+  geom->ly[geom->nref/2] = ly;
+  geom->lz[geom->nref/2] = lz;
+}
+
+void create_collision_cylinder(float x1, float y1, float z1, float x2, float y2, float z2, float radius, float height)
+{
+  refpo* geom = &refglob[refcount];
+  geom->nref++;
+  geom->x[geom->nref] = x1;
+  geom->y[geom->nref] = y1;
+  geom->z[geom->nref] = z1;
+  geom->nref++;
+  geom->x[geom->nref] = x2;
+  geom->y[geom->nref] = y2;
+  geom->z[geom->nref] = z2;
+  geom->gtip[geom->nref/2] = 'c';
+  geom->lx[geom->nref/2] = radius;
+  geom->ly[geom->nref/2] = height;
+}
+
+void create_collision_sphere(float x1, float y1, float z1, float x2, float y2, float z2, float radius)
+{
+  refpo* geom = &refglob[refcount];
+  geom->nref++;
+  geom->x[geom->nref] = x1;
+  geom->y[geom->nref] = y1;
+  geom->z[geom->nref] = z1;
+  geom->nref++;
+  geom->x[geom->nref] = x2;
+  geom->y[geom->nref] = y2;
+  geom->z[geom->nref] = z2;
+  geom->gtip[geom->nref/2] = 's';
+  geom->lx[geom->nref/2] = radius;
+}
+
+void create_collision_mesh(float x1, float y1, float z1, float x2, float y2, float z2, int ttip)
+{
+  refpo* geom = &refglob[refcount];
+  geom->nref++;
+  geom->x[geom->nref] = x1;
+  geom->y[geom->nref] = y1;
+  geom->z[geom->nref] = z1;
+  geom->nref++;
+  geom->x[geom->nref] = x2;
+  geom->y[geom->nref] = y2;
+  geom->z[geom->nref] = z2;
+  geom->gtip[geom->nref/2] = 't';
+  geom->ttip[geom->nref/2] = ttip;
 }
 
 /*run 1 simulation step; tstep - time step; af, bf - acceleration and brake factors*/
