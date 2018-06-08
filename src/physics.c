@@ -14,6 +14,7 @@ void physics_init()
 
 void physics_release()
 {
+  free (refglob);
   dWorldDestroy(wglob);
   dCloseODE();
 }

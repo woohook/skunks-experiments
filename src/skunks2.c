@@ -341,7 +341,6 @@ free(obtained);
 #endif
 
 renderer_release();
-free (refglob);
 for(i=1;i<=nob;i++)
 {
   free(objs[i]);
