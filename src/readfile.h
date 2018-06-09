@@ -366,15 +366,10 @@ sgob** readvehicle(char *numefis,sgob** objs,int *nrtyp,int *nrobt,vhc *car)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
-int i,j,k,nto,nob; /*number of object types and number of objects*/
+int i,k,nto,nob; /*number of object types and number of objects*/
 REALN tx,ty,tz, /*initial translations*/
-      ix,jx,kx,
-      iy,jy,ky,
-      iz,jz,kz, /*rotation matrix (temporary)*/
       len;
 dMatrix3 rotmt; /*also rotation matrix*/
-
-REALD xref1, yref1, zref1, xref2, yref2, zref2;
 
 nto=*nrtyp;
 nob=*nrobt;
@@ -439,58 +434,11 @@ s[0]='1';while(s[0]){
 
  	              translat(objs[i],tx,ty,tz);
 
-	            /*translated and rotated object; set geometry parameters*/
-	            for(j=1;j<=(objs[i]->nref/2);j++){
-	              xref1=refglob[objs[i]->otyp].x[2*j-1];
-	              yref1=refglob[objs[i]->otyp].y[2*j-1];
-	              zref1=refglob[objs[i]->otyp].z[2*j-1];
-	              xref2=refglob[objs[i]->otyp].x[2*j];
-	              yref2=refglob[objs[i]->otyp].y[2*j];
-	              zref2=refglob[objs[i]->otyp].z[2*j];
-	              translate_vector(&xref1, &yref1, &zref1, tx, ty, tz);
-	              translate_vector(&xref2, &yref2, &zref2, tx, ty, tz);
-	              switch(refglob[objs[i]->otyp].gtip[j]){
-	                case 'b': objs[i]->gid[j]=dCreateBox(0,refglob[objs[i]->otyp].lx[j],refglob[objs[i]->otyp].ly[j],refglob[objs[i]->otyp].lz[j]);
-	                          break;
-
-	                case 'c': objs[i]->gid[j]=dCreateCCylinder(0,refglob[objs[i]->otyp].lx[j],refglob[objs[i]->otyp].ly[j]);
-	                          break;
-
-	                case 's': objs[i]->gid[j]=dCreateSphere(0,refglob[objs[i]->otyp].lx[j]);
-	                          break;
-
-	                default: printf("Unknown geometry '%c'\r\n",refglob[objs[i]->otyp].gtip[j]); exit(1);
-	              }
-
-	              dGeomSetPosition(objs[i]->gid[j],xref1,yref1,zref1);
-	
-	              kx=xref2-xref1;
-	              ky=yref2-yref1;
-	              kz=zref2-zref1;
-	              len=sqrt(kx*kx+ky*ky+kz*kz);
-	              kx/=len; ky/=len; kz/=len;
-	              /*beam or column?*/
-	              len=sqrt(ky*ky+kz*kz); /*(horizontal length)/(length)*/
-	                if(len<1e-5){ /*column*/
-	                  jx=0; jy=0; jz=-1;
-	                }
-	                else{ /*beam*/
-	                  jx=0; jy=kz; jz=-ky;
-	                  len=sqrt(jx*jx+jy*jy+jz*jz);
-	                  jx/=len; jy/=len; jz/=len;
-	                }
-                      ix=jy*kz-jz*ky;
-                      iy=jz*kx-jx*kz;
-                      iz=jx*ky-jy*kx; /*calculated local system*/
-                        rotmt[0]=ix; rotmt[1]=jx; rotmt[2]=kx; rotmt[3]=0;
-                        rotmt[4]=iy; rotmt[5]=jy; rotmt[6]=ky; rotmt[7]=0;
-                        rotmt[8]=iz; rotmt[9]=jz; rotmt[10]=kz; rotmt[11]=0;
-
-                      dGeomSetRotation(objs[i]->gid[j],rotmt);
-	            }
-	            /*^set geometry parameters*/
+                    objs[i]->physics_object = create_collision_geometry_instance(objs[i]->otyp, tx, ty, tz, 0, 0, 0);
 
 	            car->bid[k]=physics_createBody();
+
+                    attach_body(objs[i]->physics_object, car->bid[k]);
 
 	            if((car->ofc[k])>=2){dBodySetFiniteRotationMode(car->bid[k],1);} /*for wheels*/
 
@@ -565,15 +513,6 @@ s[0]='1';while(s[0]){
 }
 fclose(fis);
 
-/*attach geoms to bodies*/
-for(i=1;i<=car->nob;i++){
-  k=car->oid[i];
-  for(j=1;j<=(objs[k]->nref/2);j++){
-    dGeomSetBody(objs[k]->gid[j],car->bid[i]);
-  }
-}
-/*attached geoms to bodies*/
-
 /*set joints*/
 car->nj=0; /*number of permanent joints*/
 for(i=1;i<=car->nob;i++){
@@ -603,13 +542,6 @@ for(i=1;i<=car->nob;i++){
 return objs;}
 
 
-dReal vert1glob[12]={0,-12.732,0,0,0,12.5,0.02,0,0,5.10,17.80,0},
-      vert2glob[12]={0,12.732,0,0,0,-12.5,0.02,0,0,-5.10,17.80,0},
-      vert3glob[12]={0,-25.465,0,0,0,12.5,0.02,0,0,9.61,14.50,0},
-      vert4glob[12]={0,25.465,0,0,0,-12.5,0.02,0,0,-9.61,14.50,0};
-dTriIndex indexlglob[3]={0,1,2},
-          indexrglob[3]={0,2,1}; /*global variables used by the function below*/
-
 /*function which reads the track; nrobt - number of objects*/
 sgob** readtrack(char *numefis,int *nrobt,int *nrtyp,int* background_red, int* background_green, int* background_blue)
 {int err,lincr=1; /*lincr-current line*/
@@ -621,25 +553,7 @@ int i,j,
 sgob** objs = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       fred=1.0,fgreen=1.0,fblue=1.0, /*color multiplication factors*/
-      ix,jx,kx,
-      iy,jy,ky,
-      iz,jz,kz, /*rotation matrix (temporary)*/
       len;
-dMatrix3 rotmt; /*also rotation matrix*/
-
-REALD xref1, yref1, zref1, xref2, yref2, zref2;
-
-dTriMeshDataID trid[5];
-
-trid[1]=dGeomTriMeshDataCreate();
-trid[2]=dGeomTriMeshDataCreate();
-trid[3]=dGeomTriMeshDataCreate();
-trid[4]=dGeomTriMeshDataCreate();
-dGeomTriMeshDataBuildSimple(trid[1],vert1glob,3,indexlglob,3);
-dGeomTriMeshDataBuildSimple(trid[2],vert2glob,3,indexrglob,3);
-dGeomTriMeshDataBuildSimple(trid[3],vert3glob,3,indexlglob,3);
-dGeomTriMeshDataBuildSimple(trid[4],vert4glob,3,indexrglob,3);
-/*data for triangle meshes used at curved road elements*/
 
 float light_ambient=0.5;
 float light_headlight=0.3;
@@ -709,65 +623,7 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); objs[i]->lev=atoi(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); objs[i]->mu=atof(s); /*friction*/
 
-	            /*translated and rotated object; set geometry parameters*/
-	            for(j=1;j<=(objs[i]->nref/2);j++){
-	              xref1 = refglob[objs[i]->otyp].x[2*j-1];
-	              yref1 = refglob[objs[i]->otyp].y[2*j-1];
-	              zref1 = refglob[objs[i]->otyp].z[2*j-1];
-	              xref2 = refglob[objs[i]->otyp].x[2*j];
-	              yref2 = refglob[objs[i]->otyp].y[2*j];
-	              zref2 = refglob[objs[i]->otyp].z[2*j];
-                      rotate_vector_z(&xref1,&yref1,0,0,rz);
-                      rotate_vector_y(&xref1,&zref1,0,0,ry);
-                      rotate_vector_x(&yref1,&zref1,0,0,rx);
-	              translate_vector(&xref1, &yref1, &zref1, tx, ty, tz);
-                      rotate_vector_z(&xref2,&yref2,0,0,rz);
-                      rotate_vector_y(&xref2,&zref2,0,0,ry);
-                      rotate_vector_x(&yref2,&zref2,0,0,rx);
-	              translate_vector(&xref2, &yref2, &zref2, tx, ty, tz);
-	              switch(refglob[objs[i]->otyp].gtip[j]){
-	                case 'b': objs[i]->gid[j]=dCreateBox(0,refglob[objs[i]->otyp].lx[j],refglob[objs[i]->otyp].ly[j],refglob[objs[i]->otyp].lz[j]);
-	                          break;
-
-	                case 'c': objs[i]->gid[j]=dCreateCCylinder(0,refglob[objs[i]->otyp].lx[j],refglob[objs[i]->otyp].ly[j]);
-	                          break;
-
-	                case 's': objs[i]->gid[j]=dCreateSphere(0,refglob[objs[i]->otyp].lx[j]);
-	                          break;
-
-	                case 't': objs[i]->gid[j]=dCreateTriMesh(0,trid[refglob[objs[i]->otyp].ttip[j]],0,0,0);
-	                          break;
-
-	                default: printf("Unknown geometry '%c'\r\n",refglob[objs[i]->otyp].gtip[j]); exit(1);
-	              }
-
-	              dGeomSetPosition(objs[i]->gid[j],xref1,yref1,zref1);
-	
-	              kx=xref2-xref1;
-	              ky=yref2-yref1;
-	              kz=zref2-zref1;
-	              len=sqrt(kx*kx+ky*ky+kz*kz);
-	              kx/=len; ky/=len; kz/=len;
-	              /*beam or column?*/
-	              len=sqrt(ky*ky+kz*kz); /*(horizontal length)/(length)*/
-	                if(len<1e-5){ /*column*/
-	                  jx=0; jy=0; jz=-1;
-	                }
-	                else{ /*beam*/
-	                  jx=0; jy=kz; jz=-ky;
-	                  len=sqrt(jx*jx+jy*jy+jz*jz);
-	                  jx/=len; jy/=len; jz/=len;
-	                }
-                      ix=jy*kz-jz*ky;
-                      iy=jz*kx-jx*kz;
-                      iz=jx*ky-jy*kx; /*calculated local system*/
-                        rotmt[0]=ix; rotmt[1]=jx; rotmt[2]=kx; rotmt[3]=0;
-                        rotmt[4]=iy; rotmt[5]=jy; rotmt[6]=ky; rotmt[7]=0;
-                        rotmt[8]=iz; rotmt[9]=jz; rotmt[10]=kz; rotmt[11]=0;
-
-                      dGeomSetRotation(objs[i]->gid[j],rotmt);
-	            }
-	            /*^set geometry parameters*/
+                    objs[i]->physics_object = create_collision_geometry_instance(objs[i]->otyp, tx, ty, tz, rx, ry, rz);
 	          }
 	          break;
 

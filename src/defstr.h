@@ -34,8 +34,7 @@ matrix transform; /*directions of local axes in global coordinates - v[1]=i, v[2
                rotation and translation of object only affect vx, vy, vz, ref. points
                and centres; triangles are calculated from vx, vy and vz at rendering*/
 int lev; /*level*/
-dGeomID gid[MAXGEOM]; /*geoms for collision; axis z of geom[i] is defined by
-                         (x[i*2-1],y[i*2-1],z[i*2-1]) and (x[i*2],y[i*2],z[i*2])*/
+struct physics_instance* physics_object;
 REALN mu; /*friction*/
 } sgob; /*3d object*/
 

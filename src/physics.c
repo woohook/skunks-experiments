@@ -2,6 +2,15 @@
 #include "config.h"
 #include "defstr.h"
 #include "physics.h"
+#include "trans.h"
+
+struct physics_instance
+{
+  int gtip;
+  // geoms for collision; axis z of geom[i] is defined by
+  //   (x[i*2-1],y[i*2-1],z[i*2-1]) and (x[i*2],y[i*2],z[i*2])
+  dGeomID gid[MAXGEOM];
+};
 
 dWorldID wglob; // world for ODE
 refpo *refglob; // array with reference points of object types
@@ -131,6 +140,119 @@ void create_collision_mesh(float x1, float y1, float z1, float x2, float y2, flo
   geom->ttip[geom->nref/2] = ttip;
 }
 
+// global variables for triangle meshes
+dReal vert1glob[12]={0,-12.732,0,0,0,12.5,0.02,0,0,5.10,17.80,0},
+      vert2glob[12]={0,12.732,0,0,0,-12.5,0.02,0,0,-5.10,17.80,0},
+      vert3glob[12]={0,-25.465,0,0,0,12.5,0.02,0,0,9.61,14.50,0},
+      vert4glob[12]={0,25.465,0,0,0,-12.5,0.02,0,0,-9.61,14.50,0};
+dTriIndex indexlglob[3]={0,1,2},
+          indexrglob[3]={0,2,1};
+
+struct physics_instance* create_collision_geometry_instance(int geomtype, float tx, float ty, float tz, float rx, float ry, float rz)
+{
+  int j;
+  float xref1, yref1, zref1, xref2, yref2, zref2;
+  float ix, iy, iz, jx, jy, jz, kx, ky, kz, len;
+  dMatrix3 rotmt; // ODE rotation matrix
+  struct physics_instance* object = (struct physics_instance*)malloc(sizeof(struct physics_instance));
+
+  // data for triangle meshes used at curved road elements
+  dTriMeshDataID trid[5];
+
+  trid[1]=dGeomTriMeshDataCreate();
+  trid[2]=dGeomTriMeshDataCreate();
+  trid[3]=dGeomTriMeshDataCreate();
+  trid[4]=dGeomTriMeshDataCreate();
+  dGeomTriMeshDataBuildSimple(trid[1],vert1glob,3,indexlglob,3);
+  dGeomTriMeshDataBuildSimple(trid[2],vert2glob,3,indexrglob,3);
+  dGeomTriMeshDataBuildSimple(trid[3],vert3glob,3,indexlglob,3);
+  dGeomTriMeshDataBuildSimple(trid[4],vert4glob,3,indexrglob,3);
+
+  object->gtip = geomtype;
+
+  // translated and rotated object; set geometry parameters
+  refpo* geom = &refglob[geomtype];
+  for(j=1;j<=(geom->nref/2);j++)
+  {
+    xref1=geom->x[2*j-1];
+    yref1=geom->y[2*j-1];
+    zref1=geom->z[2*j-1];
+    xref2=geom->x[2*j];
+    yref2=geom->y[2*j];
+    zref2=geom->z[2*j];
+    if(rz != 0) rotate_vector_z(&xref1,&yref1,0,0,rz);
+    if(ry != 0) rotate_vector_y(&xref1,&zref1,0,0,ry);
+    if(rx != 0) rotate_vector_x(&yref1,&zref1,0,0,rx);
+    translate_vector(&xref1, &yref1, &zref1, tx, ty, tz);
+    if(rz != 0) rotate_vector_z(&xref2,&yref2,0,0,rz);
+    if(ry != 0) rotate_vector_y(&xref2,&zref2,0,0,ry);
+    if(rx != 0) rotate_vector_x(&yref2,&zref2,0,0,rx);
+    translate_vector(&xref2, &yref2, &zref2, tx, ty, tz);
+
+    switch(geom->gtip[j])
+    {
+      case 'b':
+        object->gid[j] = dCreateBox(0, geom->lx[j], geom->ly[j], geom->lz[j]);
+        break;
+      case 'c':
+        object->gid[j] = dCreateCCylinder(0, geom->lx[j], geom->ly[j]);
+        break;
+      case 's':
+        object->gid[j] = dCreateSphere(0, geom->lx[j]);
+        break;
+      case 't':
+        object->gid[j] = dCreateTriMesh(0,trid[geom->ttip[j]],0,0,0);
+        break;
+      default:
+        printf("Unknown geometry '%c'\r\n",geom->gtip[j]);
+        exit(1);
+        break;
+    }
+
+    dGeomSetPosition(object->gid[j], xref1, yref1, zref1);
+
+    kx=xref2-xref1;
+    ky=yref2-yref1;
+    kz=zref2-zref1;
+    len=sqrt(kx*kx+ky*ky+kz*kz);
+    kx/=len; ky/=len; kz/=len;
+
+    // beam or column?
+    len=sqrt(ky*ky+kz*kz); // (horizontal length)/(length)
+    if(len<1e-5)  // column
+    {
+      jx=0; jy=0; jz=-1;
+    }
+    else // beam
+    {
+      jx=0; jy=kz; jz=-ky;
+      len=sqrt(jx*jx+jy*jy+jz*jz);
+      jx/=len; jy/=len; jz/=len;
+    }
+
+    // calculated local system
+    ix=jy*kz-jz*ky;
+    iy=jz*kx-jx*kz;
+    iz=jx*ky-jy*kx;
+
+    rotmt[0]=ix; rotmt[1]=jx; rotmt[2]=kx; rotmt[3]=0;
+    rotmt[4]=iy; rotmt[5]=jy; rotmt[6]=ky; rotmt[7]=0;
+    rotmt[8]=iz; rotmt[9]=jz; rotmt[10]=kz; rotmt[11]=0;
+    dGeomSetRotation(object->gid[j],rotmt);
+  }
+
+  return object;
+}
+
+void attach_body(struct physics_instance* object, dBodyID bid)
+{
+  int i;
+  for(i=1;i<=refglob[object->gtip].nref/2;i++)
+  {
+    dGeomSetBody(object->gid[i],bid);
+  }
+}
+
 /*run 1 simulation step; tstep - time step; af, bf - acceleration and brake factors*/
 void runsim(sgob** objs,int nob,vhc *car,float tstep,float vrx,float af,float bf,FILE *repf,float *timp)
 {int i,j,k,l,m,n,nobtr, /*nobtr-number of objects in the track*/
@@ -174,7 +296,7 @@ for(i=1;i<=nobtr;i++){
       k=car->oid[j];
       for(l=1;l<=(objs[k]->nref/2);l++){
         for(m=1;m<=(objs[i]->nref/2);m++){
-          n=dCollide(objs[k]->gid[l],objs[i]->gid[m],1,&dcgeom[car->ncj+1],sizeof(dContactGeom));
+          n=dCollide(objs[k]->physics_object->gid[l],objs[i]->physics_object->gid[m],1,&dcgeom[car->ncj+1],sizeof(dContactGeom));
           (car->ncj)+=n;
           if(n){bcj[car->ncj]=j;}
         }
