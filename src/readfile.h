@@ -408,7 +408,6 @@ s[0]='1';while(s[0]){
 	              if(objs[i]->otyp>(*nrtyp)){
 	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp-nto);exit(1);
 	              }
-	              objs[i]->nref=refglob[objs[i]->otyp].nref;
 	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
 	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
 	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;
@@ -603,7 +602,6 @@ s[0]='1';while(s[0]){
 	              if(objs[i]->otyp>nto){
 	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp);exit(1);
 	              }
-	              objs[i]->nref=refglob[objs[i]->otyp].nref;
 	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
 	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
 	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;

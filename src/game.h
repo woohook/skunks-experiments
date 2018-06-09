@@ -24,7 +24,6 @@ REALN x0,y0,z0,a,h,d;
 
 pos=dBodyGetPosition(car->bid[1]);
 rot=dBodyGetRotation(car->bid[1]);
-camera->nref=0;
 
 switch(flag){
   case 1: a=0.57;

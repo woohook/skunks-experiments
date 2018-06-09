@@ -294,8 +294,8 @@ for(i=1;i<=nobtr;i++){
   if((fabs(objs[i]->transform.vx[0]-x0)<50) && (fabs(objs[i]->transform.vy[0]-y0)<50) && (fabs(objs[i]->transform.vz[0]-z0)<50)){
     for(j=1;j<=car->nob;j++){
       k=car->oid[j];
-      for(l=1;l<=(objs[k]->nref/2);l++){
-        for(m=1;m<=(objs[i]->nref/2);m++){
+      for(l=1;l<=(refglob[objs[k]->physics_object->gtip].nref/2);l++){
+        for(m=1;m<=(refglob[objs[i]->physics_object->gtip].nref/2);m++){
           n=dCollide(objs[k]->physics_object->gid[l],objs[i]->physics_object->gid[m],1,&dcgeom[car->ncj+1],sizeof(dContactGeom));
           (car->ncj)+=n;
           if(n){bcj[car->ncj]=j;}
