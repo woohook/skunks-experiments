@@ -12,6 +12,8 @@ struct physics_instance
   dGeomID gid[MAXGEOM];
 };
 
+dJointID unijoint; // single universal joint
+
 dWorldID wglob; // world for ODE
 refpo *refglob; // array with reference points of object types
 int refcount = 0;
@@ -49,9 +51,15 @@ dBodyID physics_createBody()
   return dBodyCreate(wglob);
 }
 
-dJointID physics_createUniversalJoint()
+void physics_createUniversalJoint(dBodyID body1, dBodyID body2, float tx, float ty, float tz)
 {
-  return dJointCreateUniversal(wglob,0);
+  unijoint = dJointCreateUniversal(wglob,0);
+  dJointAttach(unijoint,body1, body2);
+  dJointSetUniversalAnchor(unijoint,tx,ty,tz);
+  dJointSetUniversalAxis1(unijoint,1.0,0.0,0.0);
+  dJointSetUniversalAxis2(unijoint,0.0,1.0,0.0);
+  dJointSetUniversalParam(unijoint,dParamLoStop,-2.094);
+  dJointSetUniversalParam(unijoint,dParamHiStop,2.094);
 }
 
 dJointID physics_createHinge2()
@@ -317,8 +325,8 @@ pin=af*car->accel;
 bkf=(bf+0.01)*car->brake;
 
 if(car->tjflag){
-  dJointSetUniversalParam(car->tjid,dParamStopERP,tstep*kps/(tstep*kps+kds));
-  dJointSetUniversalParam(car->tjid,dParamStopCFM,1/(tstep*kps+kds));
+  dJointSetUniversalParam(unijoint,dParamStopERP,tstep*kps/(tstep*kps+kds));
+  dJointSetUniversalParam(unijoint,dParamStopCFM,1/(tstep*kps+kds));
 }
 
 for(i=1;i<=car->nj;i++){

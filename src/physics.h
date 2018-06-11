@@ -23,7 +23,7 @@ void physics_setCFM(float cfm);
 void physics_setGravity(float gravity);
 
 dBodyID physics_createBody();
-dJointID physics_createUniversalJoint();
+void physics_createUniversalJoint(dBodyID body1, dBodyID body2, float tx, float ty, float tz);
 dJointID physics_createHinge2();
 dJointID physics_createAMotor();
 

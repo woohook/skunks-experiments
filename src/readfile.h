@@ -494,13 +494,7 @@ s[0]='1';while(s[0]){
                    if(car->ofc[2]!=2){printf("Error: '%s' line %d - trailer joint without trailer\r\n",numefis,lincr);exit(1);}
                    if(car->tjflag==1){printf("Error: '%s' line %d - only one such joint allowed\r\n",numefis,lincr);exit(1);}
                    car->tjflag=1;
-                   car->tjid=physics_createUniversalJoint();
-                   dJointAttach(car->tjid,car->bid[1],car->bid[2]);
-                   dJointSetUniversalAnchor(car->tjid,tx,ty,tz);
-                   dJointSetUniversalAxis1(car->tjid,1.0,0.0,0.0);
-                   dJointSetUniversalAxis2(car->tjid,0.0,1.0,0.0);
-                   dJointSetUniversalParam(car->tjid,dParamLoStop,-2.094);
-                   dJointSetUniversalParam(car->tjid,dParamHiStop,2.094);
+                   physics_createUniversalJoint(car->bid[1], car->bid[2],tx,ty,tz);
                    break;
 
           case 11: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->camh=atof(s);
