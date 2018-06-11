@@ -12,7 +12,7 @@ struct physics_instance
   dGeomID gid[MAXGEOM];
 };
 
-dJointID unijoint; // single universal joint
+dJointID unijoint = 0; // single universal joint
 
 dWorldID wglob; // world for ODE
 refpo *refglob; // array with reference points of object types
@@ -324,7 +324,7 @@ pin=af*car->accel;
 
 bkf=(bf+0.01)*car->brake;
 
-if(car->tjflag){
+if(unijoint != 0){
   dJointSetUniversalParam(unijoint,dParamStopERP,tstep*kps/(tstep*kps+kds));
   dJointSetUniversalParam(unijoint,dParamStopCFM,1/(tstep*kps+kds));
 }

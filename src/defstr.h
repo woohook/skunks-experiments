@@ -54,8 +54,6 @@ int ofc[MAXGEOM]; /*object function: 1-car; 2-trailer; 3-motor wheel; 4-steering
                     5-motor and steering wheel; 6-passive wheel; 7-trailer wheel*/
 dJointID cjid[MAXGEOM]; /*contact joints*/
 
-short int tjflag; /*0-no trailer joint; 1-trailer joint*/
-
 REALN accel;
 REALN brake; /*acceleration and brake torques/wheel*/
 REALN spring;

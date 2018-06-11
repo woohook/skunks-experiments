@@ -374,7 +374,7 @@ dMatrix3 rotmt; /*also rotation matrix*/
 nto=*nrtyp;
 nob=*nrobt;
 
-car->tjflag=0; /*no trailer yet*/
+int tjflag=0; // no trailer yet
 
   if(!(fis=fopen(numefis,"r"))){printf("Error: File %s could not be open\r\n",numefis);exit(1);}
 s[0]='1';while(s[0]){
@@ -492,8 +492,8 @@ s[0]='1';while(s[0]){
                    err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
                    err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
                    if(car->ofc[2]!=2){printf("Error: '%s' line %d - trailer joint without trailer\r\n",numefis,lincr);exit(1);}
-                   if(car->tjflag==1){printf("Error: '%s' line %d - only one such joint allowed\r\n",numefis,lincr);exit(1);}
-                   car->tjflag=1;
+                   if(tjflag==1){printf("Error: '%s' line %d - only one such joint allowed\r\n",numefis,lincr);exit(1);}
+                   tjflag=1;
                    physics_createUniversalJoint(car->bid[1], car->bid[2],tx,ty,tz);
                    break;
 
