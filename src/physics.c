@@ -277,7 +277,7 @@ void attach_body(struct physics_instance* object, dBodyID bid)
 }
 
 /*run 1 simulation step; tstep - time step; af, bf - acceleration and brake factors*/
-void runsim(sgob** objs,int nob,vhc *car,float tstep,float vrx,float af,float bf,FILE *repf,float *timp)
+void runsim(sgob** objs,int nob,vhc *car,float tstep,float vrx,float af,float bf)
 {int i,j,k,l,m,n,nobtr, /*nobtr-number of objects in the track*/
      bcj[21]; /*bcj[i]-vehicle object to which contact joint 'i' is attached*/
 const dReal *pos,*rot,*vel;
@@ -285,7 +285,6 @@ float x0,y0,z0,pin=0,bkf=0,
       kp,kd, /*suspension coefficients*/
       kps,kds, /*steering coefficients*/
       radius,fx,fy,fz,drg=0.0005; /*drag coefficient*/
-static int rsem=0; /*when rsem==REPSTEPS, save replay data*/
 dSurfaceParameters surf1;
 dContactGeom dcgeom[21];
 dContact dcon[21];
@@ -400,25 +399,6 @@ for(i=1;i<=car->nob;i++){
   objs[j]->transform.vy[3]=objs[j]->transform.vy[0]+rot[6];
   objs[j]->transform.vz[3]=objs[j]->transform.vz[0]+rot[10];
 }
-
-*timp+=tstep;
-
-
-#if REPLAY==1
-rsem++;
-if(rsem>=REPSTEPS){
-  fprintf(repf,"%1.3f ",*timp);
-  for(i=1;i<=car->nob;i++){
-    j=car->oid[i];
-    fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[0],objs[j]->transform.vy[0],objs[j]->transform.vz[0]);
-    fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[1],objs[j]->transform.vy[1],objs[j]->transform.vz[1]);
-    fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[2],objs[j]->transform.vy[2],objs[j]->transform.vz[2]);
-    fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[3],objs[j]->transform.vy[3],objs[j]->transform.vz[3]);
-  }
-  fprintf(repf,"\r\n");
-  rsem=0;
-}
-#endif
 
 }
 

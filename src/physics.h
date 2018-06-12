@@ -35,6 +35,6 @@ void create_collision_mesh(float x1, float y1, float z1, float x2, float y2, flo
 struct physics_instance* create_collision_geometry_instance(int geomtype, float tx, float ty, float tz, float rx, float ry, float rz);
 void attach_body(struct physics_instance* object, dBodyID bid);
 
-void runsim(sgob** objs,int nob,vhc *car,float tstep,float vrx,float af,float bf,FILE *repf,float *timp);
+void runsim(sgob** objs,int nob,vhc *car,float tstep,float vrx,float af,float bf);
 
 void rdspeed(vhc *car,float *speed,float *rotspeed,float *dspeed);

@@ -77,6 +77,7 @@ int turn, /*-1: left; 0: no turn; 1: right*/
     dmode, /*1 forward, -1 reverse*/
     nstepsf; /*number of simulation steps/frame*/
 FILE *repf;
+int rsem=0; // when rsem==REPSTEPS, save replay data
 /*for game^*/
 
 
@@ -213,9 +214,26 @@ speed=0.1/realstep; /*decrease simulation speed if < 10fps*/
 if(nstepsf>(int)speed){nstepsf=(int)speed;}
 
 for(i=1;i<=nstepsf;i++){
-  runsim(objs,nob,&car,realstep,vrx,af,bf,repf,&timp);
+  runsim(objs,nob,&car,realstep,vrx,af,bf);
+  timp+=realstep;
+
+#if REPLAY==1
+  rsem++;
+  if(rsem>=REPSTEPS){
+    int j,k;
+    fprintf(repf,"%1.3f ",timp);
+    for(k=1;k<=car.nob;k++){
+      j=car.oid[k];
+      fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[0],objs[j]->transform.vy[0],objs[j]->transform.vz[0]);
+      fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[1],objs[j]->transform.vy[1],objs[j]->transform.vz[1]);
+      fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[2],objs[j]->transform.vy[2],objs[j]->transform.vz[2]);
+      fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[3],objs[j]->transform.vy[3],objs[j]->transform.vz[3]);
+    }
+    fprintf(repf,"\r\n");
+    rsem=0;
+  }
+#endif
 }
-/*^simulation - last 2 parameters are for saving replay data*/
 
 
 for(i=1;i<=nob;i++){
