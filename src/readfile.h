@@ -514,16 +514,10 @@ for(i=1;i<=car->nob;i++){
       k=1; if(car->ofc[i]==7){k=2;}
 
       (car->nj)++;
-      car->jid[car->nj]=physics_createHinge2();
+      car->jid[car->nj]=physics_createHinge2(car->bid[k],car->bid[i],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0]);
       car->bkm[car->nj]=physics_createAMotor(); // brake motor
       car->jfc[car->nj]=car->ofc[i];
-      dJointAttach(car->jid[car->nj],car->bid[k],car->bid[i]);
       dJointAttach(car->bkm[car->nj],car->bid[k],car->bid[i]);
-      dJointSetHinge2Anchor(car->jid[car->nj],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0]);
-      dJointSetHinge2Axis1(car->jid[car->nj],1,0,0);
-      dJointSetHinge2Axis2(car->jid[car->nj],0,1,0);
-        dJointSetHinge2Param(car->jid[car->nj],dParamLoStop,-0.001);
-        dJointSetHinge2Param(car->jid[car->nj],dParamHiStop,0.001); /*for axis 1*/
       dJointSetAMotorNumAxes(car->bkm[car->nj],1);
       dJointSetAMotorAxis(car->bkm[car->nj],0,2,0,1,0);
       dJointSetAMotorParam(car->bkm[car->nj],dParamVel,0);

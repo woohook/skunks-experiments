@@ -62,9 +62,17 @@ void physics_createUniversalJoint(dBodyID body1, dBodyID body2, float tx, float 
   dJointSetUniversalParam(unijoint,dParamHiStop,2.094);
 }
 
-dJointID physics_createHinge2()
+dJointID physics_createHinge2(dBodyID body1, dBodyID body2, float x, float y, float z)
 {
-  return dJointCreateHinge2(wglob,0);
+  dJointID jid = dJointCreateHinge2(wglob,0);
+  dJointAttach(jid,body1,body2);
+  dJointSetHinge2Anchor(jid,x,y,z);
+  dJointSetHinge2Axis1(jid,1,0,0);
+  dJointSetHinge2Axis2(jid,0,1,0);
+  dJointSetHinge2Param(jid,dParamLoStop,-0.001);
+  dJointSetHinge2Param(jid,dParamHiStop,0.001); // for axis 1
+
+  return jid;
 }
 
 dJointID physics_createAMotor()

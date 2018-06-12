@@ -24,7 +24,7 @@ void physics_setGravity(float gravity);
 
 dBodyID physics_createBody();
 void physics_createUniversalJoint(dBodyID body1, dBodyID body2, float tx, float ty, float tz);
-dJointID physics_createHinge2();
+dJointID physics_createHinge2(dBodyID body1, dBodyID body2, float x, float y, float z);
 dJointID physics_createAMotor();
 
 void create_collision_geometry();
