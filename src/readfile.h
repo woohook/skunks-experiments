@@ -515,13 +515,8 @@ for(i=1;i<=car->nob;i++){
 
       (car->nj)++;
       car->jid[car->nj]=physics_createHinge2(car->bid[k],car->bid[i],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0]);
-      car->bkm[car->nj]=physics_createAMotor(); // brake motor
+      car->bkm[car->nj]=physics_createAMotor(car->bid[k],car->bid[i],car->brake); // brake motor
       car->jfc[car->nj]=car->ofc[i];
-      dJointAttach(car->bkm[car->nj],car->bid[k],car->bid[i]);
-      dJointSetAMotorNumAxes(car->bkm[car->nj],1);
-      dJointSetAMotorAxis(car->bkm[car->nj],0,2,0,1,0);
-      dJointSetAMotorParam(car->bkm[car->nj],dParamVel,0);
-      dJointSetAMotorParam(car->bkm[car->nj],dParamFMax,0.01*car->brake);
   }
 }
 /*^set joints*/

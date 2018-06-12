@@ -75,9 +75,16 @@ dJointID physics_createHinge2(dBodyID body1, dBodyID body2, float x, float y, fl
   return jid;
 }
 
-dJointID physics_createAMotor()
+dJointID physics_createAMotor(dBodyID body1, dBodyID body2, float max_acceleration)
 {
-  return dJointCreateAMotor(wglob,0);
+  dJointID jid = dJointCreateAMotor(wglob,0);
+  dJointAttach(jid,body1,body2);
+  dJointSetAMotorNumAxes(jid,1);
+  dJointSetAMotorAxis(jid,0,2,0,1,0);
+  dJointSetAMotorParam(jid,dParamVel,0);
+  dJointSetAMotorParam(jid,dParamFMax,0.01*max_acceleration);
+
+  return jid;
 }
 
 void create_collision_geometry()
