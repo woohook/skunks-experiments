@@ -301,8 +301,7 @@ struct physics_instance* create_collision_geometry_instance(int geomtype, float 
 
 /*run 1 simulation step; tstep - time step; af, bf - acceleration and brake factors*/
 void runsim(sgob** objs,int nob,vhc *car,float tstep,float vrx,float af,float bf)
-{int i,j,k,l,m,n,nobtr, /*nobtr-number of objects in the track*/
-     bcj[21]; /*bcj[i]-vehicle object to which contact joint 'i' is attached*/
+{int i,j,k,l,m,n,nobtr; /*nobtr-number of objects in the track*/
 const dReal *pos,*rot,*vel;
 float x0,y0,z0,pin=0,bkf=0,
       kp,kd, /*suspension coefficients*/
@@ -343,19 +342,18 @@ for(i=1;i<=nobtr;i++){
         for(m=1;m<=(refglob[objs[i]->physics_object->gtip].nref/2);m++){
           n=dCollide(objs[k]->physics_object->gid[l],objs[i]->physics_object->gid[m],1,&dcgeom[car->ncj+1],sizeof(dContactGeom));
           (car->ncj)+=n;
-          if(n){bcj[car->ncj]=j;}
+          if(n)
+          {
+            dcon[car->ncj].surface=surf1;
+            dcon[car->ncj].geom=dcgeom[car->ncj];
+            car->cjid[car->ncj]=dJointCreateContact(wglob,0,&dcon[car->ncj]);
+            dJointAttach(car->cjid[car->ncj],car->bid[j],0);
+          }
         }
       }
     }
   }
 } /*created dContactGeom structures*/
-
-for(i=1;i<=(car->ncj);i++){
-  dcon[i].surface=surf1;
-  dcon[i].geom=dcgeom[i];
-  car->cjid[i]=dJointCreateContact(wglob,0,&dcon[i]);
-  dJointAttach(car->cjid[i],car->bid[bcj[i]],0);
-}
 
 pin=af*car->accel;
 
