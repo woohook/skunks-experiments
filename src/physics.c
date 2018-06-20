@@ -31,6 +31,9 @@ dWorldID wglob; // world for ODE
 refpo *refglob; // array with reference points of object types
 int refcount = 0;
 
+struct physics_instance** physics_instances = 0;
+int physics_instance_count = 0;
+
 void physics_init()
 {
   dInitODE();
@@ -276,6 +279,10 @@ struct physics_instance* create_collision_geometry_instance(int geomtype, float 
     rotmt[8]=iz; rotmt[9]=jz; rotmt[10]=kz; rotmt[11]=0;
     dGeomSetRotation(object->gid[j],rotmt);
   }
+
+  physics_instance_count++;
+  physics_instances = (struct physics_instance**)realloc(physics_instances, physics_instance_count*sizeof(struct physics_instance*));
+  physics_instances[physics_instance_count-1] = object;
 
   return object;
 }
