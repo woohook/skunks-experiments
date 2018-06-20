@@ -23,6 +23,7 @@ struct physics_instance
   // geoms for collision; axis z of geom[i] is defined by
   //   (x[i*2-1],y[i*2-1],z[i*2-1]) and (x[i*2],y[i*2],z[i*2])
   dGeomID gid[MAXGEOM];
+  dBodyID bodyID;
 };
 
 dJointID unijoint = 0; // single universal joint
@@ -62,9 +63,19 @@ void physics_setGravity(float gravity)
   dWorldSetGravity(wglob,gravity,0,0);
 }
 
-dBodyID physics_createBody()
+dBodyID physics_createBody(struct physics_instance* object)
 {
-  return dBodyCreate(wglob);
+  int i;
+  dBodyID bid = dBodyCreate(wglob);
+
+  for(i=1;i<=refglob[object->gtip].nref/2;i++)
+  {
+    dGeomSetBody(object->gid[i],bid);
+  }
+
+  object->bodyID = bid;
+
+  return bid;
 }
 
 void physics_createUniversalJoint(dBodyID body1, dBodyID body2, float tx, float ty, float tz)
@@ -194,6 +205,7 @@ struct physics_instance* create_collision_geometry_instance(int geomtype, float 
   float ix, iy, iz, jx, jy, jz, kx, ky, kz, len;
   dMatrix3 rotmt; // ODE rotation matrix
   struct physics_instance* object = (struct physics_instance*)malloc(sizeof(struct physics_instance));
+  object->bodyID = 0;
 
   // data for triangle meshes used at curved road elements
   dTriMeshDataID trid[5];
@@ -285,15 +297,6 @@ struct physics_instance* create_collision_geometry_instance(int geomtype, float 
   physics_instances[physics_instance_count-1] = object;
 
   return object;
-}
-
-void attach_body(struct physics_instance* object, dBodyID bid)
-{
-  int i;
-  for(i=1;i<=refglob[object->gtip].nref/2;i++)
-  {
-    dGeomSetBody(object->gid[i],bid);
-  }
 }
 
 /*run 1 simulation step; tstep - time step; af, bf - acceleration and brake factors*/

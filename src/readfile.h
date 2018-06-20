@@ -435,9 +435,7 @@ s[0]='1';while(s[0]){
 
                     objs[i]->physics_object = create_collision_geometry_instance(objs[i]->otyp, tx, ty, tz, 0, 0, 0);
 
-	            car->bid[k]=physics_createBody();
-
-                    attach_body(objs[i]->physics_object, car->bid[k]);
+	            car->bid[k] = physics_createBody(objs[i]->physics_object);
 
 	            if((car->ofc[k])>=2){dBodySetFiniteRotationMode(car->bid[k],1);} /*for wheels*/
 
