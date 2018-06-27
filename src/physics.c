@@ -22,6 +22,7 @@ struct physics_instance
   int gtip;
   // geoms for collision; axis z of geom[i] is defined by
   //   (x[i*2-1],y[i*2-1],z[i*2-1]) and (x[i*2],y[i*2],z[i*2])
+  int gid_count;
   dGeomID gid[MAXGEOM];
   dBodyID bodyID;
 };
@@ -206,6 +207,7 @@ struct physics_instance* create_collision_geometry_instance(int geomtype, float 
   dMatrix3 rotmt; // ODE rotation matrix
   struct physics_instance* object = (struct physics_instance*)malloc(sizeof(struct physics_instance));
   object->bodyID = 0;
+  object->gid_count = 1;
 
   // data for triangle meshes used at curved road elements
   dTriMeshDataID trid[5];
@@ -259,6 +261,7 @@ struct physics_instance* create_collision_geometry_instance(int geomtype, float 
         exit(1);
         break;
     }
+    object->gid_count++;
 
     dGeomSetPosition(object->gid[j], xref1, yref1, zref1);
 
