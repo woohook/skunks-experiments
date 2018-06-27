@@ -303,8 +303,8 @@ struct physics_instance* create_collision_geometry_instance(int geomtype, float 
 }
 
 /*run 1 simulation step; tstep - time step; af, bf - acceleration and brake factors*/
-void runsim(sgob** objs,int nob,vhc *car,float tstep,float vrx,float af,float bf)
-{int i,j,k,l,m,n,nobtr; /*nobtr-number of objects in the track*/
+void runsim(sgob** objs,vhc *car,float tstep,float vrx,float af,float bf)
+{int i,j,k,l,m,n;
 const dReal *pos,*rot,*vel;
 float x0,y0,z0,pin=0,bkf=0,
       kp,kd, /*suspension coefficients*/
@@ -321,7 +321,6 @@ surf1.bounce_vel=0.1;
 surf1.soft_erp=tstep*10000/(tstep*10000+100);
 surf1.soft_cfm=1/(tstep*10000+100);
 
-nobtr=nob-car->nob;
 car->ncj=0; /*number of contact joints*/
 
 kp=car->spring;
@@ -335,28 +334,39 @@ for(i=1;i<=car->nob;i++){
   }
 }
 
+// creating dContactGeom structures
 pos=dBodyGetPosition(car->bid[1]); x0=pos[0]; y0=pos[1]; z0=pos[2];
-
-for(i=1;i<=nobtr;i++){
-  if((fabs(objs[i]->transform.vx[0]-x0)<50) && (fabs(objs[i]->transform.vy[0]-y0)<50) && (fabs(objs[i]->transform.vz[0]-z0)<50)){
-    for(j=1;j<=car->nob;j++){
-      k=car->oid[j];
-      for(l=1;l<=(refglob[objs[k]->physics_object->gtip].nref/2);l++){
-        for(m=1;m<=(refglob[objs[i]->physics_object->gtip].nref/2);m++){
-          n=dCollide(objs[k]->physics_object->gid[l],objs[i]->physics_object->gid[m],1,&dcgeom[car->ncj+1],sizeof(dContactGeom));
-          (car->ncj)+=n;
-          if(n)
+for(i=0;i<physics_instance_count;i++)
+{
+  if(physics_instances[i]->bodyID==0)
+  {
+    for(k=0;k<physics_instance_count;k++)
+    {
+      if(physics_instances[k]->bodyID!=0)
+      {
+        for(m=1;m < physics_instances[i]->gid_count;m++)
+        {
+          pos = dGeomGetPosition(physics_instances[i]->gid[m]);
+          if((fabs(pos[0]-x0)<50) && (fabs(pos[1]-y0)<50) && (fabs(pos[2]-z0)<50))
           {
-            dcon[car->ncj].surface=surf1;
-            dcon[car->ncj].geom=dcgeom[car->ncj];
-            car->cjid[car->ncj]=dJointCreateContact(wglob,0,&dcon[car->ncj]);
-            dJointAttach(car->cjid[car->ncj],car->bid[j],0);
+            for(l=1;l < physics_instances[k]->gid_count;l++)
+            {
+              n=dCollide(physics_instances[k]->gid[l],physics_instances[i]->gid[m],1,&dcgeom[car->ncj+1],sizeof(dContactGeom));
+              (car->ncj)+=n;
+              if(n)
+              {
+                dcon[car->ncj].surface=surf1;
+                dcon[car->ncj].geom=dcgeom[car->ncj];
+                car->cjid[car->ncj]=dJointCreateContact(wglob,0,&dcon[car->ncj]);
+                dJointAttach(car->cjid[car->ncj],physics_instances[k]->bodyID,0);
+              }
+            }
           }
         }
       }
     }
   }
-} /*created dContactGeom structures*/
+}
 
 pin=af*car->accel;
 
