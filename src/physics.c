@@ -315,6 +315,8 @@ float x0,y0,z0,pin=0,bkf=0,
 dSurfaceParameters surf1;
 dContactGeom dcgeom[21];
 dContact dcon[21];
+int ncj = 0;                // number of contact joints
+dJointID cjid[MAXGEOM]; // contact joints
 
 surf1.mode=dContactBounce|dContactSoftERP|dContactSoftCFM|dContactApprox1;
 surf1.mu=car->mu;
@@ -322,8 +324,6 @@ surf1.bounce=0.5;
 surf1.bounce_vel=0.1;
 surf1.soft_erp=tstep*10000/(tstep*10000+100);
 surf1.soft_cfm=1/(tstep*10000+100);
-
-car->ncj=0; /*number of contact joints*/
 
 kp=car->spring;
 kd=car->damper;
@@ -351,14 +351,14 @@ for(i=0;i<dynStart;i++)
         {
           for(l=1;l < physics_instances[k]->gid_count;l++)
           {
-            n=dCollide(physics_instances[k]->gid[l],physics_instances[i]->gid[m],1,&dcgeom[car->ncj+1],sizeof(dContactGeom));
-            (car->ncj)+=n;
+            n=dCollide(physics_instances[k]->gid[l],physics_instances[i]->gid[m],1,&dcgeom[ncj+1],sizeof(dContactGeom));
+            (ncj)+=n;
             if(n)
             {
-              dcon[car->ncj].surface=surf1;
-              dcon[car->ncj].geom=dcgeom[car->ncj];
-              car->cjid[car->ncj]=dJointCreateContact(wglob,0,&dcon[car->ncj]);
-              dJointAttach(car->cjid[car->ncj],physics_instances[k]->bodyID,0);
+              dcon[ncj].surface=surf1;
+              dcon[ncj].geom=dcgeom[ncj];
+              cjid[ncj]=dJointCreateContact(wglob,0,&dcon[ncj]);
+              dJointAttach(cjid[ncj],physics_instances[k]->bodyID,0);
             }
           }
         }
@@ -407,9 +407,9 @@ for(i=1;i<=car->nob;i++){
 
 dWorldQuickStep(wglob,tstep);
 
-for(i=1;i<=(car->ncj);i++){
-  dJointDestroy(car->cjid[i]);
-} car->ncj=0;
+for(i=1;i<=(ncj);i++){
+  dJointDestroy(cjid[i]);
+} ncj=0;
 
 for(i=1;i<=car->nob;i++){
   j=car->oid[i];

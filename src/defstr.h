@@ -41,7 +41,6 @@ REALN mu; /*friction*/
 typedef struct _vhc
 {int nob; /*number of objects in vehicle*/
 int nj; /*number of permanent joints*/
-int ncj; /*number of contact joints*/
 
 int oid[MAXGEOM]; /*number of object (rendering and collision) in 'objs' array from 'simcar.c'*/
 dMass mass[MAXGEOM];
@@ -52,7 +51,6 @@ dJointID bkm[MAXGEOM]; /*brake motors*/
 int jfc[MAXGEOM]; /*function of object attached to joint (see 'ofc' below)*/
 int ofc[MAXGEOM]; /*object function: 1-car; 2-trailer; 3-motor wheel; 4-steering wheel;
                     5-motor and steering wheel; 6-passive wheel; 7-trailer wheel*/
-dJointID cjid[MAXGEOM]; /*contact joints*/
 
 REALN accel;
 REALN brake; /*acceleration and brake torques/wheel*/
