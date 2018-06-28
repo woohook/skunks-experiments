@@ -446,27 +446,21 @@ s[0]='1';while(s[0]){
 	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s); /*box lengths*/
 	                      dMassSetBoxTotal(&(car->mass[k]),len,tx,ty,tz);
-	                      dBodySetMass(car->bid[k],&(car->mass[k]));
-	                      dBodySetPosition(car->bid[k],objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0]);
-	                        rotmt[0]=1; rotmt[1]=0; rotmt[2]=0; rotmt[3]=0;
-                                rotmt[4]=0; rotmt[5]=1; rotmt[6]=0; rotmt[7]=0;
-                                rotmt[8]=0; rotmt[9]=0; rotmt[10]=1; rotmt[11]=0;
-                              dBodySetRotation(car->bid[k],rotmt);
                               break;
 
 	              case 3: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); len=atof(s); /*mass*/
 	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s); /*sphere radius*/
 	                      dMassSetSphereTotal(&(car->mass[k]),len,tx);
-	                      dBodySetMass(car->bid[k],&(car->mass[k]));
-	                      dBodySetPosition(car->bid[k],objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0]);
-	                        rotmt[0]=1; rotmt[1]=0; rotmt[2]=0; rotmt[3]=0;
-                                rotmt[4]=0; rotmt[5]=1; rotmt[6]=0; rotmt[7]=0;
-                                rotmt[8]=0; rotmt[9]=0; rotmt[10]=1; rotmt[11]=0;
-                              dBodySetRotation(car->bid[k],rotmt);
                               break;
 
                       default: if(s[0]){printf("Error: '%s' line %d - word '%s' not recognized\r\n",numefis,lincr,s);exit(1);}
 	            }
+                    dBodySetMass(car->bid[k],&(car->mass[k]));
+                    dBodySetPosition(car->bid[k],objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0]);
+                      rotmt[0]=1; rotmt[1]=0; rotmt[2]=0; rotmt[3]=0;
+                      rotmt[4]=0; rotmt[5]=1; rotmt[6]=0; rotmt[7]=0;
+                      rotmt[8]=0; rotmt[9]=0; rotmt[10]=1; rotmt[11]=0;
+                    dBodySetRotation(car->bid[k],rotmt);
 	            /*^set mass parameters*/
 	          }
 	          break;
