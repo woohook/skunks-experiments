@@ -8,9 +8,9 @@ void physics_setCFM(float cfm);
 void physics_setGravity(float gravity);
 
 void physics_createBody(struct physics_instance* physics_object);
-void physics_createUniversalJoint(dBodyID body1, dBodyID body2, float tx, float ty, float tz);
-dJointID physics_createHinge2(dBodyID body1, dBodyID body2, float x, float y, float z);
-dJointID physics_createAMotor(dBodyID body1, dBodyID body2, float max_acceleration);
+void physics_createUniversalJoint(struct physics_instance* object1, struct physics_instance* object2, float tx, float ty, float tz);
+dJointID physics_createHinge2(struct physics_instance* object1, struct physics_instance* object2, float x, float y, float z);
+dJointID physics_createAMotor(struct physics_instance* object1, struct physics_instance* object2, float max_acceleration);
 
 void create_collision_geometry();
 void create_collision_box(float x1, float y1, float z1, float x2, float y2, float z2, float lx, float ly, float lz);
