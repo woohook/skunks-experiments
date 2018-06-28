@@ -433,8 +433,9 @@ s[0]='1';while(s[0]){
  	              translat(objs[i],tx,ty,tz);
 
                     objs[i]->physics_object = create_collision_geometry_instance(objs[i]->otyp, tx, ty, tz, 0, 0, 0);
+                    car->parts[k] = objs[i]->physics_object;
 
-	            car->bid[k] = physics_createBody(objs[i]->physics_object);
+	            physics_createBody(objs[i]->physics_object);
 
 	            if((car->ofc[k])>=2){dBodySetFiniteRotationMode(car->bid[k],1);} /*for wheels*/
 
@@ -481,7 +482,7 @@ s[0]='1';while(s[0]){
                    if(car->ofc[2]!=2){printf("Error: '%s' line %d - trailer joint without trailer\r\n",numefis,lincr);exit(1);}
                    if(tjflag==1){printf("Error: '%s' line %d - only one such joint allowed\r\n",numefis,lincr);exit(1);}
                    tjflag=1;
-                   physics_createUniversalJoint(car->bid[1], car->bid[2],tx,ty,tz);
+                   physics_createUniversalJoint(car->parts[1], car->parts[2],tx,ty,tz);
                    break;
 
           case 11: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->camh=atof(s);
@@ -501,8 +502,8 @@ for(i=1;i<=car->nob;i++){
       k=1; if(car->ofc[i]==7){k=2;}
 
       (car->nj)++;
-      car->jid[car->nj]=physics_createHinge2(car->bid[k],car->bid[i],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0]);
-      car->bkm[car->nj]=physics_createAMotor(car->bid[k],car->bid[i],car->brake); // brake motor
+      car->jid[car->nj]=physics_createHinge2(car->parts[k],car->parts[i],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0]);
+      car->bkm[car->nj]=physics_createAMotor(car->parts[k],car->parts[i],car->brake); // brake motor
       car->jfc[car->nj]=car->ofc[i];
   }
 }
