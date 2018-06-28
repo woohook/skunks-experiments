@@ -69,12 +69,19 @@ dBodyID physics_createBody(struct physics_instance* object)
 {
   int i;
   dBodyID bid = dBodyCreate(wglob);
+  dMatrix3 rotmt; // rotation matrix
+
   if(dynStart==0) dynStart = physics_instance_count-1;
 
   for(i=1;i<=refglob[object->gtip].nref/2;i++)
   {
     dGeomSetBody(object->gid[i],bid);
   }
+
+  rotmt[0]=1; rotmt[1]=0; rotmt[2]=0; rotmt[3]=0;
+  rotmt[4]=0; rotmt[5]=1; rotmt[6]=0; rotmt[7]=0;
+  rotmt[8]=0; rotmt[9]=0; rotmt[10]=1; rotmt[11]=0;
+  dBodySetRotation(bid,rotmt);
 
   object->bodyID = bid;
 

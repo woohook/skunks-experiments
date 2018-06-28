@@ -369,7 +369,6 @@ FILE *fis;
 int i,k,nto,nob; /*number of object types and number of objects*/
 REALN tx,ty,tz, /*initial translations*/
       len;
-dMatrix3 rotmt; /*also rotation matrix*/
 
 nto=*nrtyp;
 nob=*nrobt;
@@ -457,10 +456,6 @@ s[0]='1';while(s[0]){
 	            }
                     dBodySetMass(car->bid[k],&(car->mass[k]));
                     dBodySetPosition(car->bid[k],objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0]);
-                      rotmt[0]=1; rotmt[1]=0; rotmt[2]=0; rotmt[3]=0;
-                      rotmt[4]=0; rotmt[5]=1; rotmt[6]=0; rotmt[7]=0;
-                      rotmt[8]=0; rotmt[9]=0; rotmt[10]=1; rotmt[11]=0;
-                    dBodySetRotation(car->bid[k],rotmt);
 	            /*^set mass parameters*/
 	          }
 	          break;
