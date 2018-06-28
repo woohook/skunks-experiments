@@ -86,10 +86,10 @@ void physics_createBody(struct physics_instance* object)
   object->bodyID = bid;
 }
 
-void physics_createUniversalJoint(dBodyID body1, dBodyID body2, float tx, float ty, float tz)
+void physics_createUniversalJoint(struct physics_instance* object1, struct physics_instance* object2, float tx, float ty, float tz)
 {
   unijoint = dJointCreateUniversal(wglob,0);
-  dJointAttach(unijoint,body1, body2);
+  dJointAttach(unijoint,object1->bodyID, object2->bodyID);
   dJointSetUniversalAnchor(unijoint,tx,ty,tz);
   dJointSetUniversalAxis1(unijoint,1.0,0.0,0.0);
   dJointSetUniversalAxis2(unijoint,0.0,1.0,0.0);
@@ -97,10 +97,10 @@ void physics_createUniversalJoint(dBodyID body1, dBodyID body2, float tx, float 
   dJointSetUniversalParam(unijoint,dParamHiStop,2.094);
 }
 
-dJointID physics_createHinge2(dBodyID body1, dBodyID body2, float x, float y, float z)
+dJointID physics_createHinge2(struct physics_instance* object1, struct physics_instance* object2, float x, float y, float z)
 {
   dJointID jid = dJointCreateHinge2(wglob,0);
-  dJointAttach(jid,body1,body2);
+  dJointAttach(jid,object1->bodyID,object2->bodyID);
   dJointSetHinge2Anchor(jid,x,y,z);
   dJointSetHinge2Axis1(jid,1,0,0);
   dJointSetHinge2Axis2(jid,0,1,0);
@@ -110,10 +110,10 @@ dJointID physics_createHinge2(dBodyID body1, dBodyID body2, float x, float y, fl
   return jid;
 }
 
-dJointID physics_createAMotor(dBodyID body1, dBodyID body2, float max_acceleration)
+dJointID physics_createAMotor(struct physics_instance* object1, struct physics_instance* object2, float max_acceleration)
 {
   dJointID jid = dJointCreateAMotor(wglob,0);
-  dJointAttach(jid,body1,body2);
+  dJointAttach(jid,object1->bodyID,object2->bodyID);
   dJointSetAMotorNumAxes(jid,1);
   dJointSetAMotorAxis(jid,0,2,0,1,0);
   dJointSetAMotorParam(jid,dParamVel,0);
@@ -336,13 +336,13 @@ kps=150; kds=5;
 
 for(i=1;i<=car->nob;i++){
   if((car->ofc[i])>=2){
-    rot=dBodyGetRotation(car->bid[i]);
-    dBodySetFiniteRotationAxis(car->bid[i],rot[1],rot[5],rot[9]);
+    rot=dBodyGetRotation(car->parts[i]->bodyID);
+    dBodySetFiniteRotationAxis(car->parts[i]->bodyID,rot[1],rot[5],rot[9]);
   }
 }
 
 // creating dContactGeom structures
-pos=dBodyGetPosition(car->bid[1]); x0=pos[0]; y0=pos[1]; z0=pos[2];
+pos=dBodyGetPosition(car->parts[1]->bodyID); x0=pos[0]; y0=pos[1]; z0=pos[2];
 for(i=0;i<dynStart;i++)
 {
   if(physics_instances[i]->gid_count>1)
@@ -401,12 +401,12 @@ for(i=1;i<=car->nj;i++){
 
 for(i=1;i<=car->nob;i++){
   radius=objs[car->oid[i]]->radius; radius*=radius;
-  vel=dBodyGetLinearVel(car->bid[i]);
+  vel=dBodyGetLinearVel(car->parts[i]->bodyID);
   if((fabs(vel[0])+fabs(vel[1])+fabs(vel[2]))>1){
     fx=-drg*radius*vel[0]*fabs(vel[0]);
     fy=-drg*radius*vel[1]*fabs(vel[1]);
     fz=-drg*radius*vel[2]*fabs(vel[2]);
-    dBodyAddForce(car->bid[i],fx,fy,fz);
+    dBodyAddForce(car->parts[i]->bodyID,fx,fy,fz);
   }
 } /*air resistance*/
 
@@ -418,8 +418,8 @@ for(i=1;i<=(ncj);i++){
 
 for(i=1;i<=car->nob;i++){
   j=car->oid[i];
-  pos=dBodyGetPosition(car->bid[i]);
-  rot=dBodyGetRotation(car->bid[i]);
+  pos=dBodyGetPosition(car->parts[i]->bodyID);
+  rot=dBodyGetRotation(car->parts[i]->bodyID);
 
   objs[j]->transform.vx[0]=pos[0];
   objs[j]->transform.vy[0]=pos[1];
@@ -448,7 +448,7 @@ const dReal *spe,*rot;
 static float spe0[3]={0,0,0};
 float dspe[3];
 
-spe=dBodyGetLinearVel(car->bid[1]);
+spe=dBodyGetLinearVel(car->parts[1]->bodyID);
 
 dspe[0]=spe[0]-spe0[0];
 dspe[1]=spe[1]-spe0[1];
@@ -464,7 +464,7 @@ spe0[0]=spe[0]; spe0[1]=spe[1]; spe0[2]=spe[2];
 
 for(i=1;i<=car->nob;i++){
   if((car->ofc[i]==3)||(car->ofc[i]==5)){ n++;
-    rot=dBodyGetAngularVel(car->bid[i]);
+    rot=dBodyGetAngularVel(car->parts[i]->bodyID);
     (*rotspeed)+=sqrt(rot[0]*rot[0]+rot[1]*rot[1]+rot[2]*rot[2]);
   }
 }
