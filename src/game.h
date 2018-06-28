@@ -19,11 +19,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /*set camera*/
 void setcamg(sgob *camera,vhc *car,int flag)
-{const dReal *pos,*rot;
+{
+float pos[3];
+float rot[12];
 REALN x0,y0,z0,a,h,d;
 
-pos=dBodyGetPosition(car->bid[1]);
-rot=dBodyGetRotation(car->bid[1]);
+physics_getBodyPosition(car->parts[1], &pos[0], &pos[1], &pos[2]);
+physics_getBodyRotation(car->parts[1], &rot[0], &rot[1], &rot[2], &rot[3]
+                                     , &rot[4], &rot[5], &rot[6], &rot[7]
+                                     , &rot[8], &rot[9], &rot[10], &rot[11]);
 
 switch(flag){
   case 1: a=0.57;

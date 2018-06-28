@@ -456,7 +456,7 @@ s[0]='1';while(s[0]){
                       default: if(s[0]){printf("Error: '%s' line %d - word '%s' not recognized\r\n",numefis,lincr,s);exit(1);}
 	            }
                     dBodySetMass(car->bid[k],&(car->mass[k]));
-                    dBodySetPosition(car->bid[k],objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0]);
+                    physics_setBodyPosition(car->parts[k],objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0]);
 	            /*^set mass parameters*/
 	          }
 	          break;
