@@ -32,6 +32,7 @@ dJointID unijoint = 0; // single universal joint
 dWorldID wglob; // world for ODE
 refpo *refglob; // array with reference points of object types
 int refcount = 0;
+int dynStart = 0;
 
 struct physics_instance** physics_instances = 0;
 int physics_instance_count = 0;
@@ -68,6 +69,7 @@ dBodyID physics_createBody(struct physics_instance* object)
 {
   int i;
   dBodyID bid = dBodyCreate(wglob);
+  if(dynStart==0) dynStart = physics_instance_count-1;
 
   for(i=1;i<=refglob[object->gtip].nref/2;i++)
   {
@@ -336,30 +338,27 @@ for(i=1;i<=car->nob;i++){
 
 // creating dContactGeom structures
 pos=dBodyGetPosition(car->bid[1]); x0=pos[0]; y0=pos[1]; z0=pos[2];
-for(i=0;i<physics_instance_count;i++)
+for(i=0;i<dynStart;i++)
 {
-  if(physics_instances[i]->bodyID==0)
+  if(physics_instances[i]->gid_count>1)
   {
-    for(k=0;k<physics_instance_count;k++)
+    pos = dGeomGetPosition(physics_instances[i]->gid[1]);
+    if((fabs(pos[0]-x0)<50) && (fabs(pos[1]-y0)<50) && (fabs(pos[2]-z0)<50))
     {
-      if(physics_instances[k]->bodyID!=0)
+      for(k=dynStart;k<physics_instance_count;k++)
       {
         for(m=1;m < physics_instances[i]->gid_count;m++)
         {
-          pos = dGeomGetPosition(physics_instances[i]->gid[m]);
-          if((fabs(pos[0]-x0)<50) && (fabs(pos[1]-y0)<50) && (fabs(pos[2]-z0)<50))
+          for(l=1;l < physics_instances[k]->gid_count;l++)
           {
-            for(l=1;l < physics_instances[k]->gid_count;l++)
+            n=dCollide(physics_instances[k]->gid[l],physics_instances[i]->gid[m],1,&dcgeom[car->ncj+1],sizeof(dContactGeom));
+            (car->ncj)+=n;
+            if(n)
             {
-              n=dCollide(physics_instances[k]->gid[l],physics_instances[i]->gid[m],1,&dcgeom[car->ncj+1],sizeof(dContactGeom));
-              (car->ncj)+=n;
-              if(n)
-              {
-                dcon[car->ncj].surface=surf1;
-                dcon[car->ncj].geom=dcgeom[car->ncj];
-                car->cjid[car->ncj]=dJointCreateContact(wglob,0,&dcon[car->ncj]);
-                dJointAttach(car->cjid[car->ncj],physics_instances[k]->bodyID,0);
-              }
+              dcon[car->ncj].surface=surf1;
+              dcon[car->ncj].geom=dcgeom[car->ncj];
+              car->cjid[car->ncj]=dJointCreateContact(wglob,0,&dcon[car->ncj]);
+              dJointAttach(car->cjid[car->ncj],physics_instances[k]->bodyID,0);
             }
           }
         }
