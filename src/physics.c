@@ -65,7 +65,7 @@ void physics_setGravity(float gravity)
   dWorldSetGravity(wglob,gravity,0,0);
 }
 
-dBodyID physics_createBody(struct physics_instance* object)
+void physics_createBody(struct physics_instance* object)
 {
   int i;
   dBodyID bid = dBodyCreate(wglob);
@@ -84,8 +84,6 @@ dBodyID physics_createBody(struct physics_instance* object)
   dBodySetRotation(bid,rotmt);
 
   object->bodyID = bid;
-
-  return bid;
 }
 
 void physics_createUniversalJoint(dBodyID body1, dBodyID body2, float tx, float ty, float tz)

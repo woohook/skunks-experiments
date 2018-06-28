@@ -7,7 +7,7 @@ void physics_setERP(float erp);
 void physics_setCFM(float cfm);
 void physics_setGravity(float gravity);
 
-dBodyID physics_createBody(struct physics_instance* physics_object);
+void physics_createBody(struct physics_instance* physics_object);
 void physics_createUniversalJoint(dBodyID body1, dBodyID body2, float tx, float ty, float tz);
 dJointID physics_createHinge2(dBodyID body1, dBodyID body2, float x, float y, float z);
 dJointID physics_createAMotor(dBodyID body1, dBodyID body2, float max_acceleration);
