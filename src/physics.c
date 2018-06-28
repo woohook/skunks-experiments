@@ -86,6 +86,33 @@ void physics_createBody(struct physics_instance* object)
   object->bodyID = bid;
 }
 
+void physics_getBodyPosition(struct physics_instance* object, float* x, float* y, float* z)
+{
+  const dReal* pos;
+
+  pos = dBodyGetPosition(object->bodyID);
+
+  *x = pos[0];
+  *y = pos[1];
+  *z = pos[2];
+}
+
+void physics_setBodyPosition(struct physics_instance* object, float x, float y, float z)
+{
+  dBodySetPosition(object->bodyID, x,y,z);
+}
+
+void physics_getBodyRotation(struct physics_instance* object, float* rot0, float* rot1, float* rot2, float* rot3, float* rot4, float* rot5, float* rot6, float* rot7, float* rot8, float* rot9, float* rot10, float* rot11)
+{
+  const dReal* rot;
+
+  rot = dBodyGetRotation(object->bodyID);
+
+  *rot0 = rot[0]; *rot1 = rot[1]; *rot2  = rot[2];  *rot3  = rot[3];
+  *rot4 = rot[4]; *rot5 = rot[5]; *rot6  = rot[6];  *rot7  = rot[7];
+  *rot8 = rot[8]; *rot9 = rot[9]; *rot10 = rot[10]; *rot11 = rot[11];
+}
+
 void physics_createUniversalJoint(struct physics_instance* object1, struct physics_instance* object2, float tx, float ty, float tz)
 {
   unijoint = dJointCreateUniversal(wglob,0);
