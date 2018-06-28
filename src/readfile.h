@@ -437,8 +437,6 @@ s[0]='1';while(s[0]){
 
 	            physics_createBody(objs[i]->physics_object);
 
-	            if((car->ofc[k])>=2){dBodySetFiniteRotationMode(car->bid[k],1);} /*for wheels*/
-
 	            if(!(err=fisgetw(fis,s,&lincr))){afermex(numefis,lincr,s,1);}
 	            switch(identcmg(s)){
 	              case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); len=atof(s); /*mass*/
