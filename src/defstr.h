@@ -34,7 +34,6 @@ matrix transform; /*directions of local axes in global coordinates - v[1]=i, v[2
                and centres; triangles are calculated from vx, vy and vz at rendering*/
 int lev; /*level*/
 struct physics_instance* physics_object;
-REALN mu; /*friction*/
 } sgob; /*3d object*/
 
 
