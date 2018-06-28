@@ -25,6 +25,7 @@ struct physics_instance
   int gid_count;
   dGeomID gid[MAXGEOM];
   dBodyID bodyID;
+  dMass mass;
 };
 
 dJointID unijoint = 0; // single universal joint
@@ -111,6 +112,23 @@ void physics_getBodyRotation(struct physics_instance* object, float* rot0, float
   *rot0 = rot[0]; *rot1 = rot[1]; *rot2  = rot[2];  *rot3  = rot[3];
   *rot4 = rot[4]; *rot5 = rot[5]; *rot6  = rot[6];  *rot7  = rot[7];
   *rot8 = rot[8]; *rot9 = rot[9]; *rot10 = rot[10]; *rot11 = rot[11];
+}
+
+void physics_setBodyMass(struct physics_instance* object, float mass, int distribution, float x, float y, float z)
+{
+  switch(distribution)
+  {
+    case 1:
+      dMassSetBoxTotal(&object->mass,mass,x,y,z);
+      break;
+    case 3:
+      dMassSetSphereTotal(&object->mass,mass,x);
+      break;
+    default:
+      return;
+      break;
+  }
+  dBodySetMass(object->bodyID,&object->mass);
 }
 
 void physics_createUniversalJoint(struct physics_instance* object1, struct physics_instance* object2, float tx, float ty, float tz)

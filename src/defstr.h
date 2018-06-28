@@ -42,7 +42,6 @@ typedef struct _vhc
 int nj; /*number of permanent joints*/
 
 int oid[MAXGEOM]; /*number of object (rendering and collision) in 'objs' array from 'simcar.c'*/
-dMass mass[MAXGEOM];
 struct physics_instance* parts[MAXGEOM];
 dJointID jid[MAXGEOM]; /*permanent joints*/
 dJointID bkm[MAXGEOM]; /*brake motors*/
