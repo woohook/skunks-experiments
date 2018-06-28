@@ -437,23 +437,28 @@ s[0]='1';while(s[0]){
 
 	            physics_createBody(objs[i]->physics_object);
 
-	            if(!(err=fisgetw(fis,s,&lincr))){afermex(numefis,lincr,s,1);}
-	            switch(identcmg(s)){
-	              case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); len=atof(s); /*mass*/
-	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
-	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
-	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s); /*box lengths*/
-	                      dMassSetBoxTotal(&(car->mass[k]),len,tx,ty,tz);
-                              break;
+	            if(!(err=fisgetw(fis,s,&lincr)))
+	            {
+                      int distribution_type;
+                      afermex(numefis,lincr,s,1);
+                      distribution_type = identcmg(s);
 
-	              case 3: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); len=atof(s); /*mass*/
-	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s); /*sphere radius*/
-	                      dMassSetSphereTotal(&(car->mass[k]),len,tx);
-                              break;
+                      len = 0.0;
+	              switch(distribution_type){
+	                case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); len=atof(s); /*mass*/
+	                        err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
+	                        err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
+	                        err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s); /*box lengths*/
+                                break;
 
-                      default: if(s[0]){printf("Error: '%s' line %d - word '%s' not recognized\r\n",numefis,lincr,s);exit(1);}
-	            }
-                    dBodySetMass(car->bid[k],&(car->mass[k]));
+	                case 3: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); len=atof(s); /*mass*/
+	                        err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s); /*sphere radius*/
+                                break;
+
+                        default: if(s[0]){printf("Error: '%s' line %d - word '%s' not recognized\r\n",numefis,lincr,s);exit(1);}
+	              }
+                      physics_setBodyMass(car->parts[k],len,distribution_type,tx,ty,tz);
+                    }
                     physics_setBodyPosition(car->parts[k],objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0]);
 	            /*^set mass parameters*/
 	          }
