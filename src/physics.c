@@ -441,7 +441,7 @@ for(i=1;i<=car->nj;i++){
     default: break;
   }
 
-  dJointSetAMotorParam(car->bkm[i],dParamFMax,bkf);
+  dJointSetHinge2Param(car->jid[i],dParamFMax2,bkf);
 }
 
 for(i=1;i<=car->nob;i++){

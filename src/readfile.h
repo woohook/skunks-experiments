@@ -506,7 +506,6 @@ for(i=1;i<=car->nob;i++){
 
       (car->nj)++;
       car->jid[car->nj]=physics_createHinge2(car->parts[k],car->parts[i],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0]);
-      car->bkm[car->nj]=physics_createAMotor(car->parts[k],car->parts[i],car->brake); // brake motor
       car->jfc[car->nj]=car->ofc[i];
   }
 }

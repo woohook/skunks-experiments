@@ -44,7 +44,6 @@ int nj; /*number of permanent joints*/
 int oid[MAXGEOM]; /*number of object (rendering and collision) in 'objs' array from 'simcar.c'*/
 struct physics_instance* parts[MAXGEOM];
 dJointID jid[MAXGEOM]; /*permanent joints*/
-dJointID bkm[MAXGEOM]; /*brake motors*/
 
 int jfc[MAXGEOM]; /*function of object attached to joint (see 'ofc' below)*/
 int ofc[MAXGEOM]; /*object function: 1-car; 2-trailer; 3-motor wheel; 4-steering wheel;
