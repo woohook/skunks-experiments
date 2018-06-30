@@ -66,13 +66,12 @@ REALN tframe=0,xan=0,/*tframe-time necessary for display; xan-number of displaye
       timp,dstr; /*total time, distance traveled*/
 
 /*for game*/
-REALN vrx,vrxmax,vrxmr, /*rot. speed*/
+REALN vrxmax,vrxmr, /*rot. speed*/
       arx,arxmax,arxmr, /*rot. acceleration*/
       vrot3, /*rot. speed of level 3 objects*/
       vrotc,vrcmax,rotc, /*rot. speed and rotation of camera*/
       realstep, /*real time step (s)*/
-      speed,dspeed,rotspeed,acc,
-      af=0,bf=0; /*acceleration and brake factors*/
+      speed,dspeed,rotspeed,acc;
 int turn, /*-1: left; 0: no turn; 1: right*/
     dmode, /*1 forward, -1 reverse*/
     nstepsf; /*number of simulation steps/frame*/
@@ -88,6 +87,10 @@ camera.transform.vx[0]=0; camera.transform.vy[0]=0; camera.transform.vz[0]=0;
 camera.transform.vx[1]=1; camera.transform.vy[1]=0; camera.transform.vz[1]=0;
 camera.transform.vx[2]=0; camera.transform.vy[2]=1; camera.transform.vz[2]=0;
 camera.transform.vx[3]=0; camera.transform.vy[3]=0; camera.transform.vz[3]=1; /*set camera parameters*/
+
+car.af = 0;
+car.bf = 0;
+car.vrx = 0;
 
 if(argc<=2){printf("Error: Input files not specified\r\nExample: ./skunks cars/car1 tracks/track1\r\n");exit(1);}
 if(argc>=4){printf("Error: Too many arguments\r\n");exit(1);}
@@ -164,7 +167,7 @@ SDL_PauseAudio(0);
 #endif
 
 
-vrx=0; arx=0;
+arx=0;
 vrxmr=vrxmax=0.36;
 arxmr=arxmax=vrxmax/1.5;
 turn=0;
@@ -191,19 +194,19 @@ else{
 }
 
 switch(turn){
-  case 0: if(vrx>0){arx=-arxmr*1.5;}else{if(vrx<0){arx=arxmr*1.5;}else{arx=0;}}
-          if(fabs(vrx)<2.25*tframe*arx){arx=0; vrx=0;}
+  case 0: if(car.vrx>0){arx=-arxmr*1.5;}else{if(car.vrx<0){arx=arxmr*1.5;}else{arx=0;}}
+          if(fabs(car.vrx)<2.25*tframe*arx){arx=0; car.vrx=0;}
           break;
-  case -1: if(vrx>-vrxmr){arx=-arxmr; if(vrx>0){arx*=1.5;}}else{arx=0;}
+  case -1: if(car.vrx>-vrxmr){arx=-arxmr; if(car.vrx>0){arx*=1.5;}}else{arx=0;}
            break;
-  case 1: if(vrx<vrxmr){arx=arxmr; if(vrx<0){arx*=1.5;}}else{arx=0;}
+  case 1: if(car.vrx<vrxmr){arx=arxmr; if(car.vrx<0){arx*=1.5;}}else{arx=0;}
           break;
   default: break;
 }
 
-vrx+=arx*tframe;
-if(vrx>vrxmr){vrx=vrxmr;}
-if(vrx<-vrxmr){vrx=-vrxmr;}
+car.vrx+=arx*tframe;
+if(car.vrx>vrxmr){car.vrx=vrxmr;}
+if(car.vrx<-vrxmr){car.vrx=-vrxmr;}
 
 
 /*simulation*/
@@ -214,7 +217,7 @@ speed=0.1/realstep; /*decrease simulation speed if < 10fps*/
 if(nstepsf>(int)speed){nstepsf=(int)speed;}
 
 for(i=1;i<=nstepsf;i++){
-  runsim(objs,&car,realstep,vrx,af,bf);
+  runsim(objs,&car,realstep,car.vrx,car.af,car.bf);
   timp+=realstep;
 
 #if REPLAY==1
@@ -267,11 +270,11 @@ case SDL_KEYDOWN:
   switch(event.key.keysym.sym){
     case SDLK_q:
     case SDLK_UP:
-    case SDLK_t: af=dmode;
+    case SDLK_t: car.af=dmode;
                  break;
     case SDLK_a:
     case SDLK_DOWN:
-    case SDLK_f: bf=1;
+    case SDLK_f: car.bf=1;
                  break;
     case SDLK_o:
     case SDLK_LEFT:
@@ -303,11 +306,11 @@ case SDL_KEYUP:
   switch(event.key.keysym.sym){
     case SDLK_q:
     case SDLK_UP:
-    case SDLK_t: af=0;
+    case SDLK_t: car.af=0;
                  break;
     case SDLK_a:
     case SDLK_DOWN:
-    case SDLK_f: bf=0;
+    case SDLK_f: car.bf=0;
                  break;
     case SDLK_o:
     case SDLK_LEFT:
@@ -318,7 +321,7 @@ case SDL_KEYUP:
     case SDLK_u: if(turn==1){turn=0;}
                  break;
 
-    case SDLK_r: af=0;
+    case SDLK_r: car.af=0;
                  break;
 
     case SDLK_n: vrotc=0;
