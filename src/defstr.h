@@ -49,6 +49,10 @@ int jfc[MAXGEOM]; /*function of object attached to joint (see 'ofc' below)*/
 int ofc[MAXGEOM]; /*object function: 1-car; 2-trailer; 3-motor wheel; 4-steering wheel;
                     5-motor and steering wheel; 6-passive wheel; 7-trailer wheel*/
 
+float vrx; // steering speed
+float af;  // acceleration factor
+float bf;  // brake factor
+
 REALN accel;
 REALN brake; /*acceleration and brake torques/wheel*/
 REALN spring;
