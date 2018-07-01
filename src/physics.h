@@ -24,6 +24,6 @@ void create_collision_sphere(float x1, float y1, float z1, float x2, float y2, f
 void create_collision_mesh(float x1, float y1, float z1, float x2, float y2, float z2, int ttip);
 struct physics_instance* create_collision_geometry_instance(int geomtype, float tx, float ty, float tz, float rx, float ry, float rz);
 
-void runsim(sgob** objs,vhc *car,float tstep,float vrx,float af,float bf);
+void runsim(sgob** objs,vhc *car,float tstep);
 
 void rdspeed(vhc *car,float *speed,float *rotspeed,float *dspeed);
