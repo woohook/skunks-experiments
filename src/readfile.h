@@ -502,10 +502,26 @@ car->nj=0; /*number of permanent joints*/
 for(i=1;i<=car->nob;i++){
   if(car->ofc[i]>=3){
 
+      float* vrx = 0, *af = 0, *bf = &car->bf;
+      switch(car->ofc[i])
+      {
+        case 3:
+          vrx = &car->vrx;
+          break;
+        case 4:
+          af = &car->af;
+          break;
+        case 5:
+          vrx = &car->vrx;
+          af  = &car->af;
+          break;
+        default:
+          break;
+      }
       k=1; if(car->ofc[i]==7){k=2;}
 
       (car->nj)++;
-      car->jid[car->nj]=physics_createHinge2(car->parts[k],car->parts[i],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0]);
+      physics_createHinge2(car->parts[k],car->parts[i],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0], vrx, af, bf);
       car->jfc[car->nj]=car->ofc[i];
   }
 }
