@@ -170,18 +170,6 @@ void physics_createHinge2(struct physics_instance* object1, struct physics_insta
   hinge2_count++;
 }
 
-dJointID physics_createAMotor(struct physics_instance* object1, struct physics_instance* object2, float max_acceleration)
-{
-  dJointID jid = dJointCreateAMotor(wglob,0);
-  dJointAttach(jid,object1->bodyID,object2->bodyID);
-  dJointSetAMotorNumAxes(jid,1);
-  dJointSetAMotorAxis(jid,0,2,0,1,0);
-  dJointSetAMotorParam(jid,dParamVel,0);
-  dJointSetAMotorParam(jid,dParamFMax,0.01*max_acceleration);
-
-  return jid;
-}
-
 void create_collision_geometry()
 {
   refcount++;

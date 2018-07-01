@@ -15,7 +15,6 @@ void physics_setBodyMass(struct physics_instance* object, float mass, int distri
 
 void physics_createUniversalJoint(struct physics_instance* object1, struct physics_instance* object2, float tx, float ty, float tz);
 void physics_createHinge2(struct physics_instance* object1, struct physics_instance* object2, float x, float y, float z, float* steering_torque, float* acceleration_intensity, float* brake_intensity);
-dJointID physics_createAMotor(struct physics_instance* object1, struct physics_instance* object2, float max_acceleration);
 
 void create_collision_geometry();
 void create_collision_box(float x1, float y1, float z1, float x2, float y2, float z2, float lx, float ly, float lz);
