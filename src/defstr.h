@@ -39,13 +39,10 @@ struct physics_instance* physics_object;
 
 typedef struct _vhc
 {int nob; /*number of objects in vehicle*/
-int nj; /*number of permanent joints*/
 
 int oid[MAXGEOM]; /*number of object (rendering and collision) in 'objs' array from 'simcar.c'*/
 struct physics_instance* parts[MAXGEOM];
-dJointID jid[MAXGEOM]; /*permanent joints*/
 
-int jfc[MAXGEOM]; /*function of object attached to joint (see 'ofc' below)*/
 int ofc[MAXGEOM]; /*object function: 1-car; 2-trailer; 3-motor wheel; 4-steering wheel;
                     5-motor and steering wheel; 6-passive wheel; 7-trailer wheel*/
 

@@ -498,7 +498,6 @@ s[0]='1';while(s[0]){
 fclose(fis);
 
 /*set joints*/
-car->nj=0; /*number of permanent joints*/
 for(i=1;i<=car->nob;i++){
   if(car->ofc[i]>=3){
 
@@ -520,9 +519,7 @@ for(i=1;i<=car->nob;i++){
       }
       k=1; if(car->ofc[i]==7){k=2;}
 
-      (car->nj)++;
       physics_createHinge2(car->parts[k],car->parts[i],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0], vrx, af, bf);
-      car->jfc[car->nj]=car->ofc[i];
   }
 }
 /*^set joints*/
