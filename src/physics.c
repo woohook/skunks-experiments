@@ -30,6 +30,16 @@ struct physics_instance
 
 dJointID unijoint = 0; // single universal joint
 
+struct hinge2
+{
+  dJointID jid;
+  float* steering_torque;
+  float* acceleration_intensity;
+  float* brake_intensity;
+};
+int hinge2_count = 0;
+struct hinge2* hinge2s[MAXGEOM];
+
 dWorldID wglob; // world for ODE
 refpo *refglob; // array with reference points of object types
 int refcount = 0;
@@ -142,7 +152,7 @@ void physics_createUniversalJoint(struct physics_instance* object1, struct physi
   dJointSetUniversalParam(unijoint,dParamHiStop,2.094);
 }
 
-dJointID physics_createHinge2(struct physics_instance* object1, struct physics_instance* object2, float x, float y, float z)
+void physics_createHinge2(struct physics_instance* object1, struct physics_instance* object2, float x, float y, float z, float* steering_torque, float* acceleration_intensity, float* brake_intensity)
 {
   dJointID jid = dJointCreateHinge2(wglob,0);
   dJointAttach(jid,object1->bodyID,object2->bodyID);
@@ -152,7 +162,12 @@ dJointID physics_createHinge2(struct physics_instance* object1, struct physics_i
   dJointSetHinge2Param(jid,dParamLoStop,-0.001);
   dJointSetHinge2Param(jid,dParamHiStop,0.001); // for axis 1
 
-  return jid;
+  hinge2s[hinge2_count] = (struct hinge2*)malloc(sizeof(struct hinge2));
+  hinge2s[hinge2_count]->jid                    = jid;
+  hinge2s[hinge2_count]->steering_torque        = steering_torque;
+  hinge2s[hinge2_count]->acceleration_intensity = acceleration_intensity;
+  hinge2s[hinge2_count]->brake_intensity        = brake_intensity;
+  hinge2_count++;
 }
 
 dJointID physics_createAMotor(struct physics_instance* object1, struct physics_instance* object2, float max_acceleration)
@@ -417,31 +432,44 @@ for(i=0;i<dynStart;i++)
   }
 }
 
-pin=af*car->accel;
-
-bkf=(bf+0.01)*car->brake;
-
 if(unijoint != 0){
   dJointSetUniversalParam(unijoint,dParamStopERP,tstep*kps/(tstep*kps+kds));
   dJointSetUniversalParam(unijoint,dParamStopCFM,1/(tstep*kps+kds));
 }
 
-for(i=1;i<=car->nj;i++){
-  dJointSetHinge2Param(car->jid[i],dParamSuspensionERP,tstep*kp/(tstep*kp+kd));
-  dJointSetHinge2Param(car->jid[i],dParamSuspensionCFM,1/(tstep*kp+kd));
-  dJointSetHinge2Param(car->jid[i],dParamStopERP,tstep*kps/(tstep*kps+kds));
-  dJointSetHinge2Param(car->jid[i],dParamStopCFM,1/(tstep*kps+kds));
-  switch(car->jfc[i]){
-    case 3: dJointAddHinge2Torques(car->jid[i],0,pin); /*motor wheel*/
-            break;
-    case 4: dJointAddHinge2Torques(car->jid[i],360*vrx,0); /*steering wheel*/
-            break;
-    case 5: dJointAddHinge2Torques(car->jid[i],360*vrx,pin); /*motor and steering wheel*/
-            break;
-    default: break;
+for(i=0;i<hinge2_count;i++){
+  dJointID jid = hinge2s[i]->jid;
+  dJointSetHinge2Param(jid,dParamSuspensionERP,tstep*kp/(tstep*kp+kd));
+  dJointSetHinge2Param(jid,dParamSuspensionCFM,1/(tstep*kp+kd));
+  dJointSetHinge2Param(jid,dParamStopERP,tstep*kps/(tstep*kps+kds));
+  dJointSetHinge2Param(jid,dParamStopCFM,1/(tstep*kps+kds));
+  if(hinge2s[i]->steering_torque != 0)
+  {
+    if(hinge2s[i]->acceleration_intensity != 0)
+    {
+      pin=(*hinge2s[i]->acceleration_intensity)*car->accel;
+      dJointAddHinge2Torques(jid,360*(*hinge2s[i]->steering_torque),pin); // motor and steering wheel
+    }
+    else
+    {
+      dJointAddHinge2Torques(jid,360*(*hinge2s[i]->steering_torque),0); // steering wheel
+    }
+  }
+  else
+  {
+    if(hinge2s[i]->acceleration_intensity != 0)
+    {
+      pin=(*hinge2s[i]->acceleration_intensity)*car->accel;
+      dJointAddHinge2Torques(jid,0,pin); // motor and steering wheel
+    }
   }
 
-  dJointSetHinge2Param(car->jid[i],dParamFMax2,bkf);
+
+  if(hinge2s[i]->brake_intensity != 0)
+  {
+    bkf=((*hinge2s[i]->brake_intensity)+0.01)*car->brake;
+    dJointSetHinge2Param(jid,dParamFMax2,bkf);
+  }
 }
 
 for(i=1;i<=car->nob;i++){
