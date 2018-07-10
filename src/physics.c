@@ -3,6 +3,7 @@
 #include "defstr.h"
 #include "physics.h"
 #include "trans.h"
+#include "util.h"
 
 typedef struct _refpo
 {
@@ -26,6 +27,7 @@ struct physics_instance
   dGeomID gid[MAXGEOM];
   dBodyID bodyID;
   dMass mass;
+  struct _matrix* transform;
 };
 
 dJointID unijoint = 0; // single universal joint
@@ -76,7 +78,7 @@ void physics_setGravity(float gravity)
   dWorldSetGravity(wglob,gravity,0,0);
 }
 
-void physics_createBody(struct physics_instance* object)
+void physics_createBody(struct physics_instance* object, struct _matrix* transform)
 {
   int i;
   dBodyID bid = dBodyCreate(wglob);
@@ -95,6 +97,7 @@ void physics_createBody(struct physics_instance* object)
   dBodySetRotation(bid,rotmt);
 
   object->bodyID = bid;
+  object->transform = transform;
 }
 
 void physics_getBodyPosition(struct physics_instance* object, float* x, float* y, float* z)
@@ -263,6 +266,7 @@ struct physics_instance* create_collision_geometry_instance(int geomtype, float 
   struct physics_instance* object = (struct physics_instance*)malloc(sizeof(struct physics_instance));
   object->bodyID = 0;
   object->gid_count = 1;
+  object->transform = 0;
 
   // data for triangle meshes used at curved road elements
   dTriMeshDataID trid[5];

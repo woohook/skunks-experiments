@@ -435,7 +435,7 @@ s[0]='1';while(s[0]){
                     objs[i]->physics_object = create_collision_geometry_instance(objs[i]->otyp, tx, ty, tz, 0, 0, 0);
                     car->parts[k] = objs[i]->physics_object;
 
-	            physics_createBody(objs[i]->physics_object);
+	            physics_createBody(objs[i]->physics_object, &objs[i]->transform);
 
 	            if(!(err=fisgetw(fis,s,&lincr)))
 	            {

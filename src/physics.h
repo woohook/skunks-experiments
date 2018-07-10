@@ -7,7 +7,7 @@ void physics_setERP(float erp);
 void physics_setCFM(float cfm);
 void physics_setGravity(float gravity);
 
-void physics_createBody(struct physics_instance* physics_object);
+void physics_createBody(struct physics_instance* physics_object, struct _matrix* transform);
 void physics_getBodyPosition(struct physics_instance* object, float* x, float* y, float* z);
 void physics_setBodyPosition(struct physics_instance* object, float x, float y, float z);
 void physics_getBodyRotation(struct physics_instance* object, float* rot0, float* rot1, float* rot2, float* rot3, float* rot4, float* rot5, float* rot6, float* rot7, float* rot8, float* rot9, float* rot10, float* rot11);
