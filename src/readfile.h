@@ -505,10 +505,10 @@ for(i=1;i<=car->nob;i++){
       switch(car->ofc[i])
       {
         case 3:
-          vrx = &car->vrx;
+          af = &car->af;
           break;
         case 4:
-          af = &car->af;
+          vrx = &car->vrx;
           break;
         case 5:
           vrx = &car->vrx;

@@ -448,7 +448,7 @@ for(i=0;i<hinge2_count;i++){
     if(hinge2s[i]->acceleration_intensity != 0)
     {
       pin=(*hinge2s[i]->acceleration_intensity)*car->accel;
-      dJointAddHinge2Torques(jid,0,pin); // motor and steering wheel
+      dJointAddHinge2Torques(jid,0,pin); // motor wheel
     }
   }
 
