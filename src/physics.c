@@ -493,14 +493,14 @@ for(i=0;i<hinge2_count;i++){
   }
 }
 
-for(i=1;i<=car->nob;i++){
-  radius=objs[car->oid[i]]->physics_object->radius; radius*=radius;
-  vel=dBodyGetLinearVel(car->parts[i]->bodyID);
+for(i=dynStart;i<physics_instance_count;i++){
+  radius=physics_instances[i]->radius; radius*=radius;
+  vel=dBodyGetLinearVel(physics_instances[i]->bodyID);
   if((fabs(vel[0])+fabs(vel[1])+fabs(vel[2]))>1){
     fx=-drg*radius*vel[0]*fabs(vel[0]);
     fy=-drg*radius*vel[1]*fabs(vel[1]);
     fz=-drg*radius*vel[2]*fabs(vel[2]);
-    dBodyAddForce(car->parts[i]->bodyID,fx,fy,fz);
+    dBodyAddForce(physics_instances[i]->bodyID,fx,fy,fz);
   }
 } /*air resistance*/
 
