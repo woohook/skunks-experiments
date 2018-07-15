@@ -391,7 +391,7 @@ struct physics_instance* create_collision_geometry_instance(int geomtype, float 
 }
 
 /*run 1 simulation step; tstep - time step; af, bf - acceleration and brake factors*/
-void runsim(sgob** objs,vhc *car,float tstep)
+void runsim(vhc *car,float tstep)
 {int i,k,l,m,n;
 const dReal *pos,*rot,*vel;
 float x0,y0,z0,pin=0,bkf=0,
