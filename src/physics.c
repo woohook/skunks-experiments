@@ -28,6 +28,7 @@ struct physics_instance
   dBodyID bodyID;
   dMass mass;
   struct _matrix* transform;
+  float radius;
 };
 
 dJointID unijoint = 0; // single universal joint
@@ -89,6 +90,33 @@ void physics_createBody(struct physics_instance* object, struct _matrix* transfo
   for(i=1;i<=refglob[object->gtip].nref/2;i++)
   {
     dGeomSetBody(object->gid[i],bid);
+    float lx = 0, ly = 0, lz = 0, radius = 0.0f;
+    switch(refglob[object->gtip].gtip[i])
+    {
+      case 'b':
+        lx = refglob[object->gtip].lx[i];
+        ly = refglob[object->gtip].ly[i];
+        lz = refglob[object->gtip].lz[i];
+        break;
+      case 'c':
+        lx = refglob[object->gtip].lx[i]*2;
+        ly = refglob[object->gtip].ly[i];
+        lz = refglob[object->gtip].lx[i]*2;
+        break;
+      case 's':
+        radius = refglob[object->gtip].lx[i];
+        break;
+      default:
+        break;
+    }
+    if(radius==0.0f)
+    {
+      radius = sqrt(lx*lx + ly*ly + lz*lz)/2;
+    }
+    if(radius > object->radius)
+    {
+      object->radius = radius;
+    }
   }
 
   rotmt[0]=1; rotmt[1]=0; rotmt[2]=0; rotmt[3]=0;
@@ -267,6 +295,7 @@ struct physics_instance* create_collision_geometry_instance(int geomtype, float 
   object->bodyID = 0;
   object->gid_count = 1;
   object->transform = 0;
+  object->radius = 0.0f;
 
   // data for triangle meshes used at curved road elements
   dTriMeshDataID trid[5];
@@ -465,7 +494,7 @@ for(i=0;i<hinge2_count;i++){
 }
 
 for(i=1;i<=car->nob;i++){
-  radius=objs[car->oid[i]]->radius; radius*=radius;
+  radius=objs[car->oid[i]]->physics_object->radius; radius*=radius;
   vel=dBodyGetLinearVel(car->parts[i]->bodyID);
   if((fabs(vel[0])+fabs(vel[1])+fabs(vel[2]))>1){
     fx=-drg*radius*vel[0]*fabs(vel[0]);
