@@ -28,7 +28,7 @@ struct physics_instance
   dBodyID bodyID;
   dMass mass;
   struct _matrix* transform;
-  float radius;
+  float radius;  // radius of sphere in which the object is included
 };
 
 dJointID unijoint = 0; // single universal joint
