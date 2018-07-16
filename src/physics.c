@@ -39,6 +39,8 @@ struct hinge2
   float* steering_torque;
   float* acceleration_intensity;
   float* brake_intensity;
+  float spring_coefficient;
+  float damper_coefficient;
 };
 int hinge2_count = 0;
 struct hinge2* hinge2s[MAXGEOM];
@@ -183,7 +185,7 @@ void physics_createUniversalJoint(struct physics_instance* object1, struct physi
   dJointSetUniversalParam(unijoint,dParamHiStop,2.094);
 }
 
-void physics_createHinge2(struct physics_instance* object1, struct physics_instance* object2, float x, float y, float z, float* steering_torque, float* acceleration_intensity, float* brake_intensity)
+void physics_createHinge2(struct physics_instance* object1, struct physics_instance* object2, float x, float y, float z, float* steering_torque, float* acceleration_intensity, float* brake_intensity, float spring_coefficient, float damper_coefficient)
 {
   dJointID jid = dJointCreateHinge2(wglob,0);
   dJointAttach(jid,object1->bodyID,object2->bodyID);
@@ -198,6 +200,8 @@ void physics_createHinge2(struct physics_instance* object1, struct physics_insta
   hinge2s[hinge2_count]->steering_torque        = steering_torque;
   hinge2s[hinge2_count]->acceleration_intensity = acceleration_intensity;
   hinge2s[hinge2_count]->brake_intensity        = brake_intensity;
+  hinge2s[hinge2_count]->spring_coefficient     = spring_coefficient;
+  hinge2s[hinge2_count]->damper_coefficient     = damper_coefficient;
   hinge2_count++;
 }
 
@@ -395,7 +399,6 @@ void runsim(vhc *car,float tstep)
 {int i,k,l,m,n;
 const dReal *pos,*rot,*vel;
 float x0,y0,z0,pin=0,bkf=0,
-      kp,kd, /*suspension coefficients*/
       kps,kds, /*steering coefficients*/
       radius,fx,fy,fz,drg=0.0005; /*drag coefficient*/
 dSurfaceParameters surf1;
@@ -411,8 +414,6 @@ surf1.bounce_vel=0.1;
 surf1.soft_erp=tstep*10000/(tstep*10000+100);
 surf1.soft_cfm=1/(tstep*10000+100);
 
-kp=car->spring;
-kd=car->damper;
 kps=150; kds=5;
 
 for(i=1;i<=car->nob;i++){
@@ -460,6 +461,8 @@ if(unijoint != 0){
 
 for(i=0;i<hinge2_count;i++){
   dJointID jid = hinge2s[i]->jid;
+  float kp = hinge2s[i]->spring_coefficient;
+  float kd = hinge2s[i]->damper_coefficient;
   dJointSetHinge2Param(jid,dParamSuspensionERP,tstep*kp/(tstep*kp+kd));
   dJointSetHinge2Param(jid,dParamSuspensionCFM,1/(tstep*kp+kd));
   dJointSetHinge2Param(jid,dParamStopERP,tstep*kps/(tstep*kps+kds));
