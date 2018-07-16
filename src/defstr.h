@@ -52,8 +52,6 @@ float bf;  // brake factor
 
 REALN accel;
 REALN brake; /*acceleration and brake torques/wheel*/
-REALN spring;
-REALN damper; /*suspension coefficients*/
 REALN mu; /*friction*/
 
 REALN camh;

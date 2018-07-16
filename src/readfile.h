@@ -369,6 +369,8 @@ FILE *fis;
 int i,k,nto,nob; /*number of object types and number of objects*/
 REALN tx,ty,tz, /*initial translations*/
       len;
+float spring = 0;  // hinge spring coefficient
+float damper = 0;  // hinge damper coefficient
 
 nto=*nrtyp;
 nob=*nrobt;
@@ -470,10 +472,10 @@ s[0]='1';while(s[0]){
           case 6: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->brake=atof(s);
                   break;
 
-          case 7: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->spring=atof(s);
+          case 7: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); spring=atof(s);
                   break;
 
-          case 8: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->damper=atof(s);
+          case 8: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); damper=atof(s);
                   break;
 
           case 9: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->mu=atof(s);
@@ -519,7 +521,7 @@ for(i=1;i<=car->nob;i++){
       }
       k=1; if(car->ofc[i]==7){k=2;}
 
-      physics_createHinge2(car->parts[k],car->parts[i],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0], vrx, af, bf, car->spring, car->damper);
+      physics_createHinge2(car->parts[k],car->parts[i],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0], vrx, af, bf, spring, damper);
   }
 }
 /*^set joints*/
