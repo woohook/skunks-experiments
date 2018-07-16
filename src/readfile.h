@@ -519,7 +519,7 @@ for(i=1;i<=car->nob;i++){
       }
       k=1; if(car->ofc[i]==7){k=2;}
 
-      physics_createHinge2(car->parts[k],car->parts[i],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0], vrx, af, bf);
+      physics_createHinge2(car->parts[k],car->parts[i],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0], vrx, af, bf, car->spring, car->damper);
   }
 }
 /*^set joints*/
