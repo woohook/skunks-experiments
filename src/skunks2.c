@@ -273,7 +273,7 @@ case SDL_KEYDOWN:
                  break;
     case SDLK_a:
     case SDLK_DOWN:
-    case SDLK_f: car.bf=car.brake;
+    case SDLK_f: car.bf=1.01f*car.brake;
                  break;
     case SDLK_o:
     case SDLK_LEFT:
@@ -309,7 +309,7 @@ case SDL_KEYUP:
                  break;
     case SDLK_a:
     case SDLK_DOWN:
-    case SDLK_f: car.bf=0;
+    case SDLK_f: car.bf=0.01f*car.brake;
                  break;
     case SDLK_o:
     case SDLK_LEFT:

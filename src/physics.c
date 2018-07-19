@@ -491,7 +491,7 @@ for(i=0;i<hinge2_count;i++){
 
   if(hinge2s[i]->brake_intensity != 0)
   {
-    bkf=((*hinge2s[i]->brake_intensity)+0.01)*car->brake;
+    bkf=*hinge2s[i]->brake_intensity;
     dJointSetHinge2Param(jid,dParamFMax2,bkf);
   }
 }
