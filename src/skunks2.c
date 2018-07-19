@@ -269,11 +269,11 @@ case SDL_KEYDOWN:
   switch(event.key.keysym.sym){
     case SDLK_q:
     case SDLK_UP:
-    case SDLK_t: car.af=dmode;
+    case SDLK_t: car.af=car.accel*(float)dmode;
                  break;
     case SDLK_a:
     case SDLK_DOWN:
-    case SDLK_f: car.bf=1;
+    case SDLK_f: car.bf=car.brake;
                  break;
     case SDLK_o:
     case SDLK_LEFT:
