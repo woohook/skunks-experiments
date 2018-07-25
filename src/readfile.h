@@ -372,6 +372,8 @@ REALN tx,ty,tz, /*initial translations*/
 float spring = 0;  // hinge spring coefficient
 float damper = 0;  // hinge damper coefficient
 
+float friction = 0;
+
 nto=*nrtyp;
 nob=*nrobt;
 
@@ -478,7 +480,7 @@ s[0]='1';while(s[0]){
           case 8: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); damper=atof(s);
                   break;
 
-          case 9: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->mu=atof(s);
+          case 9: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); friction = atof(s);
                   break;
 
           case 10: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
@@ -501,6 +503,8 @@ fclose(fis);
 
 /*set joints*/
 for(i=1;i<=car->nob;i++){
+  physics_setBodyFriction(car->parts[i], friction);
+
   if(car->ofc[i]>=3){
 
       float* vrx = 0, *af = 0, *bf = &car->bf;
