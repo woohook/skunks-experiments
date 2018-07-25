@@ -245,7 +245,18 @@ for(i=1;i<=nob;i++){
 }
 
 physics_getLinearBodyVelocity(car.parts[1],&speed,&dspeed);
-rdspeed(&car,&rotspeed);
+{
+  int motor_wheel_count=0;
+  for(i=1;i<=car.nob;i++)
+  {
+    if((car.ofc[i]==3)||(car.ofc[i]==5))
+    {
+      motor_wheel_count++;
+      physics_getAngularBodyVelocity(car.parts[i],&rotspeed);
+    }
+  }
+  rotspeed/=motor_wheel_count; // average rot. speed of motor wheels
+}
 acc=dspeed/tframe;
 
 #if SOUND==1
