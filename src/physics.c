@@ -401,18 +401,11 @@ const dReal *pos,*rot,*vel;
 float x0,y0,z0,pin=0,bkf=0,
       kps,kds, /*steering coefficients*/
       radius,fx,fy,fz,drg=0.0005; /*drag coefficient*/
-dSurfaceParameters surf1;
 dContactGeom dcgeom[21];
 dContact dcon[21];
 int ncj = 0;                // number of contact joints
 dJointID cjid[MAXGEOM]; // contact joints
 
-surf1.mode=dContactBounce|dContactSoftERP|dContactSoftCFM|dContactApprox1;
-surf1.mu=car->mu;
-surf1.bounce=0.5;
-surf1.bounce_vel=0.1;
-surf1.soft_erp=tstep*10000/(tstep*10000+100);
-surf1.soft_cfm=1/(tstep*10000+100);
 
 kps=150; kds=5;
 
@@ -442,6 +435,14 @@ for(k=dynStart;k<physics_instance_count;k++)
             (ncj)+=n;
             if(n)
             {
+              dSurfaceParameters surf1;
+              surf1.mode=dContactBounce|dContactSoftERP|dContactSoftCFM|dContactApprox1;
+              surf1.mu=car->mu;
+              surf1.bounce=0.5;
+              surf1.bounce_vel=0.1;
+              surf1.soft_erp=tstep*10000/(tstep*10000+100);
+              surf1.soft_cfm=1/(tstep*10000+100);
+
               dcon[ncj].surface=surf1;
               dcon[ncj].geom=dcgeom[ncj];
               cjid[ncj]=dJointCreateContact(wglob,0,&dcon[ncj]);
