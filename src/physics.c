@@ -574,19 +574,10 @@ void physics_getLinearBodyVelocity(struct physics_instance* object, float* speed
   *speed_delta=sqrt(dspe[0]*dspe[0]+dspe[1]*dspe[1]+dspe[2]*dspe[2]);
 }
 
-/*function which determines speed of vehicle*/
-void rdspeed(vhc *car,float *rotspeed)
-{int i,n=0;
-const dReal *rot;
+void physics_getAngularBodyVelocity(struct physics_instance* object, float *rotspeed)
+{
+  const dReal *rot;
 
-*rotspeed=0;
-
-for(i=1;i<=car->nob;i++){
-  if((car->ofc[i]==3)||(car->ofc[i]==5)){ n++;
-    rot=dBodyGetAngularVel(car->parts[i]->bodyID);
-    (*rotspeed)+=sqrt(rot[0]*rot[0]+rot[1]*rot[1]+rot[2]*rot[2]);
-  }
-}
-(*rotspeed)/=n; /*average rot. speed of motor wheels*/
-
+  rot=dBodyGetAngularVel(object->bodyID);
+  *rotspeed=sqrt(rot[0]*rot[0]+rot[1]*rot[1]+rot[2]*rot[2]);
 }
