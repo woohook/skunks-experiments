@@ -27,4 +27,5 @@ struct physics_instance* create_collision_geometry_instance(int geomtype, float 
 
 void runsim(float tstep);
 
-void rdspeed(vhc *car,float *speed,float *rotspeed,float *dspeed);
+void physics_getLinearBodyVelocity(struct physics_instance* object, float* speed, float* speed_delta);
+void rdspeed(vhc *car,float *rotspeed);

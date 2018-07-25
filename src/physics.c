@@ -555,24 +555,29 @@ for(i=dynStart;i<physics_instance_count;i++)
 }
 
 
+void physics_getLinearBodyVelocity(struct physics_instance* object, float* speed, float* speed_delta)
+{
+  const dReal *spe;
+  static float spe0[3]={0,0,0};
+  float dspe[3];
+
+  spe=dBodyGetLinearVel(object->bodyID);
+
+  dspe[0]=spe[0]-spe0[0];
+  dspe[1]=spe[1]-spe0[1];
+  dspe[2]=spe[2]-spe0[2];
+
+  spe0[0]=spe[0]; spe0[1]=spe[1]; spe0[2]=spe[2];
+
+  *speed=sqrt(spe[0]*spe[0]+spe[1]*spe[1]+spe[2]*spe[2]);
+
+  *speed_delta=sqrt(dspe[0]*dspe[0]+dspe[1]*dspe[1]+dspe[2]*dspe[2]);
+}
+
 /*function which determines speed of vehicle*/
-void rdspeed(vhc *car,float *speed,float *rotspeed,float *dspeed)
+void rdspeed(vhc *car,float *rotspeed)
 {int i,n=0;
-const dReal *spe,*rot;
-static float spe0[3]={0,0,0};
-float dspe[3];
-
-spe=dBodyGetLinearVel(car->parts[1]->bodyID);
-
-dspe[0]=spe[0]-spe0[0];
-dspe[1]=spe[1]-spe0[1];
-dspe[2]=spe[2]-spe0[2];
-
-spe0[0]=spe[0]; spe0[1]=spe[1]; spe0[2]=spe[2];
-
-*speed=sqrt(spe[0]*spe[0]+spe[1]*spe[1]+spe[2]*spe[2]);
-
-*dspeed=sqrt(dspe[0]*dspe[0]+dspe[1]*dspe[1]+dspe[2]*dspe[2]);
+const dReal *rot;
 
 *rotspeed=0;
 
