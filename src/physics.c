@@ -424,15 +424,15 @@ for(i=1;i<=car->nob;i++){
 }
 
 // creating dContactGeom structures
-pos=dBodyGetPosition(car->parts[1]->bodyID); x0=pos[0]; y0=pos[1]; z0=pos[2];
-for(i=0;i<dynStart;i++)
+for(k=dynStart;k<physics_instance_count;k++)
 {
-  if(physics_instances[i]->gid_count>1)
+  pos=dBodyGetPosition(physics_instances[k]->bodyID); x0=pos[0]; y0=pos[1]; z0=pos[2];
+  for(i=0;i<dynStart;i++)
   {
-    pos = dGeomGetPosition(physics_instances[i]->gid[1]);
-    if((fabs(pos[0]-x0)<50) && (fabs(pos[1]-y0)<50) && (fabs(pos[2]-z0)<50))
+    if(physics_instances[i]->gid_count>1)
     {
-      for(k=dynStart;k<physics_instance_count;k++)
+      pos = dGeomGetPosition(physics_instances[i]->gid[1]);
+      if((fabs(pos[0]-x0)<50) && (fabs(pos[1]-y0)<50) && (fabs(pos[2]-z0)<50))
       {
         for(m=1;m < physics_instances[i]->gid_count;m++)
         {
