@@ -244,7 +244,8 @@ for(i=1;i<=nob;i++){
   }
 }
 
-rdspeed(&car,&speed,&rotspeed,&dspeed);
+physics_getLinearBodyVelocity(car.parts[1],&speed,&dspeed);
+rdspeed(&car,&rotspeed);
 acc=dspeed/tframe;
 
 #if SOUND==1
