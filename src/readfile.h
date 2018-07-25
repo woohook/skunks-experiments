@@ -441,6 +441,8 @@ s[0]='1';while(s[0]){
 
 	            physics_createBody(objs[i]->physics_object, &objs[i]->transform);
 
+                    if((car->ofc[k])>=2){physics_enableImprovedSpinning(objs[i]->physics_object, 1);}
+
 	            if(!(err=fisgetw(fis,s,&lincr)))
 	            {
                       int distribution_type;
