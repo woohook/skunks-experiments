@@ -216,7 +216,7 @@ speed=0.1/realstep; /*decrease simulation speed if < 10fps*/
 if(nstepsf>(int)speed){nstepsf=(int)speed;}
 
 for(i=1;i<=nstepsf;i++){
-  runsim(&car,realstep);
+  runsim(realstep);
   timp+=realstep;
 
 #if REPLAY==1
