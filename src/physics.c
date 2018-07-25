@@ -29,6 +29,7 @@ struct physics_instance
   dMass mass;
   struct _matrix* transform;
   float radius;  // radius of sphere in which the object is included
+  float friction;
 };
 
 dJointID unijoint = 0; // single universal joint
@@ -128,6 +129,7 @@ void physics_createBody(struct physics_instance* object, struct _matrix* transfo
 
   object->bodyID = bid;
   object->transform = transform;
+  object->friction = 0;
 }
 
 void physics_getBodyPosition(struct physics_instance* object, float* x, float* y, float* z)
@@ -172,6 +174,11 @@ void physics_setBodyMass(struct physics_instance* object, float mass, int distri
       break;
   }
   dBodySetMass(object->bodyID,&object->mass);
+}
+
+void physics_setBodyFriction(struct physics_instance* object, float friction)
+{
+  object->friction = friction;
 }
 
 void physics_createUniversalJoint(struct physics_instance* object1, struct physics_instance* object2, float tx, float ty, float tz)
@@ -437,7 +444,7 @@ for(k=dynStart;k<physics_instance_count;k++)
             {
               dSurfaceParameters surf1;
               surf1.mode=dContactBounce|dContactSoftERP|dContactSoftCFM|dContactApprox1;
-              surf1.mu=car->mu;
+              surf1.mu=physics_instances[k]->friction;
               surf1.bounce=0.5;
               surf1.bounce_vel=0.1;
               surf1.soft_erp=tstep*10000/(tstep*10000+100);

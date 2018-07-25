@@ -12,6 +12,7 @@ void physics_getBodyPosition(struct physics_instance* object, float* x, float* y
 void physics_setBodyPosition(struct physics_instance* object, float x, float y, float z);
 void physics_getBodyRotation(struct physics_instance* object, float* rot0, float* rot1, float* rot2, float* rot3, float* rot4, float* rot5, float* rot6, float* rot7, float* rot8, float* rot9, float* rot10, float* rot11);
 void physics_setBodyMass(struct physics_instance* object, float mass, int distribution, float x, float y, float z);
+void physics_setBodyFriction(struct physics_instance* object, float friction);
 
 void physics_createUniversalJoint(struct physics_instance* object1, struct physics_instance* object2, float tx, float ty, float tz);
 void physics_createHinge2(struct physics_instance* object1, struct physics_instance* object2, float x, float y, float z, float* steering_torque, float* acceleration_intensity, float* brake_intensity, float spring_coefficient, float damper_coefficient);
