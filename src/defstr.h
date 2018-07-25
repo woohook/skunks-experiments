@@ -52,7 +52,6 @@ float bf;  // brake factor
 
 REALN accel;
 REALN brake; /*acceleration and brake torques/wheel*/
-REALN mu; /*friction*/
 
 REALN camh;
 REALN camd; /*camera position*/
