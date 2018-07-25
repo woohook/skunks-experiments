@@ -30,6 +30,7 @@ struct physics_instance
   struct _matrix* transform;
   float radius;  // radius of sphere in which the object is included
   float friction;
+  int isSpinningImproved;
 };
 
 dJointID unijoint = 0; // single universal joint
@@ -130,6 +131,7 @@ void physics_createBody(struct physics_instance* object, struct _matrix* transfo
   object->bodyID = bid;
   object->transform = transform;
   object->friction = 0;
+  object->isSpinningImproved = 0;
 }
 
 void physics_getBodyPosition(struct physics_instance* object, float* x, float* y, float* z)
@@ -179,6 +181,12 @@ void physics_setBodyMass(struct physics_instance* object, float mass, int distri
 void physics_setBodyFriction(struct physics_instance* object, float friction)
 {
   object->friction = friction;
+}
+
+void physics_enableImprovedSpinning(struct physics_instance* object, int enabled)
+{
+  object->isSpinningImproved = enabled;
+  dBodySetFiniteRotationMode(object->bodyID,1);
 }
 
 void physics_createUniversalJoint(struct physics_instance* object1, struct physics_instance* object2, float tx, float ty, float tz)
@@ -416,16 +424,15 @@ dJointID cjid[MAXGEOM]; // contact joints
 
 kps=150; kds=5;
 
-for(i=1;i<=car->nob;i++){
-  if((car->ofc[i])>=2){
-    rot=dBodyGetRotation(car->parts[i]->bodyID);
-    dBodySetFiniteRotationAxis(car->parts[i]->bodyID,rot[1],rot[5],rot[9]);
-  }
-}
-
 // creating dContactGeom structures
 for(k=dynStart;k<physics_instance_count;k++)
 {
+  if(physics_instances[k]->isSpinningImproved == 1)
+  {
+    rot=dBodyGetRotation(physics_instances[k]->bodyID);
+    dBodySetFiniteRotationAxis(physics_instances[k]->bodyID,rot[1],rot[5],rot[9]);
+  }
+
   pos=dBodyGetPosition(physics_instances[k]->bodyID); x0=pos[0]; y0=pos[1]; z0=pos[2];
   for(i=0;i<dynStart;i++)
   {
