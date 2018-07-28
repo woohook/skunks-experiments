@@ -4,17 +4,21 @@
 #include "physics.h"
 #include "trans.h"
 
+#define PHYS_MAXREF 109  //maximum number of reference points for 1 object
+
+#define PHYS_MAXGEOM 55  //maximum number of geoms (ODE) for 1 object (=PHYS_MAXREF/2)
+
 typedef struct _refpo
 {
   int nref;           //number of reference points
-  float x[MAXREF];
-  float y[MAXREF];
-  float z[MAXREF];    // coordinates of the reference points
-  char gtip[MAXGEOM]; // type of geom - 'b', 'c', 's', 't' (box, cylinder, sphere, triangle mesh)
-  int ttip[MAXGEOM]; // type of triangle mesh - 1-left 45; 2-right 45; 3-left 22.5; 4-right 22.5
-  float lx[MAXGEOM]; // geometry parameters; for cyl. - lx = radius, ly = length;
-  float ly[MAXGEOM]; // for sphere - lx = radius; for box - lx = lx, ly = ly, lz = lz.
-  float lz[MAXGEOM];
+  float x[PHYS_MAXREF];
+  float y[PHYS_MAXREF];
+  float z[PHYS_MAXREF];    // coordinates of the reference points
+  char gtip[PHYS_MAXGEOM]; // type of geom - 'b', 'c', 's', 't' (box, cylinder, sphere, triangle mesh)
+  int ttip[PHYS_MAXGEOM]; // type of triangle mesh - 1-left 45; 2-right 45; 3-left 22.5; 4-right 22.5
+  float lx[PHYS_MAXGEOM]; // geometry parameters; for cyl. - lx = radius, ly = length;
+  float ly[PHYS_MAXGEOM]; // for sphere - lx = radius; for box - lx = lx, ly = ly, lz = lz.
+  float lz[PHYS_MAXGEOM];
 } refpo; // reference points of an object type
 
 struct physics_instance
@@ -23,7 +27,7 @@ struct physics_instance
   // geoms for collision; axis z of geom[i] is defined by
   //   (x[i*2-1],y[i*2-1],z[i*2-1]) and (x[i*2],y[i*2],z[i*2])
   int gid_count;
-  dGeomID gid[MAXGEOM];
+  dGeomID gid[PHYS_MAXGEOM];
   dBodyID bodyID;
   dMass mass;
   struct _matrix* transform;
@@ -44,7 +48,7 @@ struct hinge2
   float damper_coefficient;
 };
 int hinge2_count = 0;
-struct hinge2* hinge2s[MAXGEOM];
+struct hinge2* hinge2s[PHYS_MAXGEOM];
 
 dWorldID wglob; // world for ODE
 refpo *refglob; // array with reference points of object types
@@ -418,7 +422,7 @@ float x0,y0,z0,pin=0,bkf=0,
 dContactGeom dcgeom[21];
 dContact dcon[21];
 int ncj = 0;                // number of contact joints
-dJointID cjid[MAXGEOM]; // contact joints
+dJointID cjid[PHYS_MAXGEOM]; // contact joints
 
 
 kps=150; kds=5;
