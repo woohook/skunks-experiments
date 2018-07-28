@@ -1,5 +1,4 @@
 #include <ode/ode.h>
-#include "config.h"
 #include "util.h"
 #include "physics.h"
 #include "trans.h"
