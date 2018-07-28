@@ -7,14 +7,14 @@
 typedef struct _refpo
 {
   int nref;           //number of reference points
-  REALD x[MAXREF];
-  REALD y[MAXREF];
-  REALD z[MAXREF];    // coordinates of the reference points
+  float x[MAXREF];
+  float y[MAXREF];
+  float z[MAXREF];    // coordinates of the reference points
   char gtip[MAXGEOM]; // type of geom - 'b', 'c', 's', 't' (box, cylinder, sphere, triangle mesh)
   int ttip[MAXGEOM]; // type of triangle mesh - 1-left 45; 2-right 45; 3-left 22.5; 4-right 22.5
-  REALN lx[MAXGEOM]; // geometry parameters; for cyl. - lx = radius, ly = length;
-  REALN ly[MAXGEOM]; // for sphere - lx = radius; for box - lx = lx, ly = ly, lz = lz.
-  REALN lz[MAXGEOM];
+  float lx[MAXGEOM]; // geometry parameters; for cyl. - lx = radius, ly = length;
+  float ly[MAXGEOM]; // for sphere - lx = radius; for box - lx = lx, ly = ly, lz = lz.
+  float lz[MAXGEOM];
 } refpo; // reference points of an object type
 
 struct physics_instance
