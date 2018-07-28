@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "defstr.h"
 
 /*function which translates an object by x,y and z*/
-void translat(sgob *objs,REALD x,REALD y,REALD z)
+void translat(sgob *objs,float x,float y,float z)
 {int i;
 
   for(i=0;i<=3;i++){
@@ -34,7 +34,7 @@ void translat(sgob *objs,REALD x,REALD y,REALD z)
 }
 
 // function which translates a vector (x,y,z) by dx,dy and dz
-void translate_vector(REALD* x,REALD* y,REALD* z, REALD dx,REALD dy,REALD dz)
+void translate_vector(float* x,float* y,float* z, float dx,float dy,float dz)
 {
   *x+=dx;
   *y+=dy;
@@ -43,9 +43,9 @@ void translate_vector(REALD* x,REALD* y,REALD* z, REALD dx,REALD dy,REALD dz)
 
 /*functie care roteste un obiect in jurul unei axe paralele cu z care intersecteaza
 planul xOy intr-un punct de coordonate x si y*/
-void rotatz(sgob *objs,REALD x,REALD y,REALD tt)
+void rotatz(sgob *objs,float x,float y,float tt)
 {int i;
-REALD xtm,sintt,costt;
+float xtm,sintt,costt;
 
   sintt=sin(tt);costt=cos(tt);
 
@@ -56,9 +56,9 @@ REALD xtm,sintt,costt;
   }
 }
 
-void rotate_vector_z(REALD* x,REALD* y, REALD rx, REALD ry, REALD tt)
+void rotate_vector_z(float* x,float* y, float rx, float ry, float tt)
 {
-  REALD xtm,sintt,costt;
+  float xtm,sintt,costt;
 
   sintt=sin(tt);costt=cos(tt);
 
@@ -69,9 +69,9 @@ void rotate_vector_z(REALD* x,REALD* y, REALD rx, REALD ry, REALD tt)
 
 /*functie care roteste un obiect in jurul unei axe paralele cu y care intersecteaza
 planul xOz intr-un punct de coordonate x si z*/
-void rotaty(sgob *objs,REALD x,REALD z,REALD tt)
+void rotaty(sgob *objs,float x,float z,float tt)
 {int i;
-REALD xtm,sintt,costt;
+float xtm,sintt,costt;
 
   sintt=sin(tt);costt=cos(tt);
 
@@ -82,9 +82,9 @@ REALD xtm,sintt,costt;
   }
 }
 
-void rotate_vector_y(REALD* x,REALD* z, REALD rx, REALD rz, REALD tt)
+void rotate_vector_y(float* x,float* z, float rx, float rz, float tt)
 {
-  REALD xtm,sintt,costt;
+  float xtm,sintt,costt;
 
   sintt=sin(tt);costt=cos(tt);
 
@@ -95,9 +95,9 @@ void rotate_vector_y(REALD* x,REALD* z, REALD rx, REALD rz, REALD tt)
 
 /*functie care roteste toate triunghiurile in jurul unei axe paralele cu x care intersecteaza
 planul xOy intr-un punct de coordonate x si y*/
-void rotatx(sgob *objs,REALD y,REALD z,REALD tt)
+void rotatx(sgob *objs,float y,float z,float tt)
 {int i;
-REALD ytm,sintt,costt;
+float ytm,sintt,costt;
 
   sintt=sin(tt);costt=cos(tt);
 
@@ -108,9 +108,9 @@ REALD ytm,sintt,costt;
   }
 }
 
-void rotate_vector_x(REALD* y,REALD* z, REALD ry, REALD rz, REALD tt)
+void rotate_vector_x(float* y,float* z, float ry, float rz, float tt)
 {
-  REALD ytm,sintt,costt;
+  float ytm,sintt,costt;
 
   sintt=sin(tt);costt=cos(tt);
 
@@ -120,9 +120,9 @@ void rotate_vector_x(REALD* y,REALD* z, REALD ry, REALD rz, REALD tt)
 }
 
 /*functie care roteste un obiect in jurul unei axe oarecare care trece prin A1(x,y,z) si B(xb,yb,zb)*/
-void rotab(sgob *objs,REALD x,REALD y,REALD z,REALD xb,REALD yb,REALD zb,REALD tt)
+void rotab(sgob *objs,float x,float y,float z,float xb,float yb,float zb,float tt)
 {int i;
-REALD xtm,
+float xtm,
 sinalf=0,cosalf=0,sinbt=0,cosbt=0,sintt,costt,
 len2,len1, /*lungimea segmentului AB si a proiectiei lui in planul xOy*/
 abx,aby,abz, /*lungimile proiectiilor segmentului AB pe cele 3 axe*/
@@ -177,9 +177,9 @@ sintt=sin(tt);costt=cos(tt);
 	}
 }
 
-void rotate_vector_ab(REALD* x,REALD* y,REALD* z, REALD xa, REALD ya, REALD za, REALD xb, REALD yb, REALD zb, REALD tt)
+void rotate_vector_ab(float* x,float* y,float* z, float xa, float ya, float za, float xb, float yb, float zb, float tt)
 {
-  REALD xtm,
+  float xtm,
     sinalf=0,cosalf=0,sinbt=0,cosbt=0,sintt,costt,
     len2,len1,   // lungimea segmentului AB si a proiectiei lui in planul xOy
     abx,aby,abz, // lungimile proiectiilor segmentului AB pe cele 3 axe
