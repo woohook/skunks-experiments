@@ -1,4 +1,5 @@
 rm -f ./*.o ./skunks2 ./replay2
+gcc -c src/list.c -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
 gcc -c src/trans.c -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
 gcc -c src/physics.c -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
 gcc -c src/surface_sdl2.c -o surface_sdl2.o `sdl2-config --cflags --libs` -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
