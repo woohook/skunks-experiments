@@ -198,63 +198,67 @@ fclose(fis);
 
 
 /*function which reads the reference points and geom types of an object*/
-void readref(refpo *rep,char *numefis)
+void readref(char *numefis)
 {int i,err,lincr,ngeom; /*number of geoms*/
 char s[MAXWLG];
 FILE *fis;
+float x1, y1, z1, x2, y2, z2, lx, ly, lz;
+int ttip;
 
 if(!(fis=fopen(numefis,"r"))){printf("File '%s' could not be open\r\n",numefis);exit(1);}
 
 fscanf(fis,"%d",&ngeom);
 if(ngeom>=(MAXGEOM-1)){printf("File '%s' - too many geoms\r\n",numefis);exit(1);}
 
-rep->nref=2*ngeom; /*number of reference points*/
-
 for(i=1;i<=ngeom;i++){
 	if(!(err=fisgetw(fis,s,&lincr))){afermex(numefis,lincr,s,1);}
 
 	switch(identcmg(s)){
-	  case 1: rep->gtip[i]='b'; /*box*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->lx[i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->ly[i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->lz[i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i]=atof(s);
+	  case 1: // box
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); lx=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ly=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); lz=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x2=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y2=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z2=atof(s);
+                  create_collision_box(x1,y1,z1,x2,y2,z2,lx,ly,lz);
 	          break;
 
-          case 2: rep->gtip[i]='c'; /*cylinder*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->lx[i]=atof(s); /*radius*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->ly[i]=atof(s); /*length*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i]=atof(s);
+          case 2: // cylinder
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); lx=atof(s); // radius
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ly=atof(s); // length
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x2=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y2=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z2=atof(s);
+                  create_collision_cylinder(x1,y1,z1,x2,y2,z2,lx,ly);
 	          break;
 
-          case 3: rep->gtip[i]='s'; /*sphere*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->lx[i]=atof(s); /*radius*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i]=atof(s);
+          case 3: // sphere
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); lx=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x2=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y2=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z2=atof(s);
+                  create_collision_sphere(x1,y1,z1,x2,y2,z2,lx);
 	          break;
 
-	  case 4: rep->gtip[i]='t'; /*triangle mesh*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->ttip[i]=atoi(s); /*type*/
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i-1]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->x[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->y[2*i]=atof(s);
-	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rep->z[2*i]=atof(s);
+	  case 4: // triangle mesh
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ttip=atoi(s); // type
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z1=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x2=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y2=atof(s);
+	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z2=atof(s);
+                  create_collision_mesh(x1,y1,z1,x2,y2,z2,ttip);
 	          break;
 
 	  default: if(s[0]){printf("Error: '%s' line %d - word '%s' not recognized\r\n",numefis,lincr,s);exit(1);}
@@ -315,7 +319,7 @@ void eval_obj(int mesh_id,sgob *objs)
 REALD xmin,xmax,ymin,ymax,zmin,zmax,lenx,leny,lenz;
 REALN x1,y1,z1, x2,y2,z2, x3,y3,z3;
 
-nrfaces=objs->nfa;
+nrfaces=get_face_count(mesh_id);
 
 get_face_vertex(mesh_id,1,1,&x1,&y1,&z1);
 xmin=xmax=x1;
@@ -362,18 +366,18 @@ sgob** readvehicle(char *numefis,sgob** objs,int *nrtyp,int *nrobt,vhc *car)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
-int i,j,k,nto,nob; /*number of object types and number of objects*/
+int i,k,nto,nob; /*number of object types and number of objects*/
 REALN tx,ty,tz, /*initial translations*/
-      ix,jx,kx,
-      iy,jy,ky,
-      iz,jz,kz, /*rotation matrix (temporary)*/
       len;
-dMatrix3 rotmt; /*also rotation matrix*/
+float spring = 0;  // hinge spring coefficient
+float damper = 0;  // hinge damper coefficient
+
+float friction = 0;
 
 nto=*nrtyp;
 nob=*nrobt;
 
-car->tjflag=0; /*no trailer yet*/
+int tjflag=0; // no trailer yet
 
   if(!(fis=fopen(numefis,"r"))){printf("Error: File %s could not be open\r\n",numefis);exit(1);}
 s[0]='1';while(s[0]){
@@ -381,16 +385,15 @@ s[0]='1';while(s[0]){
 
 	switch(identcom(s)){
 	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); (*nrtyp)+=atoi(s);
-	          if(!(refglob=(refpo *)realloc(refglob,((*nrtyp)+1)*sizeof(refpo)))){printf("Out of memory");}
 	          for(i=nto+1;i<=(*nrtyp);i++){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
-	            refglob[i].nfa=findnf(s);
 	            faces(i,s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
 	              readcolor(i,s);
+                    create_collision_geometry();
 	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
-	            readref(&refglob[i],s);
+	            readref(s);
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
 	              ordercl(i,s);
                     complete_mesh();
@@ -408,18 +411,11 @@ s[0]='1';while(s[0]){
 	              if(objs[i]->otyp>(*nrtyp)){
 	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp-nto);exit(1);
 	              }
-	              objs[i]->nref=refglob[objs[i]->otyp].nref;
-	              objs[i]->nfa=refglob[objs[i]->otyp].nfa;
 	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
 	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
 	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;
 	              objs[i]->transform.vy[1]=objs[i]->transform.vy[3]=0;
 	              objs[i]->transform.vz[1]=objs[i]->transform.vz[2]=0;
-	              for(j=1;j<=objs[i]->nref;j++){
-	                objs[i]->xref[j]=refglob[objs[i]->otyp].x[j];
-	                objs[i]->yref[j]=refglob[objs[i]->otyp].y[j];
-	                objs[i]->zref[j]=refglob[objs[i]->otyp].z[j];
-	              }
 	              eval_obj(objs[i]->otyp,objs[i]);
 
                     k=i-nob+car->nob; /*1...car->nob*/
@@ -438,83 +434,38 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
 
-	              translat(objs[i],tx,ty,tz);
+ 	              translat(objs[i],tx,ty,tz);
 
-	            /*translated and rotated object; set geometry parameters*/
-	            for(j=1;j<=(objs[i]->nref/2);j++){
-	              switch(refglob[objs[i]->otyp].gtip[j]){
-	                case 'b': objs[i]->gid[j]=dCreateBox(0,refglob[objs[i]->otyp].lx[j],refglob[objs[i]->otyp].ly[j],refglob[objs[i]->otyp].lz[j]);
-	                          break;
+                    objs[i]->physics_object = create_collision_geometry_instance(objs[i]->otyp, tx, ty, tz, 0, 0, 0);
+                    car->parts[k] = objs[i]->physics_object;
 
-	                case 'c': objs[i]->gid[j]=dCreateCCylinder(0,refglob[objs[i]->otyp].lx[j],refglob[objs[i]->otyp].ly[j]);
-	                          break;
+	            physics_createBody(objs[i]->physics_object, &objs[i]->transform);
 
-	                case 's': objs[i]->gid[j]=dCreateSphere(0,refglob[objs[i]->otyp].lx[j]);
-	                          break;
+                    if((car->ofc[k])>=2){physics_enableImprovedSpinning(objs[i]->physics_object, 1);}
 
-	                default: printf("Unknown geometry '%c'\r\n",refglob[objs[i]->otyp].gtip[j]); exit(1);
+	            if(!(err=fisgetw(fis,s,&lincr)))
+	            {
+                      int distribution_type;
+                      afermex(numefis,lincr,s,1);
+                      distribution_type = identcmg(s);
+
+                      len = 0.0;
+	              switch(distribution_type){
+	                case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); len=atof(s); /*mass*/
+	                        err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
+	                        err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
+	                        err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s); /*box lengths*/
+                                break;
+
+	                case 3: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); len=atof(s); /*mass*/
+	                        err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s); /*sphere radius*/
+                                break;
+
+                        default: if(s[0]){printf("Error: '%s' line %d - word '%s' not recognized\r\n",numefis,lincr,s);exit(1);}
 	              }
-
-	              dGeomSetPosition(objs[i]->gid[j],objs[i]->xref[2*j-1],objs[i]->yref[2*j-1],objs[i]->zref[2*j-1]);
-	
-	              kx=objs[i]->xref[2*j]-objs[i]->xref[2*j-1];
-	              ky=objs[i]->yref[2*j]-objs[i]->yref[2*j-1];
-	              kz=objs[i]->zref[2*j]-objs[i]->zref[2*j-1];
-	              len=sqrt(kx*kx+ky*ky+kz*kz);
-	              kx/=len; ky/=len; kz/=len;
-	              /*beam or column?*/
-	              len=sqrt(ky*ky+kz*kz); /*(horizontal length)/(length)*/
-	                if(len<1e-5){ /*column*/
-	                  jx=0; jy=0; jz=-1;
-	                }
-	                else{ /*beam*/
-	                  jx=0; jy=kz; jz=-ky;
-	                  len=sqrt(jx*jx+jy*jy+jz*jz);
-	                  jx/=len; jy/=len; jz/=len;
-	                }
-                      ix=jy*kz-jz*ky;
-                      iy=jz*kx-jx*kz;
-                      iz=jx*ky-jy*kx; /*calculated local system*/
-                        rotmt[0]=ix; rotmt[1]=jx; rotmt[2]=kx; rotmt[3]=0;
-                        rotmt[4]=iy; rotmt[5]=jy; rotmt[6]=ky; rotmt[7]=0;
-                        rotmt[8]=iz; rotmt[9]=jz; rotmt[10]=kz; rotmt[11]=0;
-
-                      dGeomSetRotation(objs[i]->gid[j],rotmt);
-	            }
-	            /*^set geometry parameters*/
-
-	            car->bid[k]=dBodyCreate(wglob);
-
-	            if((car->ofc[k])>=2){dBodySetFiniteRotationMode(car->bid[k],1);} /*for wheels*/
-
-	            if(!(err=fisgetw(fis,s,&lincr))){afermex(numefis,lincr,s,1);}
-	            switch(identcmg(s)){
-	              case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); len=atof(s); /*mass*/
-	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
-	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
-	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s); /*box lengths*/
-	                      dMassSetBoxTotal(&(car->mass[k]),len,tx,ty,tz);
-	                      dBodySetMass(car->bid[k],&(car->mass[k]));
-	                      dBodySetPosition(car->bid[k],objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0]);
-	                        rotmt[0]=1; rotmt[1]=0; rotmt[2]=0; rotmt[3]=0;
-                                rotmt[4]=0; rotmt[5]=1; rotmt[6]=0; rotmt[7]=0;
-                                rotmt[8]=0; rotmt[9]=0; rotmt[10]=1; rotmt[11]=0;
-                              dBodySetRotation(car->bid[k],rotmt);
-                              break;
-
-	              case 3: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); len=atof(s); /*mass*/
-	                      err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s); /*sphere radius*/
-	                      dMassSetSphereTotal(&(car->mass[k]),len,tx);
-	                      dBodySetMass(car->bid[k],&(car->mass[k]));
-	                      dBodySetPosition(car->bid[k],objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0]);
-	                        rotmt[0]=1; rotmt[1]=0; rotmt[2]=0; rotmt[3]=0;
-                                rotmt[4]=0; rotmt[5]=1; rotmt[6]=0; rotmt[7]=0;
-                                rotmt[8]=0; rotmt[9]=0; rotmt[10]=1; rotmt[11]=0;
-                              dBodySetRotation(car->bid[k],rotmt);
-                              break;
-
-                      default: if(s[0]){printf("Error: '%s' line %d - word '%s' not recognized\r\n",numefis,lincr,s);exit(1);}
-	            }
+                      physics_setBodyMass(car->parts[k],len,distribution_type,tx,ty,tz);
+                    }
+                    physics_setBodyPosition(car->parts[k],objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0]);
 	            /*^set mass parameters*/
 	          }
 	          break;
@@ -525,28 +476,22 @@ s[0]='1';while(s[0]){
           case 6: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->brake=atof(s);
                   break;
 
-          case 7: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->spring=atof(s);
+          case 7: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); spring=atof(s);
                   break;
 
-          case 8: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->damper=atof(s);
+          case 8: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); damper=atof(s);
                   break;
 
-          case 9: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->mu=atof(s);
+          case 9: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); friction = atof(s);
                   break;
 
           case 10: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
                    err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
                    err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
                    if(car->ofc[2]!=2){printf("Error: '%s' line %d - trailer joint without trailer\r\n",numefis,lincr);exit(1);}
-                   if(car->tjflag==1){printf("Error: '%s' line %d - only one such joint allowed\r\n",numefis,lincr);exit(1);}
-                   car->tjflag=1;
-                   car->tjid=dJointCreateUniversal(wglob,0);
-                   dJointAttach(car->tjid,car->bid[1],car->bid[2]);
-                   dJointSetUniversalAnchor(car->tjid,tx,ty,tz);
-                   dJointSetUniversalAxis1(car->tjid,1.0,0.0,0.0);
-                   dJointSetUniversalAxis2(car->tjid,0.0,1.0,0.0);
-                   dJointSetUniversalParam(car->tjid,dParamLoStop,-2.094);
-                   dJointSetUniversalParam(car->tjid,dParamHiStop,2.094);
+                   if(tjflag==1){printf("Error: '%s' line %d - only one such joint allowed\r\n",numefis,lincr);exit(1);}
+                   tjflag=1;
+                   physics_createUniversalJoint(car->parts[1], car->parts[2],tx,ty,tz);
                    break;
 
           case 11: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->camh=atof(s);
@@ -558,50 +503,37 @@ s[0]='1';while(s[0]){
 }
 fclose(fis);
 
-/*attach geoms to bodies*/
-for(i=1;i<=car->nob;i++){
-  k=car->oid[i];
-  for(j=1;j<=(objs[k]->nref/2);j++){
-    dGeomSetBody(objs[k]->gid[j],car->bid[i]);
-  }
-}
-/*attached geoms to bodies*/
-
 /*set joints*/
-car->nj=0; /*number of permanent joints*/
 for(i=1;i<=car->nob;i++){
+  physics_setBodyFriction(car->parts[i], friction);
+
   if(car->ofc[i]>=3){
 
+      float* vrx = 0, *af = 0, *bf = &car->bf;
+      switch(car->ofc[i])
+      {
+        case 3:
+          af = &car->af;
+          break;
+        case 4:
+          vrx = &car->vrx;
+          break;
+        case 5:
+          vrx = &car->vrx;
+          af  = &car->af;
+          break;
+        default:
+          break;
+      }
       k=1; if(car->ofc[i]==7){k=2;}
 
-      (car->nj)++;
-      car->jid[car->nj]=dJointCreateHinge2(wglob,0);
-      car->bkm[car->nj]=dJointCreateAMotor(wglob,0); /*brake motor*/
-      car->jfc[car->nj]=car->ofc[i];
-      dJointAttach(car->jid[car->nj],car->bid[k],car->bid[i]);
-      dJointAttach(car->bkm[car->nj],car->bid[k],car->bid[i]);
-      dJointSetHinge2Anchor(car->jid[car->nj],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0]);
-      dJointSetHinge2Axis1(car->jid[car->nj],1,0,0);
-      dJointSetHinge2Axis2(car->jid[car->nj],0,1,0);
-        dJointSetHinge2Param(car->jid[car->nj],dParamLoStop,-0.001);
-        dJointSetHinge2Param(car->jid[car->nj],dParamHiStop,0.001); /*for axis 1*/
-      dJointSetAMotorNumAxes(car->bkm[car->nj],1);
-      dJointSetAMotorAxis(car->bkm[car->nj],0,2,0,1,0);
-      dJointSetAMotorParam(car->bkm[car->nj],dParamVel,0);
-      dJointSetAMotorParam(car->bkm[car->nj],dParamFMax,0.01*car->brake);
+      physics_createHinge2(car->parts[k],car->parts[i],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0], vrx, af, bf, spring, damper);
   }
 }
 /*^set joints*/
 
 return objs;}
 
-
-dReal vert1glob[12]={0,-12.732,0,0,0,12.5,0.02,0,0,5.10,17.80,0},
-      vert2glob[12]={0,12.732,0,0,0,-12.5,0.02,0,0,-5.10,17.80,0},
-      vert3glob[12]={0,-25.465,0,0,0,12.5,0.02,0,0,9.61,14.50,0},
-      vert4glob[12]={0,25.465,0,0,0,-12.5,0.02,0,0,-9.61,14.50,0};
-dTriIndex indexlglob[3]={0,1,2},
-          indexrglob[3]={0,2,1}; /*global variables used by the function below*/
 
 /*function which reads the track; nrobt - number of objects*/
 sgob** readtrack(char *numefis,int *nrobt,int *nrtyp,int* background_red, int* background_green, int* background_blue)
@@ -614,23 +546,7 @@ int i,j,
 sgob** objs = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       fred=1.0,fgreen=1.0,fblue=1.0, /*color multiplication factors*/
-      ix,jx,kx,
-      iy,jy,ky,
-      iz,jz,kz, /*rotation matrix (temporary)*/
       len;
-dMatrix3 rotmt; /*also rotation matrix*/
-
-dTriMeshDataID trid[5];
-
-trid[1]=dGeomTriMeshDataCreate();
-trid[2]=dGeomTriMeshDataCreate();
-trid[3]=dGeomTriMeshDataCreate();
-trid[4]=dGeomTriMeshDataCreate();
-dGeomTriMeshDataBuildSimple(trid[1],vert1glob,3,indexlglob,3);
-dGeomTriMeshDataBuildSimple(trid[2],vert2glob,3,indexrglob,3);
-dGeomTriMeshDataBuildSimple(trid[3],vert3glob,3,indexlglob,3);
-dGeomTriMeshDataBuildSimple(trid[4],vert4glob,3,indexrglob,3);
-/*data for triangle meshes used at curved road elements*/
 
 float light_ambient=0.5;
 float light_headlight=0.3;
@@ -655,16 +571,15 @@ s[0]='1';while(s[0]){
 	          break;
 
 	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); (*nrtyp)=nto=atoi(s);
-	          if(!(refglob=(refpo *)malloc((nto+1)*sizeof(refpo)))){printf("Out of memory");}
 	          for(i=1;i<=nto;i++){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
-	            refglob[i].nfa=findnf(s);
 	            faces(i,s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
 	              readcolor(i,s);
+                    create_collision_geometry();
 	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
-	            readref(&refglob[i],s);
+	            readref(s);
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
 	              ordercl(i,s);
                     complete_mesh();
@@ -681,18 +596,11 @@ s[0]='1';while(s[0]){
 	              if(objs[i]->otyp>nto){
 	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp);exit(1);
 	              }
-	              objs[i]->nref=refglob[objs[i]->otyp].nref;
-	              objs[i]->nfa=refglob[objs[i]->otyp].nfa;
 	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
 	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
 	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;
 	              objs[i]->transform.vy[1]=objs[i]->transform.vy[3]=0;
 	              objs[i]->transform.vz[1]=objs[i]->transform.vz[2]=0;
-	              for(j=1;j<=objs[i]->nref;j++){
-	                objs[i]->xref[j]=refglob[objs[i]->otyp].x[j];
-	                objs[i]->yref[j]=refglob[objs[i]->otyp].y[j];
-	                objs[i]->zref[j]=refglob[objs[i]->otyp].z[j];
-	              }
 	              eval_obj(objs[i]->otyp,objs[i]);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
@@ -705,53 +613,9 @@ s[0]='1';while(s[0]){
 	              rotatx(objs[i],0,0,rx);
 	              translat(objs[i],tx,ty,tz);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); objs[i]->lev=atoi(s);
-	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); objs[i]->mu=atof(s); /*friction*/
+	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); // friction value not used
 
-	            /*translated and rotated object; set geometry parameters*/
-	            for(j=1;j<=(objs[i]->nref/2);j++){
-	              switch(refglob[objs[i]->otyp].gtip[j]){
-	                case 'b': objs[i]->gid[j]=dCreateBox(0,refglob[objs[i]->otyp].lx[j],refglob[objs[i]->otyp].ly[j],refglob[objs[i]->otyp].lz[j]);
-	                          break;
-
-	                case 'c': objs[i]->gid[j]=dCreateCCylinder(0,refglob[objs[i]->otyp].lx[j],refglob[objs[i]->otyp].ly[j]);
-	                          break;
-
-	                case 's': objs[i]->gid[j]=dCreateSphere(0,refglob[objs[i]->otyp].lx[j]);
-	                          break;
-
-	                case 't': objs[i]->gid[j]=dCreateTriMesh(0,trid[refglob[objs[i]->otyp].ttip[j]],0,0,0);
-	                          break;
-
-	                default: printf("Unknown geometry '%c'\r\n",refglob[objs[i]->otyp].gtip[j]); exit(1);
-	              }
-
-	              dGeomSetPosition(objs[i]->gid[j],objs[i]->xref[2*j-1],objs[i]->yref[2*j-1],objs[i]->zref[2*j-1]);
-	
-	              kx=objs[i]->xref[2*j]-objs[i]->xref[2*j-1];
-	              ky=objs[i]->yref[2*j]-objs[i]->yref[2*j-1];
-	              kz=objs[i]->zref[2*j]-objs[i]->zref[2*j-1];
-	              len=sqrt(kx*kx+ky*ky+kz*kz);
-	              kx/=len; ky/=len; kz/=len;
-	              /*beam or column?*/
-	              len=sqrt(ky*ky+kz*kz); /*(horizontal length)/(length)*/
-	                if(len<1e-5){ /*column*/
-	                  jx=0; jy=0; jz=-1;
-	                }
-	                else{ /*beam*/
-	                  jx=0; jy=kz; jz=-ky;
-	                  len=sqrt(jx*jx+jy*jy+jz*jz);
-	                  jx/=len; jy/=len; jz/=len;
-	                }
-                      ix=jy*kz-jz*ky;
-                      iy=jz*kx-jx*kz;
-                      iz=jx*ky-jy*kx; /*calculated local system*/
-                        rotmt[0]=ix; rotmt[1]=jx; rotmt[2]=kx; rotmt[3]=0;
-                        rotmt[4]=iy; rotmt[5]=jy; rotmt[6]=ky; rotmt[7]=0;
-                        rotmt[8]=iz; rotmt[9]=jz; rotmt[10]=kz; rotmt[11]=0;
-
-                      dGeomSetRotation(objs[i]->gid[j],rotmt);
-	            }
-	            /*^set geometry parameters*/
+                    objs[i]->physics_object = create_collision_geometry_instance(objs[i]->otyp, tx, ty, tz, rx, ry, rz);
 	          }
 	          break;
 
@@ -772,7 +636,7 @@ s[0]='1';while(s[0]){
 fclose(fis);
 
 for(i=1;i<=nto;i++){
-  for(j=1;j<=refglob[i].nfa;j++){
+  for(j=1;j<=get_face_count(i);j++){
     int red, green, blue;
     get_face_color(i,j,&red,&green,&blue);
     len=red*fred;

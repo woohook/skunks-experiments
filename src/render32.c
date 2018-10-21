@@ -252,6 +252,11 @@ void enable_face_culling(int mesh_id, int face_id)
   face[face_id].cull = ((face[face_id].cull)&2)+1;
 }
 
+int get_face_count(int mesh_id)
+{
+  return g_meshes[mesh_id].face_count - 1;
+}
+
 void set_background_color(int red, int green, int blue)
 {
   g_backcol.red   = red;

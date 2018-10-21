@@ -21,7 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <math.h>
 #include <string.h>
 #include <SDL.h>
-#include <ode/ode.h>
 #include <time.h>
 #include "config.h"
 
@@ -187,7 +186,7 @@ SDL_Quit();
 
 runsim(objs,&car,repf,&timp,&speed,1); /*freed static variables from runsim()*/
 renderer_release();
-free (refglob);
+
 for(i=1;i<=nob;i++)
 {
   free(objs[i]);

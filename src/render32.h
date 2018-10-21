@@ -37,6 +37,8 @@ void flip_face(int mesh_id, int face_id);
 
 void enable_face_culling(int mesh_id, int face_id);
 
+int get_face_count(int mesh_id);
+
 void set_background_color(int red, int green, int blue);
 
 void set_ambient_light(float ambient_light);

@@ -21,7 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <math.h>
 #include <string.h>
 #include <SDL.h>
-#include <ode/ode.h>
 #include <time.h>
 #include "config.h"
 
@@ -29,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "surface.h"
 #include "render32.h"
+#include "physics.h"
 
 #include "trans.h"
 #include "readfile.h"
@@ -65,17 +65,17 @@ REALN tframe=0,xan=0,/*tframe-time necessary for display; xan-number of displaye
       timp,dstr; /*total time, distance traveled*/
 
 /*for game*/
-REALN vrx,vrxmax,vrxmr, /*rot. speed*/
+REALN vrxmax,vrxmr, /*rot. speed*/
       arx,arxmax,arxmr, /*rot. acceleration*/
       vrot3, /*rot. speed of level 3 objects*/
       vrotc,vrcmax,rotc, /*rot. speed and rotation of camera*/
       realstep, /*real time step (s)*/
-      speed,dspeed,rotspeed,acc,
-      af=0,bf=0; /*acceleration and brake factors*/
+      speed,dspeed,rotspeed,acc;
 int turn, /*-1: left; 0: no turn; 1: right*/
     dmode, /*1 forward, -1 reverse*/
     nstepsf; /*number of simulation steps/frame*/
 FILE *repf;
+int rsem=0; // when rsem==REPSTEPS, save replay data
 /*for game^*/
 
 
@@ -86,6 +86,10 @@ camera.transform.vx[0]=0; camera.transform.vy[0]=0; camera.transform.vz[0]=0;
 camera.transform.vx[1]=1; camera.transform.vy[1]=0; camera.transform.vz[1]=0;
 camera.transform.vx[2]=0; camera.transform.vy[2]=1; camera.transform.vz[2]=0;
 camera.transform.vx[3]=0; camera.transform.vy[3]=0; camera.transform.vz[3]=1; /*set camera parameters*/
+
+car.af = 0;
+car.bf = 0;
+car.vrx = 0;
 
 if(argc<=2){printf("Error: Input files not specified\r\nExample: ./skunks cars/car1 tracks/track1\r\n");exit(1);}
 if(argc>=4){printf("Error: Too many arguments\r\n");exit(1);}
@@ -98,12 +102,10 @@ fprintf(repf,"%s\r\n%s\r\n",argv[1],argv[2]);
 repf=NULL;
 #endif
 
-
-dInitODE();
-wglob=dWorldCreate();
-dWorldSetERP(wglob,0.2);
-dWorldSetCFM(wglob,1e-5);
-dWorldSetGravity(wglob,GRAVITY,0,0);
+physics_init();
+physics_setERP(0.2);
+physics_setCFM(1e-5);
+physics_setGravity(GRAVITY);
 
 strcpy(numefis,argv[2]);
 objs=readtrack(numefis,&nob,&nto,&background_red,&background_green,&background_blue); /*read objects from file*/
@@ -164,7 +166,7 @@ SDL_PauseAudio(0);
 #endif
 
 
-vrx=0; arx=0;
+arx=0;
 vrxmr=vrxmax=0.36;
 arxmr=arxmax=vrxmax/1.5;
 turn=0;
@@ -191,19 +193,19 @@ else{
 }
 
 switch(turn){
-  case 0: if(vrx>0){arx=-arxmr*1.5;}else{if(vrx<0){arx=arxmr*1.5;}else{arx=0;}}
-          if(fabs(vrx)<2.25*tframe*arx){arx=0; vrx=0;}
+  case 0: if(car.vrx>0){arx=-arxmr*1.5;}else{if(car.vrx<0){arx=arxmr*1.5;}else{arx=0;}}
+          if(fabs(car.vrx)<2.25*tframe*arx){arx=0; car.vrx=0;}
           break;
-  case -1: if(vrx>-vrxmr){arx=-arxmr; if(vrx>0){arx*=1.5;}}else{arx=0;}
+  case -1: if(car.vrx>-vrxmr){arx=-arxmr; if(car.vrx>0){arx*=1.5;}}else{arx=0;}
            break;
-  case 1: if(vrx<vrxmr){arx=arxmr; if(vrx<0){arx*=1.5;}}else{arx=0;}
+  case 1: if(car.vrx<vrxmr){arx=arxmr; if(car.vrx<0){arx*=1.5;}}else{arx=0;}
           break;
   default: break;
 }
 
-vrx+=arx*tframe;
-if(vrx>vrxmr){vrx=vrxmr;}
-if(vrx<-vrxmr){vrx=-vrxmr;}
+car.vrx+=arx*tframe;
+if(car.vrx>vrxmr){car.vrx=vrxmr;}
+if(car.vrx<-vrxmr){car.vrx=-vrxmr;}
 
 
 /*simulation*/
@@ -214,9 +216,26 @@ speed=0.1/realstep; /*decrease simulation speed if < 10fps*/
 if(nstepsf>(int)speed){nstepsf=(int)speed;}
 
 for(i=1;i<=nstepsf;i++){
-  runsim(objs,nob,&car,realstep,vrx,af,bf,repf,&timp);
+  runsim(realstep);
+  timp+=realstep;
+
+#if REPLAY==1
+  rsem++;
+  if(rsem>=REPSTEPS){
+    int j,k;
+    fprintf(repf,"%1.3f ",timp);
+    for(k=1;k<=car.nob;k++){
+      j=car.oid[k];
+      fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[0],objs[j]->transform.vy[0],objs[j]->transform.vz[0]);
+      fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[1],objs[j]->transform.vy[1],objs[j]->transform.vz[1]);
+      fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[2],objs[j]->transform.vy[2],objs[j]->transform.vz[2]);
+      fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[3],objs[j]->transform.vy[3],objs[j]->transform.vz[3]);
+    }
+    fprintf(repf,"\r\n");
+    rsem=0;
+  }
+#endif
 }
-/*^simulation - last 2 parameters are for saving replay data*/
 
 
 for(i=1;i<=nob;i++){
@@ -225,7 +244,19 @@ for(i=1;i<=nob;i++){
   }
 }
 
-rdspeed(&car,&speed,&rotspeed,&dspeed);
+physics_getLinearBodyVelocity(car.parts[1],&speed,&dspeed);
+{
+  int motor_wheel_count=0;
+  for(i=1;i<=car.nob;i++)
+  {
+    if((car.ofc[i]==3)||(car.ofc[i]==5))
+    {
+      motor_wheel_count++;
+      physics_getAngularBodyVelocity(car.parts[i],&rotspeed);
+    }
+  }
+  rotspeed/=motor_wheel_count; // average rot. speed of motor wheels
+}
 acc=dspeed/tframe;
 
 #if SOUND==1
@@ -250,11 +281,11 @@ case SDL_KEYDOWN:
   switch(event.key.keysym.sym){
     case SDLK_q:
     case SDLK_UP:
-    case SDLK_t: af=dmode;
+    case SDLK_t: car.af=car.accel*(float)dmode;
                  break;
     case SDLK_a:
     case SDLK_DOWN:
-    case SDLK_f: bf=1;
+    case SDLK_f: car.bf=1.01f*car.brake;
                  break;
     case SDLK_o:
     case SDLK_LEFT:
@@ -286,11 +317,11 @@ case SDL_KEYUP:
   switch(event.key.keysym.sym){
     case SDLK_q:
     case SDLK_UP:
-    case SDLK_t: af=0;
+    case SDLK_t: car.af=0;
                  break;
     case SDLK_a:
     case SDLK_DOWN:
-    case SDLK_f: bf=0;
+    case SDLK_f: car.bf=0.01f*car.brake;
                  break;
     case SDLK_o:
     case SDLK_LEFT:
@@ -301,7 +332,7 @@ case SDL_KEYUP:
     case SDLK_u: if(turn==1){turn=0;}
                  break;
 
-    case SDLK_r: af=0;
+    case SDLK_r: car.af=0;
                  break;
 
     case SDLK_n: vrotc=0;
@@ -342,7 +373,6 @@ free(obtained);
 #endif
 
 renderer_release();
-free (refglob);
 for(i=1;i<=nob;i++)
 {
   free(objs[i]);
@@ -355,8 +385,7 @@ fclose(repf);
 
 /* printf("Press ENTER: ");getchar();printf("\r\n"); */
 
-dWorldDestroy(wglob);
-dCloseODE();
+physics_release();
 
 odis(0,0,0,0); /*freed static variables from odis() in "camera.h"*/
 

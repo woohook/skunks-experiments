@@ -40,8 +40,6 @@ rot[2]=objs[j]->transform.vx[3]-objs[j]->transform.vx[0];
 rot[6]=objs[j]->transform.vy[3]-objs[j]->transform.vy[0];
 rot[10]=objs[j]->transform.vz[3]-objs[j]->transform.vz[0];
 
-camera->nref=0;
-
 switch(flag){
   case 1: a=0.57;
           x0=pos[0]+12.0; y0=pos[1]; z0=pos[2]-12.0;
