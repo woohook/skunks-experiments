@@ -37,8 +37,17 @@ void list_add(struct _list* list, void* item)
   new_item->next = 0;
   new_item->item = item;
 
-  last->next = new_item;
+  if(list->item_count > 0)
+  {
+    last->next = new_item;
+  }
+
+  if(list->item_count == 0)
+  {
+    list->first = new_item;
+  }
   list->last = new_item;
+  list->item_count++;
 }
 
 struct _list_item* list_get_first(struct _list* list)
