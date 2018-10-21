@@ -16,11 +16,15 @@ struct _list
   struct _list_item* last;
 };
 
-void list_initialize(struct _list* list)
+struct _list* list_create()
 {
+  struct _list* list = (struct _list*)malloc(sizeof(struct _list));
+
   list->item_count = 0;
   list->first = 0;
   list->last = 0;
+
+  return list;
 }
 
 void list_add(struct _list* list, void* item)

@@ -1,7 +1,7 @@
 struct _list;
 struct _list_item;
 
-void list_initialize(struct _list* list);
+struct _list* list_create();
 
 void list_add(struct _list* list, void* item);
 
