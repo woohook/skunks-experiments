@@ -27,6 +27,16 @@ struct _list* list_create()
   return list;
 }
 
+void list_release(struct _list* list)
+{
+  struct _list_item* item = list->first;
+  for(int i=0; i < list->item_count; i++)
+  {
+    free(item);
+  }
+  free(list);
+}
+
 void list_add(struct _list* list, void* item)
 {
   struct _list_item* last = list->last;
@@ -62,6 +72,18 @@ struct _list_item* list_get_first(struct _list* list)
   return item;
 }
 
+struct _list_item* list_get_last(struct _list* list)
+{
+  struct _list_item* item = 0;
+
+  if(list->item_count > 0)
+  {
+    item = list->last;
+  }
+
+  return item;
+}
+
 struct _list_item* list_get_next(struct _list_item* item)
 {
   return item->next;
@@ -70,4 +92,17 @@ struct _list_item* list_get_next(struct _list_item* item)
 void* list_get_item(struct _list_item* item)
 {
   return item->item;
+}
+
+void* list_get(struct _list* list, int item_index)
+{
+  struct _list_item* next_item = list->first;
+
+  while(item_index > 0)
+  {
+    next_item = next_item->next;
+    item_index--;
+  }
+
+  return list_get_item(next_item);
 }
