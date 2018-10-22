@@ -740,6 +740,10 @@ if(!sem){
   if(!(facedisp=(tria *)malloc(22*sizeof(tria)))){printf("Out of memory");}
   nrfm=1; sem=1;}
 
+clear_depth_buffer(distmin,width,height,zmax);
+
+surface_begin_rendering(pSurface);
+
 ix=view_transform->vx[1]-view_transform->vx[0];
 jx=view_transform->vx[2]-view_transform->vx[0];
 kx=view_transform->vx[3]-view_transform->vx[0];
@@ -867,10 +871,6 @@ for(i=0;i<instance_count;i++){
 }
 
 nrdisp=fclip(face,nrfaces,zmin,facedisp,zmax,tgh,tgv);
-
-surface_begin_rendering(pSurface);
-
-clear_depth_buffer(distmin,width,height,zmax);
 
 displaysdl(pSurface,facedisp,nrdisp,distmin,focal,&rotlight);
 
