@@ -109,5 +109,5 @@ void* list_get_value(struct _list* list, int item_index)
     item_index--;
   }
 
-  return list_get_item(next_item);
+  return list_item_get_value(next_item);
 }
