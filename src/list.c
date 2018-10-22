@@ -6,7 +6,7 @@ struct _list_item
   struct _list* parent;
   struct _list_item* previous;
   struct _list_item* next;
-  void* item;
+  void* value;
 };
 
 struct _list
@@ -37,7 +37,12 @@ void list_release(struct _list* list)
   free(list);
 }
 
-void list_add(struct _list* list, void* item)
+int list_get_size(struct _list* list)
+{
+  return list->item_count;
+}
+
+void list_add(struct _list* list, void* value)
 {
   struct _list_item* last = list->last;
 
@@ -45,7 +50,7 @@ void list_add(struct _list* list, void* item)
 
   new_item->previous = last;
   new_item->next = 0;
-  new_item->item = item;
+  new_item->value = value;
 
   if(list->item_count > 0)
   {
@@ -84,17 +89,17 @@ struct _list_item* list_get_last(struct _list* list)
   return item;
 }
 
-struct _list_item* list_get_next(struct _list_item* item)
+struct _list_item* list_item_get_next(struct _list_item* item)
 {
   return item->next;
 }
 
-void* list_get_item(struct _list_item* item)
+void* list_item_get_value(struct _list_item* item)
 {
-  return item->item;
+  return item->value;
 }
 
-void* list_get(struct _list* list, int item_index)
+void* list_get_value(struct _list* list, int item_index)
 {
   struct _list_item* next_item = list->first;
 
