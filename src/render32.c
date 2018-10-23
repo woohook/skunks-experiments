@@ -874,12 +874,12 @@ for(i=0;i<instance_count;i++){
       face[j+crf].x3=transform.vx[0]+x*fix+y*fjx+z*fkx;
       face[j+crf].y3=transform.vy[0]+x*fiy+y*fjy+z*fky;
       face[j+crf].z3=transform.vz[0]+x*fiz+y*fjz+z*fkz; /*updated positions of triangles*/
+
+      nrdisp=fclip(pSurface, &face[j+crf-1],1/*nrfaces*/,zmin,facedisp,zmax,tgh,tgv, distmin, focal, &rotlight);
     }
     crf=nrfaces;
   }
 }
-
-nrdisp=fclip(pSurface, face,nrfaces,zmin,facedisp,zmax,tgh,tgv, distmin, focal, &rotlight);
 
 finish_frame(pSurface,distmin,zfog,zmax);
 
