@@ -297,8 +297,10 @@ void set_double_pixel(int double_pixel)
   g_double_pixel = double_pixel;
 }
 
+void displaysdl(struct _surface* pSurface,tria *face,int nrfaces,float *distmin,float focal, lightpr* light);
+
 /*functie care elimina triunghiurile care sunt in plus*/
-int fclip(tria *face,int nrfaces,float zmin,tria *facedisp,float zmax,float tgh,float tgv)
+int fclip(struct _surface* pSurface, tria *face,int nrfaces,float zmin,tria *facedisp,float zmax,float tgh,float tgv, float* distmin, int focal, lightpr* pRotLight)
 {int i,j,k,l,kmin,invs;
 float x[4],y[4],z[4],tmp,tmp2;
 j=0; /*variabila pt. numarat triunghiurile afisate*/
@@ -311,7 +313,11 @@ for(i=1;i<=nrfaces;i++){
   if((face[i].x1<-tgv*face[i].z1)&&(face[i].x2<-tgv*face[i].z2)&&(face[i].x3<-tgv*face[i].z3)){continue;}
   if((face[i].y1<-tgh*face[i].z1)&&(face[i].y2<-tgh*face[i].z2)&&(face[i].y3<-tgh*face[i].z3)){continue;}
 
-  if((face[i].z1>zmin)&&(face[i].z2>zmin)&&(face[i].z3>zmin)){j++;facedisp[j]=face[i];}
+  if((face[i].z1>zmin)&&(face[i].z2>zmin)&&(face[i].z3>zmin))
+  {
+    j++;facedisp[j]=face[i];
+    displaysdl(pSurface,&facedisp[j],1/*nrdisp*/,distmin,focal,pRotLight);
+  }
   else{
     x[1]=face[i].x1;x[2]=face[i].x2;x[3]=face[i].x3;
     y[1]=face[i].y1;y[2]=face[i].y2;y[3]=face[i].y3;
@@ -349,6 +355,7 @@ for(i=1;i<=nrfaces;i++){
                 tmp2=facedisp[j].y1; facedisp[j].y1=facedisp[j].y2; facedisp[j].y2=tmp2;
                 tmp2=facedisp[j].z1; facedisp[j].z1=facedisp[j].z2; facedisp[j].z2=tmp2;
 	      }
+              displaysdl(pSurface,&facedisp[j],1/*nrdisp*/,distmin,focal,pRotLight);
   }else{
     j++;
       tmp=(zmin-z[1])/(z[2]-z[1]);
@@ -369,6 +376,7 @@ for(i=1;i<=nrfaces;i++){
                   tmp2=facedisp[j].y1; facedisp[j].y1=facedisp[j].y2; facedisp[j].y2=tmp2;
                   tmp2=facedisp[j].z1; facedisp[j].z1=facedisp[j].z2; facedisp[j].z2=tmp2;
 	        }
+                displaysdl(pSurface,&facedisp[j],1/*nrdisp*/,distmin,focal,pRotLight);
     j++;
         facedisp[j].x1=tmp*(x[2]-x[1])+x[1];
 	facedisp[j].y1=tmp*(y[2]-y[1])+y[1];
@@ -387,6 +395,7 @@ for(i=1;i<=nrfaces;i++){
                 tmp2=facedisp[j].y1; facedisp[j].y1=facedisp[j].y2; facedisp[j].y2=tmp2;
                 tmp2=facedisp[j].z1; facedisp[j].z1=facedisp[j].z2; facedisp[j].z2=tmp2;
 	      }
+              displaysdl(pSurface,&facedisp[j],1/*nrdisp*/,distmin,focal,pRotLight);
   }
   }
 
@@ -870,9 +879,7 @@ for(i=0;i<instance_count;i++){
   }
 }
 
-nrdisp=fclip(face,nrfaces,zmin,facedisp,zmax,tgh,tgv);
-
-displaysdl(pSurface,facedisp,nrdisp,distmin,focal,&rotlight);
+nrdisp=fclip(pSurface, face,nrfaces,zmin,facedisp,zmax,tgh,tgv, distmin, focal, &rotlight);
 
 finish_frame(pSurface,distmin,zfog,zmax);
 
