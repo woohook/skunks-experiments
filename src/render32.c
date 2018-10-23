@@ -316,7 +316,7 @@ for(i=1;i<=nrfaces;i++){
   if((face[i].z1>zmin)&&(face[i].z2>zmin)&&(face[i].z3>zmin))
   {
     j++;facedisp[j]=face[i];
-    displaysdl(pSurface,&facedisp[j],1/*nrdisp*/,distmin,focal,pRotLight);
+    displaysdl(pSurface,&facedisp[j-1],1/*nrdisp*/,distmin,focal,pRotLight);
   }
   else{
     x[1]=face[i].x1;x[2]=face[i].x2;x[3]=face[i].x3;
@@ -355,7 +355,7 @@ for(i=1;i<=nrfaces;i++){
                 tmp2=facedisp[j].y1; facedisp[j].y1=facedisp[j].y2; facedisp[j].y2=tmp2;
                 tmp2=facedisp[j].z1; facedisp[j].z1=facedisp[j].z2; facedisp[j].z2=tmp2;
 	      }
-              displaysdl(pSurface,&facedisp[j],1/*nrdisp*/,distmin,focal,pRotLight);
+              displaysdl(pSurface,&facedisp[j-1],1/*nrdisp*/,distmin,focal,pRotLight);
   }else{
     j++;
       tmp=(zmin-z[1])/(z[2]-z[1]);
@@ -376,7 +376,7 @@ for(i=1;i<=nrfaces;i++){
                   tmp2=facedisp[j].y1; facedisp[j].y1=facedisp[j].y2; facedisp[j].y2=tmp2;
                   tmp2=facedisp[j].z1; facedisp[j].z1=facedisp[j].z2; facedisp[j].z2=tmp2;
 	        }
-                displaysdl(pSurface,&facedisp[j],1/*nrdisp*/,distmin,focal,pRotLight);
+                displaysdl(pSurface,&facedisp[j-1],1/*nrdisp*/,distmin,focal,pRotLight);
     j++;
         facedisp[j].x1=tmp*(x[2]-x[1])+x[1];
 	facedisp[j].y1=tmp*(y[2]-y[1])+y[1];
@@ -395,7 +395,7 @@ for(i=1;i<=nrfaces;i++){
                 tmp2=facedisp[j].y1; facedisp[j].y1=facedisp[j].y2; facedisp[j].y2=tmp2;
                 tmp2=facedisp[j].z1; facedisp[j].z1=facedisp[j].z2; facedisp[j].z2=tmp2;
 	      }
-              displaysdl(pSurface,&facedisp[j],1/*nrdisp*/,distmin,focal,pRotLight);
+              displaysdl(pSurface,&facedisp[j-1],1/*nrdisp*/,distmin,focal,pRotLight);
   }
   }
 
