@@ -297,7 +297,7 @@ void set_double_pixel(int double_pixel)
   g_double_pixel = double_pixel;
 }
 
-void displaysdl(struct _surface* pSurface,tria *face,int nrfaces,float *distmin,float focal, lightpr* light);
+void displaysdl(struct _surface* pSurface,tria *face,float *distmin,float focal, lightpr* light);
 
 /*functie care elimina triunghiurile care sunt in plus*/
 int fclip(struct _surface* pSurface, tria *face,int nrfaces,float zmin,tria *facedisp,float zmax,float tgh,float tgv, float* distmin, int focal, lightpr* pRotLight)
@@ -316,7 +316,7 @@ for(i=1;i<=nrfaces;i++){
   if((face[i].z1>zmin)&&(face[i].z2>zmin)&&(face[i].z3>zmin))
   {
     j++;facedisp[j]=face[i];
-    displaysdl(pSurface,&facedisp[j-1],1/*nrdisp*/,distmin,focal,pRotLight);
+    displaysdl(pSurface,&facedisp[j],distmin,focal,pRotLight);
   }
   else{
     x[1]=face[i].x1;x[2]=face[i].x2;x[3]=face[i].x3;
@@ -355,7 +355,7 @@ for(i=1;i<=nrfaces;i++){
                 tmp2=facedisp[j].y1; facedisp[j].y1=facedisp[j].y2; facedisp[j].y2=tmp2;
                 tmp2=facedisp[j].z1; facedisp[j].z1=facedisp[j].z2; facedisp[j].z2=tmp2;
 	      }
-              displaysdl(pSurface,&facedisp[j-1],1/*nrdisp*/,distmin,focal,pRotLight);
+              displaysdl(pSurface,&facedisp[j],distmin,focal,pRotLight);
   }else{
     j++;
       tmp=(zmin-z[1])/(z[2]-z[1]);
@@ -376,7 +376,7 @@ for(i=1;i<=nrfaces;i++){
                   tmp2=facedisp[j].y1; facedisp[j].y1=facedisp[j].y2; facedisp[j].y2=tmp2;
                   tmp2=facedisp[j].z1; facedisp[j].z1=facedisp[j].z2; facedisp[j].z2=tmp2;
 	        }
-                displaysdl(pSurface,&facedisp[j-1],1/*nrdisp*/,distmin,focal,pRotLight);
+                displaysdl(pSurface,&facedisp[j],distmin,focal,pRotLight);
     j++;
         facedisp[j].x1=tmp*(x[2]-x[1])+x[1];
 	facedisp[j].y1=tmp*(y[2]-y[1])+y[1];
@@ -395,7 +395,7 @@ for(i=1;i<=nrfaces;i++){
                 tmp2=facedisp[j].y1; facedisp[j].y1=facedisp[j].y2; facedisp[j].y2=tmp2;
                 tmp2=facedisp[j].z1; facedisp[j].z1=facedisp[j].z2; facedisp[j].z2=tmp2;
 	      }
-              displaysdl(pSurface,&facedisp[j-1],1/*nrdisp*/,distmin,focal,pRotLight);
+              displaysdl(pSurface,&facedisp[j],distmin,focal,pRotLight);
   }
   }
 
@@ -636,11 +636,10 @@ void render_triangle(struct _surface* pSurface, float *distmin, tria *face, floa
   }
 }
 
-void displaysdl(struct _surface* pSurface,tria *face,int nrfaces,float *distmin,float focal, lightpr* light)
+void displaysdl(struct _surface* pSurface,tria *face,float *distmin,float focal, lightpr* light)
 {
 int red,green,blue;
 float zf,dist;
-unsigned long int crf;
 float tmp;
 float a,b,c,d,izf, /*izf=1/zf - pt. marit viteza; ecuatia planului este ax+by+cz=d*/
       a1,bright,
@@ -656,10 +655,7 @@ if(g_double_pixel == 1)
 zf=-focal;
 izf=1/zf;
 
-for(crf=1;(int)crf<=nrfaces;crf++){
-
-tria* pFace = &face[crf];
-findplan(pFace->x1,pFace->y1,pFace->z1,pFace->x2,pFace->y2,pFace->z2,pFace->x3,pFace->y3,pFace->z3,&a,&b,&c,&d);
+findplan(face->x1,face->y1,face->z1,face->x2,face->y2,face->z2,face->x3,face->y3,face->z3,&a,&b,&c,&d);
 
 aizf=a*izf; bizf=b*izf; id=1/d;
 
@@ -669,13 +665,13 @@ if(g_width_factor != 1.0f)
 }
 
 /*start lighting and backface culling*/
-tmp=a*face[crf].x1+b*face[crf].y1+c*face[crf].z1;
+tmp=a*face->x1+b*face->y1+c*face->z1;
 /*dot product used for lighting and backface culling*/
-if((face[crf].cull)&1){ /*backface culling*/
-  if(tmp<0){continue;}
+if((face->cull)&1){ /*backface culling*/
+  if(tmp<0){return;}
 }
 
-if((face[crf].cull)&2){ /*fullbright*/
+if((face->cull)&2){ /*fullbright*/
   a1=1;
 }else{
   dist=sqrt(a*a+b*b+c*c);
@@ -690,18 +686,17 @@ if((face[crf].cull)&2){ /*fullbright*/
 
 bright=a1; if(bright<0){bright=0;}
 
-red=(int)(bright*face[crf].red); green=(int)(bright*face[crf].green); blue=(int)(bright*face[crf].blue);
+red=(int)(bright*face->red); green=(int)(bright*face->green); blue=(int)(bright*face->blue);
 if(red>255){red=255;}
 if(green>255){green=255;}
 if(blue>255){blue=255;}
 
-face[crf].redd=red;
-face[crf].greend=green;
-face[crf].blued=blue;
+face->redd=red;
+face->greend=green;
+face->blued=blue;
 /*finished lighting and backface culling*/
 
-  render_triangle(pSurface, distmin, &face[crf], zf, aizf, bizf, id, c);
-}
+  render_triangle(pSurface, distmin, face, zf, aizf, bizf, id, c);
 }
 
 /*function which displays the objcts which are closer than zmax
