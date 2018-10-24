@@ -300,28 +300,27 @@ void set_double_pixel(int double_pixel)
 void displaysdl(struct _surface* pSurface,tria *face,float *distmin,float focal, lightpr* light);
 
 /*functie care elimina triunghiurile care sunt in plus*/
-int fclip(struct _surface* pSurface, tria *face,int nrfaces,float zmin,tria *facedisp,float zmax,float tgh,float tgv, float* distmin, int focal, lightpr* pRotLight)
-{int i,j,k,l,kmin,invs;
+int fclip(struct _surface* pSurface, tria *face,float zmin,tria *facedisp,float zmax,float tgh,float tgv, float* distmin, int focal, lightpr* pRotLight)
+{int j,k,l,kmin,invs;
 float x[4],y[4],z[4],tmp,tmp2;
 j=0; /*variabila pt. numarat triunghiurile afisate*/
-for(i=1;i<=nrfaces;i++){
 
-  if((face[i].z1<=zmin)&&(face[i].z2<=zmin)&&(face[i].z3<=zmin)){continue;}
-  if((face[i].z1>=zmax)&&(face[i].z2>=zmax)&&(face[i].z3>=zmax)){continue;}
-    if((face[i].x1>tgv*face[i].z1)&&(face[i].x2>tgv*face[i].z2)&&(face[i].x3>tgv*face[i].z3)){continue;}
-    if((face[i].y1>tgh*face[i].z1)&&(face[i].y2>tgh*face[i].z2)&&(face[i].y3>tgh*face[i].z3)){continue;}
-  if((face[i].x1<-tgv*face[i].z1)&&(face[i].x2<-tgv*face[i].z2)&&(face[i].x3<-tgv*face[i].z3)){continue;}
-  if((face[i].y1<-tgh*face[i].z1)&&(face[i].y2<-tgh*face[i].z2)&&(face[i].y3<-tgh*face[i].z3)){continue;}
+  if((face->z1<=zmin)&&(face->z2<=zmin)&&(face->z3<=zmin)){return 0;}
+  if((face->z1>=zmax)&&(face->z2>=zmax)&&(face->z3>=zmax)){return 0;}
+    if((face->x1>tgv*face->z1)&&(face->x2>tgv*face->z2)&&(face->x3>tgv*face->z3)){return 0;}
+    if((face->y1>tgh*face->z1)&&(face->y2>tgh*face->z2)&&(face->y3>tgh*face->z3)){return 0;}
+  if((face->x1 < -tgv*face->z1)&&(face->x2 < -tgv*face->z2)&&(face->x3 < -tgv*face->z3)){return 0;}
+  if((face->y1 < -tgh*face->z1)&&(face->y2 < -tgh*face->z2)&&(face->y3 < -tgh*face->z3)){return 0;}
 
-  if((face[i].z1>zmin)&&(face[i].z2>zmin)&&(face[i].z3>zmin))
+  if((face->z1>zmin)&&(face->z2>zmin)&&(face->z3>zmin))
   {
-    j++;facedisp[j]=face[i];
+    j++;facedisp[j]=*face;
     displaysdl(pSurface,&facedisp[j],distmin,focal,pRotLight);
   }
   else{
-    x[1]=face[i].x1;x[2]=face[i].x2;x[3]=face[i].x3;
-    y[1]=face[i].y1;y[2]=face[i].y2;y[3]=face[i].y3;
-    z[1]=face[i].z1;z[2]=face[i].z2;z[3]=face[i].z3;
+    x[1]=face->x1;x[2]=face->x2;x[3]=face->x3;
+    y[1]=face->y1;y[2]=face->y2;y[3]=face->y3;
+    z[1]=face->z1;z[2]=face->z2;z[3]=face->z3;
 
     invs=1;
 
@@ -347,9 +346,9 @@ for(i=1;i<=nrfaces;i++){
 	  facedisp[j].y3=y[3];
 	    facedisp[j].z1=facedisp[j].z2=zmin;
 	    facedisp[j].z3=z[3];
-	      facedisp[j].red=face[i].red;facedisp[j].green=face[i].green;facedisp[j].blue=face[i].blue;
+	      facedisp[j].red=face->red;facedisp[j].green=face->green;facedisp[j].blue=face->blue;
 
-	      facedisp[j].cull=face[i].cull;
+	      facedisp[j].cull=face->cull;
 	      if(invs==(-1)){
 	        tmp2=facedisp[j].x1; facedisp[j].x1=facedisp[j].x2; facedisp[j].x2=tmp2;
                 tmp2=facedisp[j].y1; facedisp[j].y1=facedisp[j].y2; facedisp[j].y2=tmp2;
@@ -368,9 +367,9 @@ for(i=1;i<=nrfaces;i++){
 	      facedisp[j].z1=zmin;
 	      facedisp[j].z2=z[2];
 	      facedisp[j].z3=z[3];
-	        facedisp[j].red=face[i].red;facedisp[j].green=face[i].green;facedisp[j].blue=face[i].blue;
+	        facedisp[j].red=face->red;facedisp[j].green=face->green;facedisp[j].blue=face->blue;
 
-	        facedisp[j].cull=face[i].cull;
+	        facedisp[j].cull=face->cull;
 	        if(invs==(-1)){
 	          tmp2=facedisp[j].x1; facedisp[j].x1=facedisp[j].x2; facedisp[j].x2=tmp2;
                   tmp2=facedisp[j].y1; facedisp[j].y1=facedisp[j].y2; facedisp[j].y2=tmp2;
@@ -387,9 +386,9 @@ for(i=1;i<=nrfaces;i++){
 	  facedisp[j].y3=y[3];
 	    facedisp[j].z1=facedisp[j].z2=zmin;
 	    facedisp[j].z3=z[3];
-	      facedisp[j].red=face[i].red;facedisp[j].green=face[i].green;facedisp[j].blue=face[i].blue;
+	      facedisp[j].red=face->red;facedisp[j].green=face->green;facedisp[j].blue=face->blue;
 
-	      facedisp[j].cull=face[i].cull;
+	      facedisp[j].cull=face->cull;
 	      if(invs==(1)){
 	        tmp2=facedisp[j].x1; facedisp[j].x1=facedisp[j].x2; facedisp[j].x2=tmp2;
                 tmp2=facedisp[j].y1; facedisp[j].y1=facedisp[j].y2; facedisp[j].y2=tmp2;
@@ -399,9 +398,8 @@ for(i=1;i<=nrfaces;i++){
   }
   }
 
+  return j;
 }
-
-return j;}
 
 
 /*functie care verifica daca punctul M(x,y,z) se afla in interiorul triunghiului ABC
@@ -870,7 +868,7 @@ for(i=0;i<instance_count;i++){
       face[j+crf].y3=transform.vy[0]+x*fiy+y*fjy+z*fky;
       face[j+crf].z3=transform.vz[0]+x*fiz+y*fjz+z*fkz; /*updated positions of triangles*/
 
-      fclip(pSurface, &face[j+crf-1],1/*nrfaces*/,zmin,facedisp,zmax,tgh,tgv, distmin, focal, &rotlight);
+      fclip(pSurface, &face[j+crf],zmin,facedisp,zmax,tgh,tgv, distmin, focal, &rotlight);
     }
     crf=nrfaces;
   }
