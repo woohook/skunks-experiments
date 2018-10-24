@@ -715,7 +715,7 @@ static int sem=0,nrfm=0; /*number of triangles for which memory has been allocat
 static tria *face,*facedisp; /*triangles and displayed triangles in global system*/
 static matrix transform; /* current object's world transformation */
 static float *distmin; /*Zbuffer for sending to displaysdl()*/
-int nrfaces,nrdisp,crf; /*number of triangles and of displayed triangles, current triangle*/
+int nrfaces,crf; /*number of triangles and of displayed triangles, current triangle*/
 
 lightpr rotlight; /*rotated light parameters*/
 
@@ -875,7 +875,7 @@ for(i=0;i<instance_count;i++){
       face[j+crf].y3=transform.vy[0]+x*fiy+y*fjy+z*fky;
       face[j+crf].z3=transform.vz[0]+x*fiz+y*fjz+z*fkz; /*updated positions of triangles*/
 
-      nrdisp=fclip(pSurface, &face[j+crf-1],1/*nrfaces*/,zmin,facedisp,zmax,tgh,tgv, distmin, focal, &rotlight);
+      fclip(pSurface, &face[j+crf-1],1/*nrfaces*/,zmin,facedisp,zmax,tgh,tgv, distmin, focal, &rotlight);
     }
     crf=nrfaces;
   }
