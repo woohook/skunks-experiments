@@ -300,22 +300,22 @@ void set_double_pixel(int double_pixel)
 void displaysdl(struct _surface* pSurface,tria *face,float *distmin,float focal, lightpr* light);
 
 /*functie care elimina triunghiurile care sunt in plus*/
-int fclip(struct _surface* pSurface, tria *face,float zmin,tria *facedisp,float zmax,float tgh,float tgv, float* distmin, int focal, lightpr* pRotLight)
+void fclip(struct _surface* pSurface, tria *face,float zmin,float zmax,float tgh,float tgv, float* distmin, int focal, lightpr* pRotLight)
 {int j,k,l,kmin,invs;
 float x[4],y[4],z[4],tmp,tmp2;
-j=0; /*variabila pt. numarat triunghiurile afisate*/
+tria facedisp;
 
-  if((face->z1<=zmin)&&(face->z2<=zmin)&&(face->z3<=zmin)){return 0;}
-  if((face->z1>=zmax)&&(face->z2>=zmax)&&(face->z3>=zmax)){return 0;}
-    if((face->x1>tgv*face->z1)&&(face->x2>tgv*face->z2)&&(face->x3>tgv*face->z3)){return 0;}
-    if((face->y1>tgh*face->z1)&&(face->y2>tgh*face->z2)&&(face->y3>tgh*face->z3)){return 0;}
-  if((face->x1 < -tgv*face->z1)&&(face->x2 < -tgv*face->z2)&&(face->x3 < -tgv*face->z3)){return 0;}
-  if((face->y1 < -tgh*face->z1)&&(face->y2 < -tgh*face->z2)&&(face->y3 < -tgh*face->z3)){return 0;}
+  if((face->z1<=zmin)&&(face->z2<=zmin)&&(face->z3<=zmin)){return;}
+  if((face->z1>=zmax)&&(face->z2>=zmax)&&(face->z3>=zmax)){return;}
+    if((face->x1>tgv*face->z1)&&(face->x2>tgv*face->z2)&&(face->x3>tgv*face->z3)){return;}
+    if((face->y1>tgh*face->z1)&&(face->y2>tgh*face->z2)&&(face->y3>tgh*face->z3)){return;}
+  if((face->x1 < -tgv*face->z1)&&(face->x2 < -tgv*face->z2)&&(face->x3 < -tgv*face->z3)){return;}
+  if((face->y1 < -tgh*face->z1)&&(face->y2 < -tgh*face->z2)&&(face->y3 < -tgh*face->z3)){return;}
 
   if((face->z1>zmin)&&(face->z2>zmin)&&(face->z3>zmin))
   {
-    j++;facedisp[j]=*face;
-    displaysdl(pSurface,&facedisp[j],distmin,focal,pRotLight);
+    j++;facedisp=*face;
+    displaysdl(pSurface,&facedisp,distmin,focal,pRotLight);
   }
   else{
     x[1]=face->x1;x[2]=face->x2;x[3]=face->x3;
@@ -337,68 +337,66 @@ j=0; /*variabila pt. numarat triunghiurile afisate*/
   if((z[1]<=zmin)&&(z[2]<=zmin)){
     j++;
       tmp=(zmin-z[1])/(z[3]-z[1]);
-        facedisp[j].x1=tmp*(x[3]-x[1])+x[1];
-        facedisp[j].y1=tmp*(y[3]-y[1])+y[1];
+        facedisp.x1=tmp*(x[3]-x[1])+x[1];
+        facedisp.y1=tmp*(y[3]-y[1])+y[1];
       tmp=(zmin-z[2])/(z[3]-z[2]);
-        facedisp[j].x2=tmp*(x[3]-x[2])+x[2];
-        facedisp[j].y2=tmp*(y[3]-y[2])+y[2];
-	  facedisp[j].x3=x[3];
-	  facedisp[j].y3=y[3];
-	    facedisp[j].z1=facedisp[j].z2=zmin;
-	    facedisp[j].z3=z[3];
-	      facedisp[j].red=face->red;facedisp[j].green=face->green;facedisp[j].blue=face->blue;
+        facedisp.x2=tmp*(x[3]-x[2])+x[2];
+        facedisp.y2=tmp*(y[3]-y[2])+y[2];
+	  facedisp.x3=x[3];
+	  facedisp.y3=y[3];
+	    facedisp.z1=facedisp.z2=zmin;
+	    facedisp.z3=z[3];
+	      facedisp.red=face->red;facedisp.green=face->green;facedisp.blue=face->blue;
 
-	      facedisp[j].cull=face->cull;
+	      facedisp.cull=face->cull;
 	      if(invs==(-1)){
-	        tmp2=facedisp[j].x1; facedisp[j].x1=facedisp[j].x2; facedisp[j].x2=tmp2;
-                tmp2=facedisp[j].y1; facedisp[j].y1=facedisp[j].y2; facedisp[j].y2=tmp2;
-                tmp2=facedisp[j].z1; facedisp[j].z1=facedisp[j].z2; facedisp[j].z2=tmp2;
+	        tmp2=facedisp.x1; facedisp.x1=facedisp.x2; facedisp.x2=tmp2;
+                tmp2=facedisp.y1; facedisp.y1=facedisp.y2; facedisp.y2=tmp2;
+                tmp2=facedisp.z1; facedisp.z1=facedisp.z2; facedisp.z2=tmp2;
 	      }
-              displaysdl(pSurface,&facedisp[j],distmin,focal,pRotLight);
+              displaysdl(pSurface,&facedisp,distmin,focal,pRotLight);
   }else{
     j++;
       tmp=(zmin-z[1])/(z[2]-z[1]);
-        facedisp[j].x1=tmp*(x[2]-x[1])+x[1];
-	facedisp[j].y1=tmp*(y[2]-y[1])+y[1];
-	  facedisp[j].x2=x[2];
-	  facedisp[j].y2=y[2];
-	    facedisp[j].x3=x[3];
-	    facedisp[j].y3=y[3];
-	      facedisp[j].z1=zmin;
-	      facedisp[j].z2=z[2];
-	      facedisp[j].z3=z[3];
-	        facedisp[j].red=face->red;facedisp[j].green=face->green;facedisp[j].blue=face->blue;
+        facedisp.x1=tmp*(x[2]-x[1])+x[1];
+	facedisp.y1=tmp*(y[2]-y[1])+y[1];
+	  facedisp.x2=x[2];
+	  facedisp.y2=y[2];
+	    facedisp.x3=x[3];
+	    facedisp.y3=y[3];
+	      facedisp.z1=zmin;
+	      facedisp.z2=z[2];
+	      facedisp.z3=z[3];
+	        facedisp.red=face->red;facedisp.green=face->green;facedisp.blue=face->blue;
 
-	        facedisp[j].cull=face->cull;
+	        facedisp.cull=face->cull;
 	        if(invs==(-1)){
-	          tmp2=facedisp[j].x1; facedisp[j].x1=facedisp[j].x2; facedisp[j].x2=tmp2;
-                  tmp2=facedisp[j].y1; facedisp[j].y1=facedisp[j].y2; facedisp[j].y2=tmp2;
-                  tmp2=facedisp[j].z1; facedisp[j].z1=facedisp[j].z2; facedisp[j].z2=tmp2;
+	          tmp2=facedisp.x1; facedisp.x1=facedisp.x2; facedisp.x2=tmp2;
+                  tmp2=facedisp.y1; facedisp.y1=facedisp.y2; facedisp.y2=tmp2;
+                  tmp2=facedisp.z1; facedisp.z1=facedisp.z2; facedisp.z2=tmp2;
 	        }
-                displaysdl(pSurface,&facedisp[j],distmin,focal,pRotLight);
+                displaysdl(pSurface,&facedisp,distmin,focal,pRotLight);
     j++;
-        facedisp[j].x1=tmp*(x[2]-x[1])+x[1];
-	facedisp[j].y1=tmp*(y[2]-y[1])+y[1];
+        facedisp.x1=tmp*(x[2]-x[1])+x[1];
+	facedisp.y1=tmp*(y[2]-y[1])+y[1];
       tmp=(zmin-z[1])/(z[3]-z[1]);
-        facedisp[j].x2=tmp*(x[3]-x[1])+x[1];
-	facedisp[j].y2=tmp*(y[3]-y[1])+y[1];
-	  facedisp[j].x3=x[3];
-	  facedisp[j].y3=y[3];
-	    facedisp[j].z1=facedisp[j].z2=zmin;
-	    facedisp[j].z3=z[3];
-	      facedisp[j].red=face->red;facedisp[j].green=face->green;facedisp[j].blue=face->blue;
+        facedisp.x2=tmp*(x[3]-x[1])+x[1];
+	facedisp.y2=tmp*(y[3]-y[1])+y[1];
+	  facedisp.x3=x[3];
+	  facedisp.y3=y[3];
+	    facedisp.z1=facedisp.z2=zmin;
+	    facedisp.z3=z[3];
+	      facedisp.red=face->red;facedisp.green=face->green;facedisp.blue=face->blue;
 
-	      facedisp[j].cull=face->cull;
+	      facedisp.cull=face->cull;
 	      if(invs==(1)){
-	        tmp2=facedisp[j].x1; facedisp[j].x1=facedisp[j].x2; facedisp[j].x2=tmp2;
-                tmp2=facedisp[j].y1; facedisp[j].y1=facedisp[j].y2; facedisp[j].y2=tmp2;
-                tmp2=facedisp[j].z1; facedisp[j].z1=facedisp[j].z2; facedisp[j].z2=tmp2;
+	        tmp2=facedisp.x1; facedisp.x1=facedisp.x2; facedisp.x2=tmp2;
+                tmp2=facedisp.y1; facedisp.y1=facedisp.y2; facedisp.y2=tmp2;
+                tmp2=facedisp.z1; facedisp.z1=facedisp.z2; facedisp.z2=tmp2;
 	      }
-              displaysdl(pSurface,&facedisp[j],distmin,focal,pRotLight);
+              displaysdl(pSurface,&facedisp,distmin,focal,pRotLight);
   }
   }
-
-  return j;
 }
 
 
@@ -705,7 +703,7 @@ void odis(struct _surface* pSurface,float zfog,float zmax, struct _matrix* view_
 unsigned int width,height;
 unsigned long int area;
 static int sem=0,nrfm=0; /*number of triangles for which memory has been allocated*/
-static tria *face,*facedisp; /*triangles and displayed triangles in global system*/
+static tria *face; /*triangles and displayed triangles in global system*/
 static matrix transform; /* current object's world transformation */
 static float *distmin; /*Zbuffer for sending to displaysdl()*/
 int nrfaces,crf; /*number of triangles and of displayed triangles, current triangle*/
@@ -716,7 +714,7 @@ float tgh,tgv,zmin;
 float x,y,z,ix,iy,iz,jx,jy,jz,kx,ky,kz; /*temporary variables for transformations*/
 float xcen,ycen,zcen,radius;
 
-if(pSurface==0){free(face); free(facedisp); free(distmin); return;}
+if(pSurface==0){free(face); free(distmin); return;}
 /*to free static variables, call odis(0,0,0,0,0,0,0)*/
 
 width=surface_get_width(pSurface);
@@ -739,7 +737,6 @@ zmin=1e-3;
 if(!sem){
   if(!(distmin=(float *)malloc(area*sizeof(float)))){printf("Out of memory");}
   if(!(face=(tria *)malloc(11*sizeof(tria)))){printf("Out of memory");}
-  if(!(facedisp=(tria *)malloc(22*sizeof(tria)))){printf("Out of memory");}
   nrfm=1; sem=1;}
 
 clear_depth_buffer(distmin,width,height,zmax);
@@ -834,7 +831,6 @@ for(i=0;i<instance_count;i++){
     if(nrfaces>nrfm){
       nrfm=nrfaces;
       if(!(face=(tria *)realloc(face,(nrfm+10)*sizeof(tria)))){printf("Out of memory");}
-      if(!(facedisp=(tria *)realloc(facedisp,(2*nrfm+20)*sizeof(tria)))){printf("Out of memory");}
     }
 
     fix=transform.vx[1]-transform.vx[0];
@@ -868,7 +864,7 @@ for(i=0;i<instance_count;i++){
       face[j+crf].y3=transform.vy[0]+x*fiy+y*fjy+z*fky;
       face[j+crf].z3=transform.vz[0]+x*fiz+y*fjz+z*fkz; /*updated positions of triangles*/
 
-      fclip(pSurface, &face[j+crf],zmin,facedisp,zmax,tgh,tgv, distmin, focal, &rotlight);
+      fclip(pSurface, &face[j+crf],zmin,zmax,tgh,tgv, distmin, focal, &rotlight);
     }
     crf=nrfaces;
   }
