@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "render32.h"
 #include "surface.h"
 #include "util.h"
+#include "list.h"
 
 typedef struct _pixcol
 {int red;int green;int blue; /*culoarea pixelului*/
@@ -57,8 +58,7 @@ float dz;
 
 typedef struct _mesh
 {
-  int face_count;
-  tria* faces;
+  struct _list* faces;
   float xcen, ycen, zcen, radius;
 } mesh;
 
@@ -92,7 +92,7 @@ void create_mesh()
     if(!(g_meshes=(mesh*)realloc(g_meshes,(mesh_count+1)*sizeof(mesh)))){printf("Out of memory");}
     mesh_count++;
   }
-  g_meshes[mesh_count-1].face_count = 0;
+  g_meshes[mesh_count-1].faces = list_create();
 }
 
 void create_mesh_instance(int mesh_id, matrix* transform)
@@ -114,24 +114,25 @@ void create_mesh_instance(int mesh_id, matrix* transform)
 // function which finds the center and size of the current mesh
 void complete_mesh()
 {
-  int i;
   float xmin,xmax,ymin,ymax,zmin,zmax,lenx,leny,lenz;
   float x1,y1,z1, x2,y2,z2, x3,y3,z3;
 
-  tria* face = g_meshes[mesh_count-1].faces;
-  x1 = face[1].x1; y1 = face[1].y1; z1 = face[1].z1;
-  x2 = face[1].x2; y2 = face[1].y2; z2 = face[1].z2;
-  x3 = face[1].x3; y3 = face[1].y3; z3 = face[1].z3;
+  struct _list_item* faceNode = list_get_first(g_meshes[mesh_count-1].faces);
+  tria* face = list_item_get_value(faceNode);
+  x1 = face->x1; y1 = face->y1; z1 = face->z1;
+  x2 = face->x2; y2 = face->y2; z2 = face->z2;
+  x3 = face->x3; y3 = face->y3; z3 = face->z3;
   xmin=xmax=x1;
   ymin=ymax=y1;
   zmin=zmax=z1;
 
-  for(i=1;i<g_meshes[mesh_count-1].face_count;i++)
+  while(faceNode != 0)
   {
+    face     = list_item_get_value(faceNode);
 
-    x1 = face[i].x1; y1 = face[i].y1; z1 = face[i].z1;
-    x2 = face[i].x2; y2 = face[i].y2; z2 = face[i].z2;
-    x3 = face[i].x3; y3 = face[i].y3; z3 = face[i].z3;
+    x1 = face->x1; y1 = face->y1; z1 = face->z1;
+    x2 = face->x2; y2 = face->y2; z2 = face->z2;
+    x3 = face->x3; y3 = face->y3; z3 = face->z3;
 
     if(xmin>x1){xmin=x1;}
     if(xmin>x2){xmin=x2;}
@@ -153,6 +154,8 @@ void complete_mesh()
     if(zmax<z1){zmax=z1;}
     if(zmax<z2){zmax=z2;}
     if(zmax<z3){zmax=z3;}
+
+    faceNode = list_item_get_next(faceNode);
   }
 
   lenx=xmax-xmin;
@@ -166,71 +169,61 @@ void complete_mesh()
 
 void add_face(int mesh_id, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3)
 {
-  g_meshes[mesh_id].face_count++;
-  if(g_meshes[mesh_id].face_count==1)
-  {
-    g_meshes[mesh_id].face_count = 2;
-    if(!(g_meshes[mesh_id].faces=(tria *)malloc(g_meshes[mesh_id].face_count*sizeof(tria)))){printf("Out of memory");}
-  }
-  else
-  {
-    if(!(g_meshes[mesh_id].faces=(tria *)realloc(g_meshes[mesh_id].faces, g_meshes[mesh_id].face_count*sizeof(tria)))){printf("Out of memory");}
-  }
+  tria* face = malloc(sizeof(tria));
 
-  tria* face = g_meshes[mesh_id].faces;
-  int face_id = g_meshes[mesh_id].face_count-1;
+  face->x1 = x1; face->y1 = y1; face->z1 = z1;
+  face->x2 = x2; face->y2 = y2; face->z2 = z2;
+  face->x3 = x3; face->y3 = y3; face->z3 = z3;
+  face->red = 255;
+  face->green = 200;
+  face->blue = 0;
 
-  face[face_id].x1 = x1; face[face_id].y1 = y1; face[face_id].z1 = z1;
-  face[face_id].x2 = x2; face[face_id].y2 = y2; face[face_id].z2 = z2;
-  face[face_id].x3 = x3; face[face_id].y3 = y3; face[face_id].z3 = z3;
-  face[face_id].red = 255;
-  face[face_id].green = 200;
-  face[face_id].blue = 0;
+  face->cull = 0; /*no culling and no fullbright if not specified*/
 
-  face[face_id].cull = 0; /*no culling and no fullbright if not specified*/
+  list_add_value(g_meshes[mesh_id].faces, face);
 }
 
 void set_face_color(int mesh_id, int face_id, int red, int green, int blue)
 {
-  tria* face = g_meshes[mesh_id].faces;
-  face[face_id].red   = red;
-  face[face_id].green = green;
-  face[face_id].blue  = blue;
+  tria* face = list_get_value(g_meshes[mesh_id].faces, face_id-1);
+  face->red   = red;
+  face->green = green;
+  face->blue  = blue;
 }
 
 void get_face_color(int mesh_id, int face_id, int* red, int* green, int* blue)
 {
-  tria* face = g_meshes[mesh_id].faces;
-  *red   = face[face_id].red;
-  *green = face[face_id].green;
-  *blue  = face[face_id].blue;
+  tria* face = list_get_value(g_meshes[mesh_id].faces, face_id-1);
+  *red   = face->red;
+  *green = face->green;
+  *blue  = face->blue;
 }
 
 void set_face_fullbright(int mesh_id, int face_id)
 {
-  tria* face = g_meshes[mesh_id].faces;
-  face[face_id].cull = ((face[face_id].cull)&1)+2;
+  tria* face = list_get_value(g_meshes[mesh_id].faces, face_id-1);
+  face->cull = ((face->cull)&1)+2;
 }
 
 void get_face_vertex(int mesh_id, int face_id, int vertex_id, float *x, float *y, float *z)
 {
-  tria* face = g_meshes[mesh_id].faces;
+  tria* face = list_get_value(g_meshes[mesh_id].faces, face_id-1);
   switch(vertex_id)
   {
     case 1:
-      *x = face[face_id].x1;
-      *y = face[face_id].y1;
-      *z = face[face_id].z1;
+      *x = face->x1;
+      *y = face->y1;
+      *z = face->z1;
       break;
     case 2:
-      *x = face[face_id].x2;
-      *y = face[face_id].y2;
-      *z = face[face_id].z2;
+      *x = face->x2;
+      *y = face->y2;
+      *z = face->z2;
       break;
     case 3:
-      *x = face[face_id].x3;
-      *y = face[face_id].y3;
-      *z = face[face_id].z3;
+      *x = face->x3;
+      *y = face->y3;
+      *z = face->z3;
       break;
     default:
       break;
@@ -239,22 +232,22 @@ void get_face_vertex(int mesh_id, int face_id, int vertex_id, float *x, float *y
 
 void flip_face(int mesh_id, int face_id)
 {
-  tria* face = g_meshes[mesh_id].faces;
+  tria* face = list_get_value(g_meshes[mesh_id].faces, face_id-1);
   float tmp;
-  tmp = face[face_id].x1; face[face_id].x1 = face[face_id].x2; face[face_id].x2 = tmp;
-  tmp = face[face_id].y1; face[face_id].y1 = face[face_id].y2; face[face_id].y2 = tmp;
-  tmp = face[face_id].z1; face[face_id].z1 = face[face_id].z2; face[face_id].z2 = tmp;
+  tmp = face->x1; face->x1 = face->x2; face->x2 = tmp;
+  tmp = face->y1; face->y1 = face->y2; face->y2 = tmp;
+  tmp = face->z1; face->z1 = face->z2; face->z2 = tmp;
 }
 
 void enable_face_culling(int mesh_id, int face_id)
 {
-  tria* face = g_meshes[mesh_id].faces;
-  face[face_id].cull = ((face[face_id].cull)&2)+1;
+  tria* face = list_get_value(g_meshes[mesh_id].faces, face_id-1);
+  face->cull = ((face->cull)&2)+1;
 }
 
 int get_face_count(int mesh_id)
 {
-  return g_meshes[mesh_id].face_count - 1;
+  return list_get_size(g_meshes[mesh_id].faces);
 }
 
 void set_background_color(int red, int green, int blue)
@@ -833,28 +826,33 @@ for(i=0;i<instance_count;i++){
         fjz=transform.vz[2]-transform.vz[0];
         fkz=transform.vz[3]-transform.vz[0]; /*unit vectors of the local axes in global system*/
 
-    for(j=1;j<=g_meshes[mesh_id].face_count-1;j++){
-      face=g_meshes[mesh_id].faces[j]; /*added triangles*/
-        x=g_meshes[mesh_id].faces[j].x1;
-        y=g_meshes[mesh_id].faces[j].y1;
-        z=g_meshes[mesh_id].faces[j].z1;
+    struct _list_item* faceNode = list_get_first(g_meshes[mesh_id].faces);
+
+    while(faceNode != 0){
+      tria* pface = list_item_get_value(faceNode);
+      face = *(tria*)list_item_get_value(faceNode);
+        x=pface->x1;
+        y=pface->y1;
+        z=pface->z1;
       face.x1=transform.vx[0]+x*fix+y*fjx+z*fkx;
       face.y1=transform.vy[0]+x*fiy+y*fjy+z*fky;
       face.z1=transform.vz[0]+x*fiz+y*fjz+z*fkz;
-        x=g_meshes[mesh_id].faces[j].x2;
-        y=g_meshes[mesh_id].faces[j].y2;
-        z=g_meshes[mesh_id].faces[j].z2;
+        x=pface->x2;
+        y=pface->y2;
+        z=pface->z2;
       face.x2=transform.vx[0]+x*fix+y*fjx+z*fkx;
       face.y2=transform.vy[0]+x*fiy+y*fjy+z*fky;
       face.z2=transform.vz[0]+x*fiz+y*fjz+z*fkz;
-        x=g_meshes[mesh_id].faces[j].x3;
-        y=g_meshes[mesh_id].faces[j].y3;
-        z=g_meshes[mesh_id].faces[j].z3;
+        x=pface->x3;
+        y=pface->y3;
+        z=pface->z3;
       face.x3=transform.vx[0]+x*fix+y*fjx+z*fkx;
       face.y3=transform.vy[0]+x*fiy+y*fjy+z*fky;
       face.z3=transform.vz[0]+x*fiz+y*fjz+z*fkz; /*updated positions of triangles*/
 
       fclip(pSurface, &face,zmin,zmax,tgh,tgv, distmin, focal, &rotlight);
+
+      faceNode = list_item_get_next(faceNode);
     }
   }
 }
