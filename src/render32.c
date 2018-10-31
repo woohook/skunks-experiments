@@ -702,11 +702,10 @@ void odis(struct _surface* pSurface,float zfog,float zmax, struct _matrix* view_
 {int i,j,focal;
 unsigned int width,height;
 unsigned long int area;
-static int sem=0,nrfm=0; /*number of triangles for which memory has been allocated*/
-static tria *face; /*triangles and displayed triangles in global system*/
+static int sem=0; /*number of triangles for which memory has been allocated*/
+static tria face; /*triangles and displayed triangles in global system*/
 static matrix transform; /* current object's world transformation */
 static float *distmin; /*Zbuffer for sending to displaysdl()*/
-int nrfaces,crf; /*number of triangles and of displayed triangles, current triangle*/
 
 lightpr rotlight; /*rotated light parameters*/
 
@@ -714,7 +713,7 @@ float tgh,tgv,zmin;
 float x,y,z,ix,iy,iz,jx,jy,jz,kx,ky,kz; /*temporary variables for transformations*/
 float xcen,ycen,zcen,radius;
 
-if(pSurface==0){free(face); free(distmin); return;}
+if(pSurface==0){free(distmin); return;}
 /*to free static variables, call odis(0,0,0,0,0,0,0)*/
 
 width=surface_get_width(pSurface);
@@ -736,8 +735,7 @@ zmin=1e-3;
 
 if(!sem){
   if(!(distmin=(float *)malloc(area*sizeof(float)))){printf("Out of memory");}
-  if(!(face=(tria *)malloc(11*sizeof(tria)))){printf("Out of memory");}
-  nrfm=1; sem=1;}
+  sem=1;}
 
 clear_depth_buffer(distmin,width,height,zmax);
 
@@ -762,9 +760,6 @@ rotlight.dz=x*kx+y*ky+z*kz; /*rotated light*/
 rotlight.ambient=g_light.ambient;
 rotlight.headlight=g_light.headlight;
 rotlight.directional=g_light.directional;
-
-nrfaces=0;
-crf=0;
 
 for(i=0;i<instance_count;i++){
   int mesh_id = g_instances[i]->iMesh;
@@ -827,11 +822,6 @@ for(i=0;i<instance_count;i++){
   if((xcen-radius)>(zcen+radius)*tgv){continue;}
   if((xcen+radius)<(zcen+radius)*(-tgv)){continue;}
   if(((zcen-radius)<zmax)&&((zcen+radius)>0)){
-    nrfaces+=g_meshes[mesh_id].face_count-1;
-    if(nrfaces>nrfm){
-      nrfm=nrfaces;
-      if(!(face=(tria *)realloc(face,(nrfm+10)*sizeof(tria)))){printf("Out of memory");}
-    }
 
     fix=transform.vx[1]-transform.vx[0];
     fjx=transform.vx[2]-transform.vx[0];
@@ -844,29 +834,28 @@ for(i=0;i<instance_count;i++){
         fkz=transform.vz[3]-transform.vz[0]; /*unit vectors of the local axes in global system*/
 
     for(j=1;j<=g_meshes[mesh_id].face_count-1;j++){
-      face[j+crf]=g_meshes[mesh_id].faces[j]; /*added triangles*/
+      face=g_meshes[mesh_id].faces[j]; /*added triangles*/
         x=g_meshes[mesh_id].faces[j].x1;
         y=g_meshes[mesh_id].faces[j].y1;
         z=g_meshes[mesh_id].faces[j].z1;
-      face[j+crf].x1=transform.vx[0]+x*fix+y*fjx+z*fkx;
-      face[j+crf].y1=transform.vy[0]+x*fiy+y*fjy+z*fky;
-      face[j+crf].z1=transform.vz[0]+x*fiz+y*fjz+z*fkz;
+      face.x1=transform.vx[0]+x*fix+y*fjx+z*fkx;
+      face.y1=transform.vy[0]+x*fiy+y*fjy+z*fky;
+      face.z1=transform.vz[0]+x*fiz+y*fjz+z*fkz;
         x=g_meshes[mesh_id].faces[j].x2;
         y=g_meshes[mesh_id].faces[j].y2;
         z=g_meshes[mesh_id].faces[j].z2;
-      face[j+crf].x2=transform.vx[0]+x*fix+y*fjx+z*fkx;
-      face[j+crf].y2=transform.vy[0]+x*fiy+y*fjy+z*fky;
-      face[j+crf].z2=transform.vz[0]+x*fiz+y*fjz+z*fkz;
+      face.x2=transform.vx[0]+x*fix+y*fjx+z*fkx;
+      face.y2=transform.vy[0]+x*fiy+y*fjy+z*fky;
+      face.z2=transform.vz[0]+x*fiz+y*fjz+z*fkz;
         x=g_meshes[mesh_id].faces[j].x3;
         y=g_meshes[mesh_id].faces[j].y3;
         z=g_meshes[mesh_id].faces[j].z3;
-      face[j+crf].x3=transform.vx[0]+x*fix+y*fjx+z*fkx;
-      face[j+crf].y3=transform.vy[0]+x*fiy+y*fjy+z*fky;
-      face[j+crf].z3=transform.vz[0]+x*fiz+y*fjz+z*fkz; /*updated positions of triangles*/
+      face.x3=transform.vx[0]+x*fix+y*fjx+z*fkx;
+      face.y3=transform.vy[0]+x*fiy+y*fjy+z*fky;
+      face.z3=transform.vz[0]+x*fiz+y*fjz+z*fkz; /*updated positions of triangles*/
 
-      fclip(pSurface, &face[j+crf],zmin,zmax,tgh,tgv, distmin, focal, &rotlight);
+      fclip(pSurface, &face,zmin,zmax,tgh,tgv, distmin, focal, &rotlight);
     }
-    crf=nrfaces;
   }
 }
 
