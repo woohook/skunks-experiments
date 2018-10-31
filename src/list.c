@@ -42,7 +42,7 @@ int list_get_size(struct _list* list)
   return list->item_count;
 }
 
-void list_add(struct _list* list, void* value)
+void list_add_value(struct _list* list, void* value)
 {
   struct _list_item* last = list->last;
 
