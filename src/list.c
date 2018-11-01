@@ -27,12 +27,17 @@ struct _list* list_create()
   return list;
 }
 
-void list_release(struct _list* list)
+void list_release(struct _list* list, int release_items)
 {
-  struct _list_item* item = list->first;
-  for(int i=0; i < list->item_count; i++)
+  if(release_items != 0)
   {
-    free(item);
+    struct _list_item* item = list->first;
+    while(item != 0)
+    {
+      struct _list_item* next = item->next;
+      free(item);
+      item = next;
+    }
   }
   free(list);
 }

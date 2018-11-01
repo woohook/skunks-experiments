@@ -2,7 +2,7 @@ struct _list;
 struct _list_item;
 
 struct _list* list_create();
-void list_release(struct _list* list);
+void list_release(struct _list* list, int release_items);
 
 int list_get_size(struct _list* list);
 
