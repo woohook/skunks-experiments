@@ -70,8 +70,7 @@ typedef struct mesh_instance
 
 struct _list* g_meshes = 0;
 
-mesh_instance** g_instances = 0;
-int instance_count = 0;
+struct _list* g_instances = 0;
 
 pixcol g_backcol = {0,0,0};
 lightpr g_light = {0,0,0,0,0,0};
@@ -101,18 +100,23 @@ void create_mesh()
 
 void create_mesh_instance(int mesh_id, matrix* transform)
 {
-  if(instance_count==0)
+  if(g_instances==0)
   {
-    if(!(g_instances=(mesh_instance**)malloc(sizeof(mesh_instance*)))){printf("Out of memory");}
+    g_instances = list_create();
+  }
+
+  mesh_instance* pInstance = (mesh_instance*)malloc(sizeof(mesh_instance));
+  if(pInstance == 0)
+  {
+    printf("Out of memory");
+    exit(-1);
   }
   else
   {
-    if(!(g_instances=(mesh_instance**)realloc(g_instances,(instance_count+1)*sizeof(mesh_instance*)))){printf("Out of memory");}
+    pInstance->iMesh = mesh_id;
+    pInstance->transform = transform;
+    list_add_value(g_instances, pInstance);
   }
-  if(!(g_instances[instance_count]=(mesh_instance*)malloc(sizeof(mesh_instance)))){printf("Out of memory");}
-  g_instances[instance_count]->iMesh = mesh_id;
-  g_instances[instance_count]->transform = transform;
-  instance_count++;
 }
 
 // function which finds the center and size of the current mesh
@@ -707,7 +711,7 @@ face->blued=blue;
 nob - total number of objects
 cam - camera*/
 void odis(struct _surface* pSurface,float zfog,float zmax, struct _matrix* view_transform)
-{int i,j,focal;
+{int j,focal;
 unsigned int width,height;
 unsigned long int area;
 static int sem=0; /*number of triangles for which memory has been allocated*/
@@ -769,9 +773,12 @@ rotlight.ambient=g_light.ambient;
 rotlight.headlight=g_light.headlight;
 rotlight.directional=g_light.directional;
 
-for(i=0;i<instance_count;i++){
-  int mesh_id = g_instances[i]->iMesh;
-  transform = *g_instances[i]->transform;
+struct _list_item* instanceNode = list_get_first(g_instances);
+while(instanceNode != 0){
+  mesh_instance* pInstance = list_item_get_value(instanceNode);
+  int mesh_id = pInstance->iMesh;
+  transform = *pInstance->transform;
+  instanceNode = list_item_get_next(instanceNode);
 
     float fix=transform.vx[1]-transform.vx[0];
     float fjx=transform.vx[2]-transform.vx[0];
@@ -881,11 +888,7 @@ surface_end_rendering(pSurface);
 
 void renderer_release()
 {
-  for(int i=1;i<instance_count;i++)
-  {
-    free(g_instances[i]);
-  }
-  free(g_instances);
+  list_release(g_instances, 1);
 
   struct _list_item* meshNode = list_get_first(g_meshes);
   while(meshNode != 0)
