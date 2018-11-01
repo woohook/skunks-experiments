@@ -68,8 +68,7 @@ typedef struct mesh_instance
   matrix* transform;
 } mesh_instance;
 
-mesh* g_meshes = 0;
-int mesh_count = 0;
+struct _list* g_meshes = 0;
 
 mesh_instance** g_instances = 0;
 int instance_count = 0;
@@ -82,17 +81,22 @@ int g_double_pixel = 0;
 
 void create_mesh()
 {
-  if(mesh_count==0)
+  if(g_meshes==0)
   {
-    if(!(g_meshes=(mesh*)malloc(2*sizeof(mesh)))){printf("Out of memory");}
-    mesh_count = 2;
+    g_meshes = list_create();
+  }
+
+  mesh* pMesh = (mesh*)malloc(sizeof(mesh));
+  if(pMesh==0)
+  {
+    printf("Out of memory");
+    exit(-1);
   }
   else
   {
-    if(!(g_meshes=(mesh*)realloc(g_meshes,(mesh_count+1)*sizeof(mesh)))){printf("Out of memory");}
-    mesh_count++;
+    pMesh->faces = list_create();
+    list_add_value(g_meshes, pMesh);
   }
-  g_meshes[mesh_count-1].faces = list_create();
 }
 
 void create_mesh_instance(int mesh_id, matrix* transform)
@@ -117,7 +121,9 @@ void complete_mesh()
   float xmin,xmax,ymin,ymax,zmin,zmax,lenx,leny,lenz;
   float x1,y1,z1, x2,y2,z2, x3,y3,z3;
 
-  struct _list_item* faceNode = list_get_first(g_meshes[mesh_count-1].faces);
+  struct _list_item* meshNode = list_get_last(g_meshes);
+  mesh* pMesh = list_item_get_value(meshNode);
+  struct _list_item* faceNode = list_get_first(pMesh->faces);
   tria* face = list_item_get_value(faceNode);
   x1 = face->x1; y1 = face->y1; z1 = face->z1;
   x2 = face->x2; y2 = face->y2; z2 = face->z2;
@@ -161,10 +167,11 @@ void complete_mesh()
   lenx=xmax-xmin;
   leny=ymax-ymin;
   lenz=zmax-zmin;
-  g_meshes[mesh_count-1].xcen=(xmax+xmin)/2;
-  g_meshes[mesh_count-1].ycen=(ymax+ymin)/2;
-  g_meshes[mesh_count-1].zcen=(zmax+zmin)/2;
-  g_meshes[mesh_count-1].radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
+
+  pMesh->xcen=(xmax+xmin)/2;
+  pMesh->ycen=(ymax+ymin)/2;
+  pMesh->zcen=(zmax+zmin)/2;
+  pMesh->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 }
 
 void add_face(int mesh_id, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3)
@@ -180,12 +187,14 @@ void add_face(int mesh_id, float x1, float y1, float z1, float x2, float y2, flo
 
   face->cull = 0; /*no culling and no fullbright if not specified*/
 
-  list_add_value(g_meshes[mesh_id].faces, face);
+  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
+  list_add_value(pMesh->faces, face);
 }
 
 void set_face_color(int mesh_id, int face_id, int red, int green, int blue)
 {
-  tria* face = list_get_value(g_meshes[mesh_id].faces, face_id-1);
+  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
+  tria* face = list_get_value(pMesh->faces, face_id-1);
   face->red   = red;
   face->green = green;
   face->blue  = blue;
@@ -193,7 +202,8 @@ void set_face_color(int mesh_id, int face_id, int red, int green, int blue)
 
 void get_face_color(int mesh_id, int face_id, int* red, int* green, int* blue)
 {
-  tria* face = list_get_value(g_meshes[mesh_id].faces, face_id-1);
+  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
+  tria* face = list_get_value(pMesh->faces, face_id-1);
   *red   = face->red;
   *green = face->green;
   *blue  = face->blue;
@@ -201,13 +211,15 @@ void get_face_color(int mesh_id, int face_id, int* red, int* green, int* blue)
 
 void set_face_fullbright(int mesh_id, int face_id)
 {
-  tria* face = list_get_value(g_meshes[mesh_id].faces, face_id-1);
+  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
+  tria* face = list_get_value(pMesh->faces, face_id-1);
   face->cull = ((face->cull)&1)+2;
 }
 
 void get_face_vertex(int mesh_id, int face_id, int vertex_id, float *x, float *y, float *z)
 {
-  tria* face = list_get_value(g_meshes[mesh_id].faces, face_id-1);
+  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
+  tria* face = list_get_value(pMesh->faces, face_id-1);
   switch(vertex_id)
   {
     case 1:
@@ -232,7 +244,8 @@ void get_face_vertex(int mesh_id, int face_id, int vertex_id, float *x, float *y
 
 void flip_face(int mesh_id, int face_id)
 {
-  tria* face = list_get_value(g_meshes[mesh_id].faces, face_id-1);
+  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
+  tria* face = list_get_value(pMesh->faces, face_id-1);
   float tmp;
   tmp = face->x1; face->x1 = face->x2; face->x2 = tmp;
   tmp = face->y1; face->y1 = face->y2; face->y2 = tmp;
@@ -241,13 +254,15 @@ void flip_face(int mesh_id, int face_id)
 
 void enable_face_culling(int mesh_id, int face_id)
 {
-  tria* face = list_get_value(g_meshes[mesh_id].faces, face_id-1);
+  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
+  tria* face = list_get_value(pMesh->faces, face_id-1);
   face->cull = ((face->cull)&2)+1;
 }
 
 int get_face_count(int mesh_id)
 {
-  return list_get_size(g_meshes[mesh_id].faces);
+  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
+  return list_get_size(pMesh->faces);
 }
 
 void set_background_color(int red, int green, int blue)
@@ -768,10 +783,11 @@ for(i=0;i<instance_count;i++){
         float fjz=transform.vz[2]-transform.vz[0];
         float fkz=transform.vz[3]-transform.vz[0]; /*unit vectors of the local axes in global system*/
 
-  xcen=g_meshes[mesh_id].xcen;
-  ycen=g_meshes[mesh_id].ycen;
-  zcen=g_meshes[mesh_id].zcen;
-  radius=g_meshes[mesh_id].radius;
+  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
+  xcen=pMesh->xcen;
+  ycen=pMesh->ycen;
+  zcen=pMesh->zcen;
+  radius=pMesh->radius;
   x=xcen;
   y=ycen;
   z=zcen;
@@ -826,7 +842,8 @@ for(i=0;i<instance_count;i++){
         fjz=transform.vz[2]-transform.vz[0];
         fkz=transform.vz[3]-transform.vz[0]; /*unit vectors of the local axes in global system*/
 
-    struct _list_item* faceNode = list_get_first(g_meshes[mesh_id].faces);
+    mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
+    struct _list_item* faceNode = list_get_first(pMesh->faces);
 
     while(faceNode != 0){
       tria* pface = list_item_get_value(faceNode);
@@ -870,9 +887,13 @@ void renderer_release()
   }
   free(g_instances);
 
-  for(int i=1;i<mesh_count;i++)
+  struct _list_item* meshNode = list_get_first(g_meshes);
+  while(meshNode != 0)
   {
-    free(g_meshes[i].faces);
+    mesh* pMesh = list_item_get_value(meshNode);
+    list_release(pMesh->faces, 1);
+    meshNode = list_item_get_next(meshNode);
   }
-  free(g_meshes);
+  list_release(g_meshes, 1);
+  g_meshes = 0;
 }
