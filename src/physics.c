@@ -2,6 +2,7 @@
 #include "util.h"
 #include "physics.h"
 #include "trans.h"
+#include "list.h"
 
 #define PHYS_MAXREF 109  //maximum number of reference points for 1 object
 
@@ -54,8 +55,8 @@ refpo *refglob; // array with reference points of object types
 int refcount = 0;
 int dynStart = 0;
 
-struct physics_instance** physics_instances = 0;
-int physics_instance_count = 0;
+struct _list* instances_static = 0;
+struct _list* instances_dynamic = 0;
 
 void physics_init()
 {
@@ -90,8 +91,6 @@ void physics_createBody(struct physics_instance* object, struct _matrix* transfo
   int i;
   dBodyID bid = dBodyCreate(wglob);
   dMatrix3 rotmt; // rotation matrix
-
-  if(dynStart==0) dynStart = physics_instance_count-1;
 
   for(i=1;i<=refglob[object->gtip].nref/2;i++)
   {
@@ -404,13 +403,23 @@ struct physics_instance* create_collision_geometry_instance(int geomtype, float 
     dGeomSetRotation(object->gid[j],rotmt);
   }
 
-  physics_instance_count++;
-  physics_instances = (struct physics_instance**)realloc(physics_instances, physics_instance_count*sizeof(struct physics_instance*));
-  physics_instances[physics_instance_count-1] = object;
 
   if(transform != 0)
   {
+    if(instances_dynamic == 0)
+    {
+      instances_dynamic = list_create();
+    }
+    list_add_value(instances_dynamic, object);
     physics_createBody(object, transform);
+  }
+  else
+  {
+    if(instances_static == 0)
+    {
+      instances_static = list_create();
+    }
+    list_add_value(instances_static, object);
   }
 
   return object;
@@ -432,33 +441,42 @@ dJointID cjid[PHYS_MAXGEOM]; // contact joints
 kps=150; kds=5;
 
 // creating dContactGeom structures
-for(k=dynStart;k<physics_instance_count;k++)
+struct _list_item* dynamic_instance_node = list_get_first(instances_dynamic);
+while(dynamic_instance_node != 0)
 {
-  if(physics_instances[k]->isSpinningImproved == 1)
+  struct physics_instance* pDynInst = list_item_get_value(dynamic_instance_node);
+  dynamic_instance_node = list_item_get_next(dynamic_instance_node);
+
+  if(pDynInst->isSpinningImproved == 1)
   {
-    rot=dBodyGetRotation(physics_instances[k]->bodyID);
-    dBodySetFiniteRotationAxis(physics_instances[k]->bodyID,rot[1],rot[5],rot[9]);
+    rot=dBodyGetRotation(pDynInst->bodyID);
+    dBodySetFiniteRotationAxis(pDynInst->bodyID,rot[1],rot[5],rot[9]);
   }
 
-  pos=dBodyGetPosition(physics_instances[k]->bodyID); x0=pos[0]; y0=pos[1]; z0=pos[2];
-  for(i=0;i<dynStart;i++)
+  pos=dBodyGetPosition(pDynInst->bodyID); x0=pos[0]; y0=pos[1]; z0=pos[2];
+
+  struct _list_item* static_instance_node = list_get_first(instances_static);
+  while(static_instance_node != 0)
   {
-    if(physics_instances[i]->gid_count>1)
+    struct physics_instance* pStatInst = list_item_get_value(static_instance_node);
+    static_instance_node = list_item_get_next(static_instance_node);
+
+    if(pStatInst->gid_count>1)
     {
-      pos = dGeomGetPosition(physics_instances[i]->gid[1]);
+      pos = dGeomGetPosition(pStatInst->gid[1]);
       if((fabs(pos[0]-x0)<50) && (fabs(pos[1]-y0)<50) && (fabs(pos[2]-z0)<50))
       {
-        for(m=1;m < physics_instances[i]->gid_count;m++)
+        for(m=1;m < pStatInst->gid_count;m++)
         {
-          for(l=1;l < physics_instances[k]->gid_count;l++)
+          for(l=1;l < pDynInst->gid_count;l++)
           {
-            n=dCollide(physics_instances[k]->gid[l],physics_instances[i]->gid[m],1,&dcgeom[ncj+1],sizeof(dContactGeom));
+            n=dCollide(pDynInst->gid[l],pStatInst->gid[m],1,&dcgeom[ncj+1],sizeof(dContactGeom));
             (ncj)+=n;
             if(n)
             {
               dSurfaceParameters surf1;
               surf1.mode=dContactBounce|dContactSoftERP|dContactSoftCFM|dContactApprox1;
-              surf1.mu=physics_instances[k]->friction;
+              surf1.mu=pDynInst->friction;
               surf1.bounce=0.5;
               surf1.bounce_vel=0.1;
               surf1.soft_erp=tstep*10000/(tstep*10000+100);
@@ -467,7 +485,7 @@ for(k=dynStart;k<physics_instance_count;k++)
               dcon[ncj].surface=surf1;
               dcon[ncj].geom=dcgeom[ncj];
               cjid[ncj]=dJointCreateContact(wglob,0,&dcon[ncj]);
-              dJointAttach(cjid[ncj],physics_instances[k]->bodyID,0);
+              dJointAttach(cjid[ncj],pDynInst->bodyID,0);
             }
           }
         }
@@ -518,14 +536,19 @@ for(i=0;i<hinge2_count;i++){
   }
 }
 
-for(i=dynStart;i<physics_instance_count;i++){
-  radius=physics_instances[i]->radius; radius*=radius;
-  vel=dBodyGetLinearVel(physics_instances[i]->bodyID);
+dynamic_instance_node = list_get_first(instances_dynamic);
+while(dynamic_instance_node != 0)
+{
+  struct physics_instance* pDynInst = list_item_get_value(dynamic_instance_node);
+  dynamic_instance_node = list_item_get_next(dynamic_instance_node);
+
+  radius=pDynInst->radius; radius*=radius;
+  vel=dBodyGetLinearVel(pDynInst->bodyID);
   if((fabs(vel[0])+fabs(vel[1])+fabs(vel[2]))>1){
     fx=-drg*radius*vel[0]*fabs(vel[0]);
     fy=-drg*radius*vel[1]*fabs(vel[1]);
     fz=-drg*radius*vel[2]*fabs(vel[2]);
-    dBodyAddForce(physics_instances[i]->bodyID,fx,fy,fz);
+    dBodyAddForce(pDynInst->bodyID,fx,fy,fz);
   }
 } /*air resistance*/
 
@@ -535,9 +558,11 @@ for(i=1;i<=(ncj);i++){
   dJointDestroy(cjid[i]);
 } ncj=0;
 
-for(i=dynStart;i<physics_instance_count;i++)
+dynamic_instance_node = list_get_first(instances_dynamic);
+while(dynamic_instance_node != 0)
 {
-  struct physics_instance* object = physics_instances[i];
+  struct physics_instance* object = list_item_get_value(dynamic_instance_node);
+  dynamic_instance_node = list_item_get_next(dynamic_instance_node);
 
   pos=dBodyGetPosition(object->bodyID);
   rot=dBodyGetRotation(object->bodyID);
