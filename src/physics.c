@@ -306,7 +306,7 @@ dReal vert1glob[12]={0,-12.732,0,0,0,12.5,0.02,0,0,5.10,17.80,0},
 dTriIndex indexlglob[3]={0,1,2},
           indexrglob[3]={0,2,1};
 
-struct physics_instance* create_collision_geometry_instance(int geomtype, float tx, float ty, float tz, float rx, float ry, float rz)
+struct physics_instance* create_collision_geometry_instance(int geomtype, float tx, float ty, float tz, float rx, float ry, float rz, struct _matrix* transform)
 {
   int j;
   float xref1, yref1, zref1, xref2, yref2, zref2;
@@ -407,6 +407,11 @@ struct physics_instance* create_collision_geometry_instance(int geomtype, float 
   physics_instance_count++;
   physics_instances = (struct physics_instance**)realloc(physics_instances, physics_instance_count*sizeof(struct physics_instance*));
   physics_instances[physics_instance_count-1] = object;
+
+  if(transform != 0)
+  {
+    physics_createBody(object, transform);
+  }
 
   return object;
 }

@@ -436,10 +436,8 @@ s[0]='1';while(s[0]){
 
  	              translat(objs[i],tx,ty,tz);
 
-                    objs[i]->physics_object = create_collision_geometry_instance(objs[i]->otyp, tx, ty, tz, 0, 0, 0);
+                    objs[i]->physics_object = create_collision_geometry_instance(objs[i]->otyp, tx, ty, tz, 0, 0, 0, &objs[i]->transform);
                     car->parts[k] = objs[i]->physics_object;
-
-	            physics_createBody(objs[i]->physics_object, &objs[i]->transform);
 
                     if((car->ofc[k])>=2){physics_enableImprovedSpinning(objs[i]->physics_object, 1);}
 
@@ -615,7 +613,7 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); objs[i]->lev=atoi(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); // friction value not used
 
-                    objs[i]->physics_object = create_collision_geometry_instance(objs[i]->otyp, tx, ty, tz, rx, ry, rz);
+                    objs[i]->physics_object = create_collision_geometry_instance(objs[i]->otyp, tx, ty, tz, rx, ry, rz, 0);
 	          }
 	          break;
 
