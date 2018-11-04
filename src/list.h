@@ -7,6 +7,7 @@ void list_release(struct _list* list, int release_items);
 int list_get_size(struct _list* list);
 
 void list_add_value(struct _list* list, void* value);
+void list_item_remove(struct _list_item* item, int release_value);
 
 struct _list_item* list_get_first(struct _list* list);
 struct _list_item* list_get_last(struct _list* list);

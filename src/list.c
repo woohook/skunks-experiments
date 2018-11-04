@@ -70,6 +70,39 @@ void list_add_value(struct _list* list, void* value)
   list->item_count++;
 }
 
+void list_item_remove(struct _list_item* item, int release_value)
+{
+  struct _list_item* previous = item->previous;
+  struct _list_item* next = item->next;
+  struct _list* list = item->parent;
+
+  if(previous==0)
+  {
+    list->first = next;
+  }
+  else
+  {
+    previous->next = next;
+  }
+
+  if(next==0)
+  {
+    list->last = previous;
+  }
+  else
+  {
+    next->previous = previous;
+  }
+
+  if(release_value != 0)
+  {
+    free(item->value);
+  }
+  free(item);
+
+  list->item_count--;
+}
+
 struct _list_item* list_get_first(struct _list* list)
 {
   struct _list_item* item = 0;
