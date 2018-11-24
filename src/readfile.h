@@ -16,6 +16,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+int g_numberOfMeshes = 0;
+
 /*functie care returneaza 1 daca i se transmite un caracter de delimitare si 0 daca nu*/
 int verdel(char s)
 {char a[6]={' ','\r','\n','\t',':'};
@@ -362,11 +364,11 @@ objs->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 
 /*function which reads the vehicle; must be called AFTER readtrack()
 nrtyp,nrobt - number of object types and objects given by readtrack()*/
-sgob** readvehicle(char *numefis,sgob** objs,int *nrtyp,int *nrobt,vhc *car)
+sgob** readvehicle(char *numefis,sgob** objs,int *nrobt,vhc *car)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
-int i,k,nto,nob; /*number of object types and number of objects*/
+int i,k,nob; /*number of object types and number of objects*/
 REALN tx,ty,tz, /*initial translations*/
       len;
 float spring = 0;  // hinge spring coefficient
@@ -374,7 +376,7 @@ float damper = 0;  // hinge damper coefficient
 
 float friction = 0;
 
-nto=*nrtyp;
+int previousNumberOfMeshes = g_numberOfMeshes;
 nob=*nrobt;
 
 int tjflag=0; // no trailer yet
@@ -384,8 +386,8 @@ s[0]='1';while(s[0]){
 	if(!(err=fisgetw(fis,s,&lincr))){afermex(numefis,lincr,s,1);}
 
 	switch(identcom(s)){
-	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); (*nrtyp)+=atoi(s);
-	          for(i=nto+1;i<=(*nrtyp);i++){
+	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); g_numberOfMeshes+=atoi(s);
+	          for(i=previousNumberOfMeshes+1;i<=g_numberOfMeshes;i++){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
 	            faces(i,s);
@@ -406,10 +408,10 @@ s[0]='1';while(s[0]){
 	          for(i=(nob-car->nob+1);i<=nob;i++){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
                       objs[i]=(sgob*)malloc(sizeof(sgob));
-	              objs[i]->otyp=nto+atoi(s);
+	              objs[i]->otyp=previousNumberOfMeshes+atoi(s);
                       create_mesh_instance(objs[i]->otyp, &objs[i]->transform);
-	              if(objs[i]->otyp>(*nrtyp)){
-	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp-nto);exit(1);
+	              if(objs[i]->otyp>g_numberOfMeshes){
+	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp-previousNumberOfMeshes);exit(1);
 	              }
 	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
 	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
@@ -534,17 +536,18 @@ return objs;}
 
 
 /*function which reads the track; nrobt - number of objects*/
-sgob** readtrack(char *numefis,int *nrobt,int *nrtyp,int* background_red, int* background_green, int* background_blue)
+sgob** readtrack(char *numefis,int *nrobt,int* background_red, int* background_green, int* background_blue)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
 int i,j,
-    nto=0,nob=0, /*number of object types and number of objects; nob=(*nrobt) */
+    nob=0, /* number of objects; nob=(*nrobt) */
     bred=130,bgreen=160,bblue=200; /*background color*/
 sgob** objs = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       fred=1.0,fgreen=1.0,fblue=1.0, /*color multiplication factors*/
       len;
+int previousNumberOfMeshes = g_numberOfMeshes;
 
 float light_ambient=0.5;
 float light_headlight=0.3;
@@ -568,8 +571,8 @@ s[0]='1';while(s[0]){
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); fblue=atof(s);
 	          break;
 
-	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); (*nrtyp)=nto=atoi(s);
-	          for(i=1;i<=nto;i++){
+	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); g_numberOfMeshes+=atoi(s);
+	          for(i=previousNumberOfMeshes+1;i<=g_numberOfMeshes;i++){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
 	            faces(i,s);
@@ -591,8 +594,8 @@ s[0]='1';while(s[0]){
                       objs[i]=(sgob*)malloc(sizeof(sgob));
 	              objs[i]->otyp=atoi(s);
                       create_mesh_instance(objs[i]->otyp, &objs[i]->transform);
-	              if(objs[i]->otyp>nto){
-	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp);exit(1);
+	              if(objs[i]->otyp>g_numberOfMeshes){
+	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp-previousNumberOfMeshes);exit(1);
 	              }
 	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
 	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
@@ -633,7 +636,7 @@ s[0]='1';while(s[0]){
 }
 fclose(fis);
 
-for(i=1;i<=nto;i++){
+for(i=previousNumberOfMeshes+1;i<=g_numberOfMeshes;i++){
   for(j=1;j<=get_face_count(i);j++){
     int red, green, blue;
     get_face_color(i,j,&red,&green,&blue);

@@ -57,7 +57,7 @@ int background_red, background_green, background_blue;
 REALN  zfog,zmax; /*zfog,zmax - distanta de la care incepe ceatza, respectiv de la care nu se mai vede nimic*/
 
 sgob** objs,camera; /*objects*/
-int nob,nto,camflag=2; /*number of objects and of object types*/
+int nob,camflag=2; /*number of objects and of object types*/
 
 vhc car; /*vehicle*/
 
@@ -108,11 +108,11 @@ physics_setCFM(1e-5);
 physics_setGravity(GRAVITY);
 
 strcpy(numefis,argv[2]);
-objs=readtrack(numefis,&nob,&nto,&background_red,&background_green,&background_blue); /*read objects from file*/
+objs=readtrack(numefis,&nob,&background_red,&background_green,&background_blue); /*read objects from file*/
 set_background_color(background_red,background_green,background_blue);
 
 strcpy(numefis,argv[1]);
-objs=readvehicle(numefis,objs,&nto,&nob,&car); /*read vehicle from file*/
+objs=readvehicle(numefis,objs,&nob,&car); /*read vehicle from file*/
 
 printf("\r\n");
 
