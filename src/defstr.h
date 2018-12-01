@@ -21,12 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 typedef struct _sgob
 {int otyp; /*number of object type in the global array*/
  REALN radius; /*radius of sphere in which the object is included*/
-REALN xmin;
-REALN ymin;
-REALN zmin;
-REALN xmax;
-REALN ymax;
-REALN zmax;
 matrix transform; /*directions of local axes in global coordinates - v[1]=i, v[2]=j, v[3]=k
                and origin of local system, in global coord. - v[0];
                in local coord. vx[1]=1, vy[1]=0, vz[1]=0; vx[2]=0, vy[2]=1, vz[2]=0 etc.
