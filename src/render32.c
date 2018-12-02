@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "render32.h"
 #include "surface.h"
-#include "util.h"
+#include "trans.h"
 #include "list.h"
 
 typedef struct _pixcol

@@ -1,7 +1,6 @@
 #include <ode/ode.h>
-#include "util.h"
-#include "physics.h"
 #include "trans.h"
+#include "physics.h"
 #include "list.h"
 
 #define PHYS_MAXREF 109  //maximum number of reference points for 1 object

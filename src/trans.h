@@ -16,7 +16,20 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-struct _matrix;
+#ifndef SKUNKS_TRANS_H
+#define SKUNKS_TRANS_H
+
+// directions of local axes in global coordinates - v[1]=i, v[2]=j, v[3]=k
+// and origin of local system, in global coord. - v[0];
+// in local coord. vx[1]=1, vy[1]=0, vz[1]=0; vx[2]=0, vy[2]=1, vz[2]=0 etc.
+// rotation and translation of object only affect vx, vy, vz
+
+typedef struct _matrix
+{
+  float vx[4];
+  float vy[4];
+  float vz[4];
+} matrix;
 
 /*function which translates an object by x,y and z*/
 void translat(struct _matrix *mtrx,float x,float y,float z);
@@ -46,3 +59,5 @@ void rotate_vector_x(float* y,float* z, float ry, float rz, float tt);
 void rotab(struct _matrix *mtrx,float x,float y,float z,float xb,float yb,float zb,float tt);
 
 void rotate_vector_ab(float* x,float* y,float* z, float xa, float ya, float za, float xb, float yb, float zb, float tt);
+
+#endif // SKUNKS_TRANS_H
