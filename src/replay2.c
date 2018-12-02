@@ -45,7 +45,8 @@ struct _surface* pSurface;
 int background_red, background_green, background_blue;
 REALN  zfog,zmax; /*zfog,zmax - distanta de la care incepe ceatza, respectiv de la care nu se mai vede nimic*/
 
-sgob** objs,camera; /*objects*/
+sgob** objs; /*objects*/
+struct _matrix camera;
 int nob,nto,camflag=1; /*number of objects and of object types*/
 
 vhc car; /*vehicle*/
@@ -64,10 +65,10 @@ FILE *repf;
 zfog=80;
 zmax=120; /*visibility (m)*/
 
-camera.transform.vx[0]=0; camera.transform.vy[0]=0; camera.transform.vz[0]=0;
-camera.transform.vx[1]=1; camera.transform.vy[1]=0; camera.transform.vz[1]=0;
-camera.transform.vx[2]=0; camera.transform.vy[2]=1; camera.transform.vz[2]=0;
-camera.transform.vx[3]=0; camera.transform.vy[3]=0; camera.transform.vz[3]=1; /*set camera parameters*/
+camera.vx[0]=0; camera.vy[0]=0; camera.vz[0]=0;
+camera.vx[1]=1; camera.vy[1]=0; camera.vz[1]=0;
+camera.vx[2]=0; camera.vy[2]=1; camera.vz[2]=0;
+camera.vx[3]=0; camera.vy[3]=0; camera.vz[3]=1; /*set camera parameters*/
 
 if(argc<=1){printf("Error: Input files not specified\r\nExample: ./replay replays/rep2\r\n");exit(1);}
 if(argc>=3){printf("Error: Too many arguments\r\n");exit(1);}
@@ -125,9 +126,9 @@ for(i=1;i<=nob;i++){
 setcamg(objs,&camera,&car,camflag);
 
 rotc+=vrotc*tframe; if(camflag==2){rotc=0; vrotc=0;}
-if(rotc){rotatx(&camera.transform,objs[car.oid[1]]->transform.vy[0],objs[car.oid[1]]->transform.vz[0],rotc);}
+if(rotc){rotatx(&camera,objs[car.oid[1]]->transform.vy[0],objs[car.oid[1]]->transform.vz[0],rotc);}
 
-odis(pSurface,zfog,zmax,&camera.transform); /*display image*/
+odis(pSurface,zfog,zmax,&camera); /*display image*/
 
 dstr+=(speed*tframe);
 
