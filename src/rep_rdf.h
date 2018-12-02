@@ -241,7 +241,7 @@ fclose(fis);
 
 
 /*function which finds the center and size of the object*/
-void eval_obj(int mesh_id,sgob *objs)
+void eval_obj(int mesh_id,sgob *object)
 {int i,nrfaces;
 REALD xmin,xmax,ymin,ymax,zmin,zmax,lenx,leny,lenz;
 REALN x1,y1,z1, x2,y2,z2, x3,y3,z3;
@@ -283,7 +283,7 @@ if(zmax<z3){zmax=z3;}
 lenx=xmax-xmin;
 leny=ymax-ymin;
 lenz=zmax-zmin;
-objs->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
+object->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 }
 
 
@@ -295,6 +295,7 @@ char s[MAXWLG]; /*a word*/
 FILE *fis;
 int i,k,nto,nob; /*number of object types and number of objects*/
 REALN tx,ty,tz; /*initial translations*/
+sgob* object = 0;
 
 nto=*nrtyp;
 nob=*nrobt;
@@ -323,18 +324,19 @@ s[0]='1';while(s[0]){
 	          if(!(objs=(sgob**)realloc(objs,(nob+1)*sizeof(sgob*)))){printf("Out of memory");}
 	          for(i=(nob-car->nob+1);i<=nob;i++){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
-                      objs[i]=(sgob*)malloc(sizeof(sgob));
-	              objs[i]->otyp=nto+atoi(s);
-                      create_mesh_instance(objs[i]->otyp, &objs[i]->transform);
-	              if(objs[i]->otyp>(*nrtyp)){
-	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp-nto);exit(1);
+                      object=(sgob*)malloc(sizeof(sgob));
+                      objs[i]=object;
+	              object->otyp=nto+atoi(s);
+                      create_mesh_instance(object->otyp, &object->transform);
+	              if(object->otyp>(*nrtyp)){
+	                printf("Error: there is no object type '%d'\r\n",object->otyp-nto);exit(1);
 	              }
-	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
-	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
-	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;
-	              objs[i]->transform.vy[1]=objs[i]->transform.vy[3]=0;
-	              objs[i]->transform.vz[1]=objs[i]->transform.vz[2]=0;
-	              eval_obj(objs[i]->otyp,objs[i]);
+	              object->transform.vx[0]=object->transform.vy[0]=object->transform.vz[0]=0;
+	              object->transform.vx[1]=object->transform.vy[2]=object->transform.vz[3]=1;
+	              object->transform.vx[2]=object->transform.vx[3]=0;
+	              object->transform.vy[1]=object->transform.vy[3]=0;
+	              object->transform.vz[1]=object->transform.vz[2]=0;
+	              eval_obj(object->otyp,object);
 
                     k=i-nob+car->nob; /*1...car->nob*/
                     car->oid[k]=i;
@@ -350,7 +352,7 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
 
-	              translat(&objs[i]->transform,tx,ty,tz);
+	              translat(&object->transform,tx,ty,tz);
 
 	            if(!(err=fisgetw(fis,s,&lincr))){afermex(numefis,lincr,s,1);}
 	            switch(identcmg(s)){
@@ -411,6 +413,7 @@ int i,j,
     nto=0,nob=0, /*number of object types and number of objects; nob=(*nrobt) */
     bred=130,bgreen=160,bblue=200; /*background color*/
 sgob** objs = 0;
+sgob* object = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       fred=1.0,fgreen=1.0,fblue=1.0, /*color multiplication factors*/
       len;
@@ -455,29 +458,30 @@ s[0]='1';while(s[0]){
 	          if(!(objs=(sgob**)malloc((nob+1)*sizeof(sgob*)))){printf("Out of memory");}
 	          for(i=1;i<=nob;i++){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
-                      objs[i]=(sgob*)malloc(sizeof(sgob));
-	              objs[i]->otyp=atoi(s);
-                      create_mesh_instance(objs[i]->otyp, &objs[i]->transform);
-	              if(objs[i]->otyp>nto){
-	                printf("Error: there is no object type '%d'\r\n",objs[i]->otyp);exit(1);
+                      object=(sgob*)malloc(sizeof(sgob));
+                      objs[i]=object;
+	              object->otyp=atoi(s);
+                      create_mesh_instance(object->otyp, &object->transform);
+	              if(object->otyp>nto){
+	                printf("Error: there is no object type '%d'\r\n",object->otyp);exit(1);
 	              }
-	              objs[i]->transform.vx[0]=objs[i]->transform.vy[0]=objs[i]->transform.vz[0]=0;
-	              objs[i]->transform.vx[1]=objs[i]->transform.vy[2]=objs[i]->transform.vz[3]=1;
-	              objs[i]->transform.vx[2]=objs[i]->transform.vx[3]=0;
-	              objs[i]->transform.vy[1]=objs[i]->transform.vy[3]=0;
-	              objs[i]->transform.vz[1]=objs[i]->transform.vz[2]=0;
-	              eval_obj(objs[i]->otyp,objs[i]);
+	              object->transform.vx[0]=object->transform.vy[0]=object->transform.vz[0]=0;
+	              object->transform.vx[1]=object->transform.vy[2]=object->transform.vz[3]=1;
+	              object->transform.vx[2]=object->transform.vx[3]=0;
+	              object->transform.vy[1]=object->transform.vy[3]=0;
+	              object->transform.vz[1]=object->transform.vz[2]=0;
+	              eval_obj(object->otyp,object);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rz=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ry=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rx=atof(s);
-	              rotatz(&objs[i]->transform,0,0,rz);
-	              rotaty(&objs[i]->transform,0,0,ry);
-	              rotatx(&objs[i]->transform,0,0,rx);
-	              translat(&objs[i]->transform,tx,ty,tz);
-	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); objs[i]->lev=atoi(s);
+	              rotatz(&object->transform,0,0,rz);
+	              rotaty(&object->transform,0,0,ry);
+	              rotatx(&object->transform,0,0,rx);
+	              translat(&object->transform,tx,ty,tz);
+	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); object->lev=atoi(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2);
 
 	            /*translated and rotated object*/
