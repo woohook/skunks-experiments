@@ -55,7 +55,7 @@ switch(flag){
           camera->transform.vx[1]=x0+rot[0]; camera->transform.vy[1]=y0+rot[4]; camera->transform.vz[1]=z0+rot[8];
           camera->transform.vx[2]=x0+rot[1]; camera->transform.vy[2]=y0+rot[5]; camera->transform.vz[2]=z0+rot[9];
           camera->transform.vx[3]=x0+rot[2]; camera->transform.vy[3]=y0+rot[6]; camera->transform.vz[3]=z0+rot[10];
-          translat(camera,h*rot[0]+d*rot[2],h*rot[4]+d*rot[6],h*rot[8]+d*rot[10]);
+          translat(&camera->transform,h*rot[0]+d*rot[2],h*rot[4]+d*rot[6],h*rot[8]+d*rot[10]);
           break;
 
   default: break;

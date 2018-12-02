@@ -44,7 +44,7 @@ switch(flag){
           camera->transform.vx[1]=x0+rot[0]; camera->transform.vy[1]=y0+rot[4]; camera->transform.vz[1]=z0+rot[8];
           camera->transform.vx[2]=x0+rot[1]; camera->transform.vy[2]=y0+rot[5]; camera->transform.vz[2]=z0+rot[9];
           camera->transform.vx[3]=x0+rot[2]; camera->transform.vy[3]=y0+rot[6]; camera->transform.vz[3]=z0+rot[10];
-          translat(camera,h*rot[0]+d*rot[2],h*rot[4]+d*rot[6],h*rot[8]+d*rot[10]);
+          translat(&camera->transform,h*rot[0]+d*rot[2],h*rot[4]+d*rot[6],h*rot[8]+d*rot[10]);
           break;
 
   case 3: x0=pos[0]+7.0; y0=pos[1]; z0=pos[2]-8.0;
@@ -58,8 +58,8 @@ switch(flag){
           a=y0*h+z0*d;
           if(a>1){a=1;}else{if(a<-1){a=-1;}}
           if(y0>0){a=acos(a);}else{a=-acos(a);}
-          rotatx(camera,pos[1],pos[2],-a);
-          rotab(camera,camera->transform.vx[0],camera->transform.vy[0],camera->transform.vz[0],camera->transform.vx[2],camera->transform.vy[2],camera->transform.vz[2],-0.57);
+          rotatx(&camera->transform,pos[1],pos[2],-a);
+          rotab(&camera->transform,camera->transform.vx[0],camera->transform.vy[0],camera->transform.vz[0],camera->transform.vx[2],camera->transform.vy[2],camera->transform.vz[2],-0.57);
           break;
 
   default: break;

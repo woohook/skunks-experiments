@@ -436,7 +436,7 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
 
- 	              translat(objs[i],tx,ty,tz);
+	              translat(&objs[i]->transform,tx,ty,tz);
 
                     objs[i]->physics_object = create_collision_geometry_instance(objs[i]->otyp, tx, ty, tz, 0, 0, 0, &objs[i]->transform);
                     car->parts[k] = objs[i]->physics_object;
@@ -609,10 +609,10 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rz=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ry=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rx=atof(s);
-	              rotatz(objs[i],0,0,rz);
-	              rotaty(objs[i],0,0,ry);
-	              rotatx(objs[i],0,0,rx);
-	              translat(objs[i],tx,ty,tz);
+	              rotatz(&objs[i]->transform,0,0,rz);
+	              rotaty(&objs[i]->transform,0,0,ry);
+	              rotatx(&objs[i]->transform,0,0,rx);
+	              translat(&objs[i]->transform,tx,ty,tz);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); objs[i]->lev=atoi(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); // friction value not used
 

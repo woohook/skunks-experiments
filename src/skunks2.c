@@ -240,7 +240,7 @@ for(i=1;i<=nstepsf;i++){
 
 for(i=1;i<=nob;i++){
   if(objs[i]->lev==3){
-    rotab(objs[i],objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0],objs[i]->transform.vx[3],objs[i]->transform.vy[3],objs[i]->transform.vz[3],vrot3*tframe);
+    rotab(&objs[i]->transform,objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0],objs[i]->transform.vx[3],objs[i]->transform.vy[3],objs[i]->transform.vz[3],vrot3*tframe);
   }
 }
 
@@ -267,7 +267,7 @@ volum[5]=acc;
 setcamg(&camera,&car,camflag);
 
 rotc+=vrotc*tframe; if(camflag==2){rotc=0; vrotc=0;}
-if(rotc){rotatx(&camera,objs[car.oid[1]]->transform.vy[0],objs[car.oid[1]]->transform.vz[0],rotc);}
+if(rotc){rotatx(&camera.transform,objs[car.oid[1]]->transform.vy[0],objs[car.oid[1]]->transform.vz[0],rotc);}
 
 odis(pSurface,zfog,zmax,&camera.transform); /*display image*/
 
