@@ -18,18 +18,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <math.h>
 
-#include "config.h"
 #include "trans.h"
-#include "defstr.h"
+#include "util.h"
 
 /*function which translates an object by x,y and z*/
-void translat(sgob *objs,float x,float y,float z)
+void translat(struct _matrix *mtrx,float x,float y,float z)
 {int i;
 
   for(i=0;i<=3;i++){
-    objs->transform.vx[i]+=x;
-    objs->transform.vy[i]+=y;
-    objs->transform.vz[i]+=z;
+    mtrx->vx[i]+=x;
+    mtrx->vy[i]+=y;
+    mtrx->vz[i]+=z;
   }
 }
 
@@ -43,16 +42,16 @@ void translate_vector(float* x,float* y,float* z, float dx,float dy,float dz)
 
 /*functie care roteste un obiect in jurul unei axe paralele cu z care intersecteaza
 planul xOy intr-un punct de coordonate x si y*/
-void rotatz(sgob *objs,float x,float y,float tt)
+void rotatz(struct _matrix *mtrx,float x,float y,float tt)
 {int i;
 float xtm,sintt,costt;
 
   sintt=sin(tt);costt=cos(tt);
 
   for(i=0;i<=3;i++){
-    xtm=objs->transform.vx[i];
-    objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*costt-(objs->transform.vy[i]-y)*sintt;
-    objs->transform.vy[i]=y+(objs->transform.vy[i]-y)*costt+(xtm-x)*sintt;
+    xtm=mtrx->vx[i];
+    mtrx->vx[i]=x+(mtrx->vx[i]-x)*costt-(mtrx->vy[i]-y)*sintt;
+    mtrx->vy[i]=y+(mtrx->vy[i]-y)*costt+(xtm-x)*sintt;
   }
 }
 
@@ -69,16 +68,16 @@ void rotate_vector_z(float* x,float* y, float rx, float ry, float tt)
 
 /*functie care roteste un obiect in jurul unei axe paralele cu y care intersecteaza
 planul xOz intr-un punct de coordonate x si z*/
-void rotaty(sgob *objs,float x,float z,float tt)
+void rotaty(struct _matrix *mtrx,float x,float z,float tt)
 {int i;
 float xtm,sintt,costt;
 
   sintt=sin(tt);costt=cos(tt);
 
   for(i=0;i<=3;i++){
-    xtm=objs->transform.vx[i];
-    objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*costt+(objs->transform.vz[i]-z)*sintt;
-    objs->transform.vz[i]=z+(objs->transform.vz[i]-z)*costt-(xtm-x)*sintt;
+    xtm=mtrx->vx[i];
+    mtrx->vx[i]=x+(mtrx->vx[i]-x)*costt+(mtrx->vz[i]-z)*sintt;
+    mtrx->vz[i]=z+(mtrx->vz[i]-z)*costt-(xtm-x)*sintt;
   }
 }
 
@@ -95,16 +94,16 @@ void rotate_vector_y(float* x,float* z, float rx, float rz, float tt)
 
 /*functie care roteste toate triunghiurile in jurul unei axe paralele cu x care intersecteaza
 planul xOy intr-un punct de coordonate x si y*/
-void rotatx(sgob *objs,float y,float z,float tt)
+void rotatx(struct _matrix *mtrx,float y,float z,float tt)
 {int i;
 float ytm,sintt,costt;
 
   sintt=sin(tt);costt=cos(tt);
 
   for(i=0;i<=3;i++){
-    ytm=objs->transform.vy[i];
-    objs->transform.vy[i]=y+(objs->transform.vy[i]-y)*costt-(objs->transform.vz[i]-z)*sintt;
-    objs->transform.vz[i]=z+(objs->transform.vz[i]-z)*costt+(ytm-y)*sintt;
+    ytm=mtrx->vy[i];
+    mtrx->vy[i]=y+(mtrx->vy[i]-y)*costt-(mtrx->vz[i]-z)*sintt;
+    mtrx->vz[i]=z+(mtrx->vz[i]-z)*costt+(ytm-y)*sintt;
   }
 }
 
@@ -120,7 +119,7 @@ void rotate_vector_x(float* y,float* z, float ry, float rz, float tt)
 }
 
 /*functie care roteste un obiect in jurul unei axe oarecare care trece prin A1(x,y,z) si B(xb,yb,zb)*/
-void rotab(sgob *objs,float x,float y,float z,float xb,float yb,float zb,float tt)
+void rotab(struct _matrix *mtrx,float x,float y,float z,float xb,float yb,float zb,float tt)
 {int i;
 float xtm,
 sinalf=0,cosalf=0,sinbt=0,cosbt=0,sintt,costt,
@@ -141,38 +140,38 @@ sintt=sin(tt);costt=cos(tt);
 	if(len1>thres){
 /*1 - rotire cu (-alfa) in jurul axei z*/
   for(i=0;i<=3;i++){
-    xtm=objs->transform.vx[i];
-    objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*cosalf+(objs->transform.vy[i]-y)*sinalf;
-    objs->transform.vy[i]=y+(objs->transform.vy[i]-y)*cosalf-(xtm-x)*sinalf;
+    xtm=mtrx->vx[i];
+    mtrx->vx[i]=x+(mtrx->vx[i]-x)*cosalf+(mtrx->vy[i]-y)*sinalf;
+    mtrx->vy[i]=y+(mtrx->vy[i]-y)*cosalf-(xtm-x)*sinalf;
   }
   
 /*2 - rotire cu (-beta) in jurul axei y*/
   for(i=0;i<=3;i++){
-    xtm=objs->transform.vx[i];
-    objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*cosbt-(objs->transform.vz[i]-z)*sinbt;
-    objs->transform.vz[i]=z+(objs->transform.vz[i]-z)*cosbt+(xtm-x)*sinbt;
+    xtm=mtrx->vx[i];
+    mtrx->vx[i]=x+(mtrx->vx[i]-x)*cosbt-(mtrx->vz[i]-z)*sinbt;
+    mtrx->vz[i]=z+(mtrx->vz[i]-z)*cosbt+(xtm-x)*sinbt;
   }
 	}
 /*3 - rotire cu teta in jurul axei z*/
   for(i=0;i<=3;i++){
-    xtm=objs->transform.vx[i];
-    objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*costt-(objs->transform.vy[i]-y)*sintt;
-    objs->transform.vy[i]=y+(objs->transform.vy[i]-y)*costt+(xtm-x)*sintt;
+    xtm=mtrx->vx[i];
+    mtrx->vx[i]=x+(mtrx->vx[i]-x)*costt-(mtrx->vy[i]-y)*sintt;
+    mtrx->vy[i]=y+(mtrx->vy[i]-y)*costt+(xtm-x)*sintt;
   }
 
 	if(len1>thres){
 /*4 - rotire cu beta in jurul axei y*/
   for(i=0;i<=3;i++){
-    xtm=objs->transform.vx[i];
-    objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*cosbt+(objs->transform.vz[i]-z)*sinbt;
-    objs->transform.vz[i]=z+(objs->transform.vz[i]-z)*cosbt-(xtm-x)*sinbt;
+    xtm=mtrx->vx[i];
+    mtrx->vx[i]=x+(mtrx->vx[i]-x)*cosbt+(mtrx->vz[i]-z)*sinbt;
+    mtrx->vz[i]=z+(mtrx->vz[i]-z)*cosbt-(xtm-x)*sinbt;
   }
   
 /*5 - rotire cu alfa in jurul axei z*/
   for(i=0;i<=3;i++){
-    xtm=objs->transform.vx[i];
-    objs->transform.vx[i]=x+(objs->transform.vx[i]-x)*cosalf-(objs->transform.vy[i]-y)*sinalf;
-    objs->transform.vy[i]=y+(objs->transform.vy[i]-y)*cosalf+(xtm-x)*sinalf;
+    xtm=mtrx->vx[i];
+    mtrx->vx[i]=x+(mtrx->vx[i]-x)*cosalf-(mtrx->vy[i]-y)*sinalf;
+    mtrx->vy[i]=y+(mtrx->vy[i]-y)*cosalf+(xtm-x)*sinalf;
   }
 	}
 }
