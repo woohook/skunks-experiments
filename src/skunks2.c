@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "trans.h"
 #include "readfile.h"
 #include "game.h"
+#include "camera.h"
 
 int main(int argc,char *argv[])
 {char numefis[MAXWLG];
@@ -265,7 +266,7 @@ volum[1]=rotspeed; if (volum[1]>200){volum[1]=200;}
 volum[5]=acc;
 #endif
 
-setcamg(&camera,&car,camflag);
+setcamg(&camera,&car,camflag,objs[car.oid[1]]);
 
 rotc+=vrotc*tframe; if(camflag==2){rotc=0; vrotc=0;}
 if(rotc){rotatx(&camera,objs[car.oid[1]]->transform.vy[0],objs[car.oid[1]]->transform.vz[0],rotc);}

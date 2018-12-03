@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "trans.h"
 #include "rep_rdf.h"
 #include "rep_game.h"
+#include "camera.h"
 
 int main(int argc,char *argv[])
 {char numefis1[MAXWLG],numefis2[MAXWLG];
@@ -123,7 +124,7 @@ for(i=1;i<=nob;i++){
 }
 
 
-setcamg(objs,&camera,&car,camflag);
+setcamg(&camera,&car,camflag,objs[car.oid[1]]);
 
 rotc+=vrotc*tframe; if(camflag==2){rotc=0; vrotc=0;}
 if(rotc){rotatx(&camera,objs[car.oid[1]]->transform.vy[0],objs[car.oid[1]]->transform.vz[0],rotc);}
