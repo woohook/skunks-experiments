@@ -97,6 +97,8 @@ int identcom(char *s)
  if(strcmp(s,"directional")==0){return 14;} /*intensity of light with fixed direction*/
  if(strcmp(s,"lightdir")==0){return 15;} /*direction of light*/
  if(strcmp(s,"fullbright")==0){return 16;}
+ if(strcmp(s,"objtype")==0){return 17;}
+ if(strcmp(s,"object")==0){return 18;}
  return 0;}
 
 
@@ -545,6 +547,8 @@ FILE *fis;
 int i,j,
     nob=0, /* number of objects; nob=(*nrobt) */
     bred=130,bgreen=160,bblue=200; /*background color*/
+int object_index = 0;
+int object_type_index = 0;
 sgob** objs = 0;
 sgob* object = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
@@ -575,27 +579,35 @@ s[0]='1';while(s[0]){
 	          break;
 
 	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); g_numberOfMeshes+=atoi(s);
-	          for(i=previousNumberOfMeshes+1;i<=g_numberOfMeshes;i++){
+                  object_type_index = previousNumberOfMeshes + 1;
+                  break;
+	  case 17:
+	          if(object_type_index<=g_numberOfMeshes){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
-	            faces(i,s);
+	            faces(object_type_index,s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
-	              readcolor(i,s);
+	              readcolor(object_type_index,s);
                     create_collision_geometry();
 	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
 	            readref(s);
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
-	              ordercl(i,s);
+	              ordercl(object_type_index,s);
                     complete_mesh();
+                    object_type_index++;
 	          }
+                  else {printf("More object types than announced!\r\n"); exit(1);}
 	          break;
 
 	  case 2: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); (*nrobt)=nob=atoi(s);
 	          if(!(objs=(sgob**)malloc((nob+1)*sizeof(sgob*)))){printf("Out of memory");}
-	          for(i=1;i<=nob;i++){
+                  object_index=1;
+                  break;
+	  case 18:
+	          if(object_index<=nob){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
                       object=(sgob*)malloc(sizeof(sgob));
-                      objs[i] = object;
+                      objs[object_index] = object;
 	              object->otyp=atoi(s);
                       create_mesh_instance(object->otyp, &object->transform);
 	              if(object->otyp>g_numberOfMeshes){
@@ -621,7 +633,9 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); // friction value not used
 
                     object->physics_object = create_collision_geometry_instance(object->otyp, tx, ty, tz, rx, ry, rz, 0);
+                    object_index++;
 	          }
+                  else {printf("More objects than announced!\r\n"); exit(1);}
 	          break;
 
 	  case 12: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_ambient=atof(s); break;
