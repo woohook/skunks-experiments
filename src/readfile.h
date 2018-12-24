@@ -371,6 +371,8 @@ sgob** readvehicle(char *numefis,sgob** objs,int *nrobt,vhc *car)
 char s[MAXWLG]; /*a word*/
 FILE *fis;
 int i,k,nob; /*number of object types and number of objects*/
+int object_type_index = 0;
+int object_index = 0;
 REALN tx,ty,tz, /*initial translations*/
       len;
 float spring = 0;  // hinge spring coefficient
@@ -390,28 +392,36 @@ s[0]='1';while(s[0]){
 
 	switch(identcom(s)){
 	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); g_numberOfMeshes+=atoi(s);
-	          for(i=previousNumberOfMeshes+1;i<=g_numberOfMeshes;i++){
+	          object_type_index = previousNumberOfMeshes+1;
+                  break;
+	  case 17:
+	          if(object_type_index<=g_numberOfMeshes){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
-	            faces(i,s);
+	            faces(object_type_index,s);
 	              err=fisgetw(fis,s,&lincr); /*file with colors*/
-	              readcolor(i,s);
+	              readcolor(object_type_index,s);
                     create_collision_geometry();
 	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
 	            readref(s);
 	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
-	              ordercl(i,s);
+	              ordercl(object_type_index,s);
                     complete_mesh();
+                    object_type_index++;
 	          }
+                  else {printf("More object types than announced\n"); exit(1);}
 	          break;
 
 	  case 2: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
 	          car->nob=atoi(s); nob+=car->nob; (*nrobt)=nob;
 	          if(!(objs=(sgob**)realloc(objs,(nob+1)*sizeof(sgob*)))){printf("Out of memory");}
-	          for(i=(nob-car->nob+1);i<=nob;i++){
+	          object_index=(nob-car->nob+1);
+                  break;
+	  case 18:
+	          if(object_index<=nob){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
                       object=(sgob*)malloc(sizeof(sgob));
-                      objs[i] = object;
+                      objs[object_index] = object;
 	              object->otyp=previousNumberOfMeshes+atoi(s);
                       create_mesh_instance(object->otyp, &object->transform);
 	              if(object->otyp>g_numberOfMeshes){
@@ -424,8 +434,8 @@ s[0]='1';while(s[0]){
 	              object->transform.vz[1]=object->transform.vz[2]=0;
 	              eval_obj(object->otyp,object);
 
-                    k=i-nob+car->nob; /*1...car->nob*/
-                    car->oid[k]=i;
+                    k=object_index-nob+car->nob; /*1...car->nob*/
+                    car->oid[k]=object_index;
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); car->ofc[k]=atoi(s);
 	            switch(k){
 	              case 1: if(car->ofc[k]!=1){printf("Error: '%s' line %d - second number must be 1\r\n",numefis,lincr); exit(1);}
@@ -471,7 +481,9 @@ s[0]='1';while(s[0]){
                     }
                     physics_setBodyPosition(car->parts[k],object->transform.vx[0],object->transform.vy[0],object->transform.vz[0]);
 	            /*^set mass parameters*/
+                    object_index++;
 	          }
+                  else {printf("More objects than announced\n"); exit(1);}
 	          break;
 
 	  case 5: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->accel=atof(s);
