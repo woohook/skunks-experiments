@@ -16,8 +16,17 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#include <SDL.h>
+#include "config.h"
+#include "sound.h"
+
 
 #if SOUND==1
+
+SDL_AudioSpec *desired, *obtained;
+SDL_AudioSpec *hardware_spec;
+REALN volum[6]={0,0,0,0,0,0};
+
 
 REALN sintr(REALN x)
 {const REALN pi=3.1415926536;
@@ -106,7 +115,70 @@ a=a*(n-2)+1-j1;
       }
 
   }
+}
+#endif
 
+void sound_initialize()
+{
+#if SOUND==1
+/* Allocate a desired SDL_AudioSpec */
+desired = (SDL_AudioSpec *)malloc(sizeof(SDL_AudioSpec));
+/* Allocate space for the obtained SDL_AudioSpec */
+obtained = (SDL_AudioSpec *)malloc(sizeof(SDL_AudioSpec));
+/* 22050Hz - FM Radio quality */
+desired->freq=22050;
+/* 16-bit signed audio */
+desired->format=AUDIO_U8;
+/* Mono */
+desired->channels=1;
+/* Large audio buffer reduces risk of dropouts but increases response time */
+desired->samples=1024; /*increase if using computer faster than 400MHz*/
+/* Our callback function */
+desired->callback=my_audio_callback;
+desired->userdata=volum;
+
+/* Open the audio device */
+if ( SDL_OpenAudio(desired, obtained) < 0 ){
+  fprintf(stderr, "Couldn't open audio: %s\n", SDL_GetError());
+  exit(-1);
+}
+/* desired spec is no longer needed */
+free(desired);
+hardware_spec=obtained;
+
+volum[2]=hardware_spec->format;
+volum[3]=hardware_spec->channels;
+volum[4]=hardware_spec->freq; /*pentru trimis la callback()*/
+
+/* Start playing */
+SDL_PauseAudio(0);
+#endif
 }
 
+void sound_update(float rotspeed, float acc)
+{
+#if SOUND==1
+  volum[1]=rotspeed;
+  if(volum[1]>200)
+  {
+    volum[1]=200;
+  }
+  volum[5]=acc;
 #endif
+}
+
+void sound_terminate()
+{
+#if SOUND==1
+  // Stop playing
+  SDL_PauseAudio(1);
+  SDL_CloseAudio();
+#endif
+}
+
+void sound_release()
+{
+#if SOUND==1
+  free(obtained);
+#endif
+}
