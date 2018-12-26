@@ -18,7 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
 /*run 1 simulation step; tstep - time step; af, bf - acceleration and brake factors*/
-void runsim(sgob** objs,vhc *car,FILE *repf,REALN *timp,REALN *speed,int ff)
+void replay_sim(sgob** objs,vhc *car,FILE *repf,REALN *timp,REALN *speed,int ff)
 {int i,k,cnob;
 REALN tmp,rap,spd[3];
 static REALN rtim1=0,rtim2=0,*vx1,*vx2,*vy1,*vy2,*vz1,*vz2;

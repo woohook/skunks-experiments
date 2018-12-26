@@ -113,7 +113,7 @@ xan++;
 
 
 
-runsim(objs,&car,repf,&timp,&speed,0);
+replay_sim(objs,&car,repf,&timp,&speed,0);
 /*^reads replay data*/
 
 
@@ -186,7 +186,7 @@ printf("**********************************************\r\n\r\n");
 SDL_Quit();
 
 
-runsim(objs,&car,repf,&timp,&speed,1); /*freed static variables from runsim()*/
+replay_sim(objs,&car,repf,&timp,&speed,1); /*freed static variables from replay_sim()*/
 renderer_release();
 
 for(i=1;i<=nob;i++)
