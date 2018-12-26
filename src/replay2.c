@@ -28,9 +28,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "surface.h"
 #include "render32.h"
+#include "physics.h"
 
 #include "trans.h"
-#include "rep_rdf.h"
+#include "readfile.h"
 #include "rep_game.h"
 #include "camera.h"
 
@@ -48,7 +49,7 @@ REALN  zfog,zmax; /*zfog,zmax - distanta de la care incepe ceatza, respectiv de 
 
 sgob** objs; /*objects*/
 struct _matrix camera;
-int nob,nto,camflag=1; /*number of objects and of object types*/
+int nob,camflag=1; /*number of objects and of object types*/
 
 vhc car; /*vehicle*/
 
@@ -74,16 +75,17 @@ camera.vx[3]=0; camera.vy[3]=0; camera.vz[3]=1; /*set camera parameters*/
 if(argc<=1){printf("Error: Input files not specified\r\nExample: ./replay replays/rep2\r\n");exit(1);}
 if(argc>=3){printf("Error: Too many arguments\r\n");exit(1);}
 
+physics_init();
+
 strcpy(numefis1,argv[1]);
 if(!(repf=fopen(numefis1,"r"))){printf("Error: could not open '%s'\r\n",numefis1); exit(1);}
-
 
 fscanf(repf,"%s",numefis1);
 fscanf(repf,"%s",numefis2);
 
-objs=readtrack(numefis2,&nob,&nto,&background_red,&background_green,&background_blue); /*read objects from file*/
+objs=readtrack(numefis2,&nob,&background_red,&background_green,&background_blue); /*read objects from file*/
 set_background_color(background_red,background_green,background_blue);
-objs=readvehicle(numefis1,objs,&nto,&nob,&car); /*read vehicle from file*/
+objs=readvehicle(numefis1,objs,&nob,&car); /*read vehicle from file*/
 
 printf("\r\n");
 
