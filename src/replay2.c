@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "trans.h"
 #include "readfile.h"
-#include "rep_game.h"
+#include "replay.h"
 #include "camera.h"
 
 int main(int argc,char *argv[])
