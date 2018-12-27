@@ -43,9 +43,6 @@ int i,quit=0,
 SDL_Event event;
 struct _surface* pSurface = NULL;
 
-
-REALN  zfog,zmax; /*zfog,zmax - distanta de la care incepe ceatza, respectiv de la care nu se mai vede nimic*/
-
 sgob** objs; /*objects*/
 struct _matrix camera;
 int nob,camflag=2; /*number of objects and of object types*/
@@ -63,9 +60,6 @@ int turn, /*-1: left; 0: no turn; 1: right*/
     nstepsf; /*number of simulation steps/frame*/
 /*for game^*/
 
-
-zfog=80;
-zmax=120; /*visibility (m)*/
 
 camera.vx[0]=0; camera.vy[0]=0; camera.vz[0]=0;
 camera.vx[1]=1; camera.vy[1]=0; camera.vz[1]=0;
@@ -135,7 +129,7 @@ for(i=1;i<=nstepsf;i++){
 
 setcamg(&camera,&car,camflag,objs[car.oid[1]]);
 
-odis(pSurface,zfog,zmax,&camera); /*display image*/
+odis(pSurface,&camera); /*display image*/
 
 
 while(SDL_PollEvent(&event)){
@@ -223,6 +217,6 @@ free(objs);
 
 physics_release();
 
-odis(0,0,0,0); /*freed static variables from odis() in "camera.h"*/
+odis(0,0); /*freed static variables from odis() in "camera.h"*/
 
 return 0;}
