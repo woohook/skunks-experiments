@@ -552,7 +552,7 @@ return objs;}
 
 
 /*function which reads the track; nrobt - number of objects*/
-sgob** readtrack(char *numefis,int *nrobt,int* background_red, int* background_green, int* background_blue)
+sgob** readtrack(char *numefis,int *nrobt)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
@@ -683,8 +683,6 @@ for(i=previousNumberOfMeshes+1;i<=g_numberOfMeshes;i++){
   }
 }
 
-*background_red=bred; *background_green=bgreen; *background_blue=bblue;
-
 len=sqrt(light_dx*light_dx+light_dy*light_dy+light_dz*light_dz);
 light_dx/=len;
 light_dy/=len;
@@ -693,5 +691,6 @@ light_dz/=len; /*normalized light direction*/
 set_ambient_light(light_ambient);
 set_headlight(light_headlight);
 set_directional_light(light_directional, light_dx, light_dy, light_dz);
+set_background_color(bred,bgreen,bblue);
 
 return objs;}

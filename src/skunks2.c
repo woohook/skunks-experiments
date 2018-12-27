@@ -44,8 +44,6 @@ SDL_Event event;
 struct _surface* pSurface = NULL;
 
 
-//pixcol backcol; /*culoarea fundalului*/
-int background_red, background_green, background_blue;
 REALN  zfog,zmax; /*zfog,zmax - distanta de la care incepe ceatza, respectiv de la care nu se mai vede nimic*/
 
 sgob** objs; /*objects*/
@@ -88,8 +86,7 @@ physics_setCFM(1e-5);
 physics_setGravity(GRAVITY);
 
 strcpy(numefis,argv[2]);
-objs=readtrack(numefis,&nob,&background_red,&background_green,&background_blue); /*read objects from file*/
-set_background_color(background_red,background_green,background_blue);
+objs=readtrack(numefis,&nob); /*read objects from file*/
 
 strcpy(numefis,argv[1]);
 objs=readvehicle(numefis,objs,&nob,&car); /*read vehicle from file*/
