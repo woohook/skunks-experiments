@@ -59,11 +59,5 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define GRAVITY -9.81
 /*gravitational acceleration (m/s2)*/
 
-#define REPSTEPS 8
-/*save replay data every REPSTEPS simulation steps*/
-
-#define REPLAY 1
-/*1 - record replay; 0 - don't record*/
-
 #define SOUND 1
 /*1 - sound; 0 - no sound*/

@@ -1,9 +1,8 @@
-rm -f ./*.o ./skunks2 ./replay2
+rm -f ./*.o ./skunks2
 gcc -c src/list.c -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
 gcc -c src/trans.c -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
 gcc -c src/physics.c -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
 gcc -c src/surface_sdl2.c -o surface_sdl2.o `sdl2-config --cflags --libs` -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
 gcc -c src/render32.c -o render32.o -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
 gcc -c src/sound.c -o sound.o `sdl2-config --cflags --libs` -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
-gcc src/skunks2.c list.o trans.o render32.o surface_sdl2.o physics.o sound.o -o skunks2 `sdl2-config --cflags --libs` -I./ODE/local/include -L./ODE/local/lib -lode -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
-gcc src/replay2.c list.o trans.o render32.o surface_sdl2.o physics.o -o replay2 `sdl2-config --cflags --libs` -I./ODE/local/include -L./ODE/local/lib -lode -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W
+gcc src/skunks2.c list.o trans.o render32.o surface_sdl2.o physics.o sound.o -o skunks2 `sdl2-config --cflags --libs` -I./ODE/local/include -L./ODE/local/lib -lode -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W

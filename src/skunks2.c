@@ -68,8 +68,6 @@ REALN vrxmax,vrxmr, /*rot. speed*/
 int turn, /*-1: left; 0: no turn; 1: right*/
     dmode, /*1 forward, -1 reverse*/
     nstepsf; /*number of simulation steps/frame*/
-FILE *repf;
-int rsem=0; // when rsem==REPSTEPS, save replay data
 /*for game^*/
 
 
@@ -88,13 +86,6 @@ car.vrx = 0;
 if(argc<=2){printf("Error: Input files not specified\r\nExample: ./skunks cars/car1 tracks/track1\r\n");exit(1);}
 if(argc>=4){printf("Error: Too many arguments\r\n");exit(1);}
 
-
-#if REPLAY==1
-if(!(repf=fopen("replays/rep1","w"))){printf("Error: could not open 'replays/rep1' (check the permissions)\r\n"); exit(1);}
-fprintf(repf,"%s\r\n%s\r\n",argv[1],argv[2]);
-#else
-repf=NULL;
-#endif
 
 physics_init();
 physics_setERP(0.2);
@@ -176,23 +167,6 @@ if(nstepsf>(int)speed){nstepsf=(int)speed;}
 for(i=1;i<=nstepsf;i++){
   runsim(realstep);
   timp+=realstep;
-
-#if REPLAY==1
-  rsem++;
-  if(rsem>=REPSTEPS){
-    int j,k;
-    fprintf(repf,"%1.3f ",timp);
-    for(k=1;k<=car.nob;k++){
-      j=car.oid[k];
-      fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[0],objs[j]->transform.vy[0],objs[j]->transform.vz[0]);
-      fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[1],objs[j]->transform.vy[1],objs[j]->transform.vz[1]);
-      fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[2],objs[j]->transform.vy[2],objs[j]->transform.vz[2]);
-      fprintf(repf,"%1.3f %1.3f %1.3f ",objs[j]->transform.vx[3],objs[j]->transform.vy[3],objs[j]->transform.vz[3]);
-    }
-    fprintf(repf,"\r\n");
-    rsem=0;
-  }
-#endif
 }
 
 
@@ -327,10 +301,6 @@ for(i=1;i<=nob;i++)
   free(objs[i]);
 }
 free(objs);
-
-#if REPLAY==1
-fclose(repf);
-#endif
 
 /* printf("Press ENTER: ");getchar();printf("\r\n"); */
 
