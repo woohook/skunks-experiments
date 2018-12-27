@@ -63,7 +63,7 @@ REALN vrxmax,vrxmr, /*rot. speed*/
       vrot3, /*rot. speed of level 3 objects*/
       vrotc,vrcmax,rotc, /*rot. speed and rotation of camera*/
       realstep, /*real time step (s)*/
-      speed,dspeed;
+      speed,dspeed,sim_speed;
 int turn, /*-1: left; 0: no turn; 1: right*/
     dmode, /*1 forward, -1 reverse*/
     nstepsf; /*number of simulation steps/frame*/
@@ -158,8 +158,8 @@ if(car.vrx<-vrxmr){car.vrx=-vrxmr;}
 nstepsf=(int)(tframe/STIMESTEP)+1; /*number of simulation steps/frame*/
 realstep=tframe/nstepsf; /*simulation time step*/
 
-speed=0.1/realstep; /*decrease simulation speed if < 10fps*/
-if(nstepsf>(int)speed){nstepsf=(int)speed;}
+sim_speed=0.1/realstep; /*decrease simulation speed if < 10fps*/
+if(nstepsf>(int)sim_speed){nstepsf=(int)sim_speed;}
 
 for(i=1;i<=nstepsf;i++){
   runsim(realstep);
