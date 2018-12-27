@@ -58,8 +58,7 @@ REALN tframe=0,xan=0,/*tframe-time necessary for display; xan-number of displaye
       timp; /*total time*/
 
 /*for game*/
-REALN vrotc,vrcmax,rotc, /*rot. speed and rotation of camera*/
-      realstep, /*real time step (s)*/
+REALN realstep, /*real time step (s)*/
       sim_speed;
 int turn, /*-1: left; 0: no turn; 1: right*/
     dmode, /*1 forward, -1 reverse*/
@@ -111,9 +110,6 @@ set_width_factor(WIDTHFACTOR);
 
 turn=0;
 dmode=1;
-vrcmax=0.79;
-vrotc=0;
-rotc=0;
 
 timp=0; /*pornit cronometru*/
 tframe=0.5; /*assuming 2 frames/second*/
@@ -141,9 +137,6 @@ for(i=1;i<=nstepsf;i++){
 
 
 setcamg(&camera,&car,camflag,objs[car.oid[1]]);
-
-rotc+=vrotc*tframe; if(camflag==2){rotc=0; vrotc=0;}
-if(rotc){rotatx(&camera,objs[car.oid[1]]->transform.vy[0],objs[car.oid[1]]->transform.vz[0],rotc);}
 
 odis(pSurface,zfog,zmax,&camera); /*display image*/
 
@@ -174,14 +167,7 @@ case SDL_KEYDOWN:
                  break;
 
     case SDLK_c: camflag++; if(camflag>3){camflag=1;}
-                 rotc=0; vrotc=0;
                  break;
-
-    case SDLK_n: vrotc=-vrcmax;
-                   break;
-
-    case SDLK_m: vrotc=vrcmax;
-                   break;
 
     case SDLK_ESCAPE: quit=1;
 
@@ -208,12 +194,6 @@ case SDL_KEYUP:
 
     case SDLK_r: car.af=0;
                  break;
-
-    case SDLK_n: vrotc=0;
-                   break;
-
-    case SDLK_m: vrotc=0;
-                   break;
 
     default: break;
   } break;
