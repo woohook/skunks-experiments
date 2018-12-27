@@ -58,12 +58,10 @@ REALN tframe=0,xan=0,/*tframe-time necessary for display; xan-number of displaye
       timp; /*total time*/
 
 /*for game*/
-REALN vrxmax,vrxmr, /*rot. speed*/
-      arx,arxmax,arxmr, /*rot. acceleration*/
-      vrot3, /*rot. speed of level 3 objects*/
+REALN vrot3, /*rot. speed of level 3 objects*/
       vrotc,vrcmax,rotc, /*rot. speed and rotation of camera*/
       realstep, /*real time step (s)*/
-      speed,dspeed,sim_speed;
+      sim_speed;
 int turn, /*-1: left; 0: no turn; 1: right*/
     dmode, /*1 forward, -1 reverse*/
     nstepsf; /*number of simulation steps/frame*/
@@ -112,9 +110,6 @@ set_double_pixel(DOUBLEPIX);
 set_width_factor(WIDTHFACTOR);
 #endif
 
-arx=0;
-vrxmr=vrxmax=0.36;
-arxmr=arxmax=vrxmax/1.5;
 turn=0;
 dmode=1;
 vrot3=0.5;
@@ -132,27 +127,7 @@ while(!quit){
 t0frame=SDL_GetTicks();
 xan++;
 
-if(speed<10){vrxmr=vrxmax; arxmr=arxmax;}
-else{
-  vrxmr=vrxmax/(0.1*speed);
-  arxmr=arxmax/(0.1*speed);
-}
-
-switch(turn){
-  case 0: if(car.vrx>0){arx=-arxmr*1.5;}else{if(car.vrx<0){arx=arxmr*1.5;}else{arx=0;}}
-          if(fabs(car.vrx)<2.25*tframe*arx){arx=0; car.vrx=0;}
-          break;
-  case -1: if(car.vrx>-vrxmr){arx=-arxmr; if(car.vrx>0){arx*=1.5;}}else{arx=0;}
-           break;
-  case 1: if(car.vrx<vrxmr){arx=arxmr; if(car.vrx<0){arx*=1.5;}}else{arx=0;}
-          break;
-  default: break;
-}
-
-car.vrx+=arx*tframe;
-if(car.vrx>vrxmr){car.vrx=vrxmr;}
-if(car.vrx<-vrxmr){car.vrx=-vrxmr;}
-
+car.vrx = ((float)turn)*0.36;
 
 /*simulation*/
 nstepsf=(int)(tframe/STIMESTEP)+1; /*number of simulation steps/frame*/
@@ -172,8 +147,6 @@ for(i=1;i<=nob;i++){
     rotab(&objs[i]->transform,objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0],objs[i]->transform.vx[3],objs[i]->transform.vy[3],objs[i]->transform.vz[3],vrot3*tframe);
   }
 }
-
-physics_getLinearBodyVelocity(car.parts[1],&speed,&dspeed);
 
 setcamg(&camera,&car,camflag,objs[car.oid[1]]);
 
