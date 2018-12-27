@@ -55,7 +55,7 @@ int nob,camflag=2; /*number of objects and of object types*/
 vhc car; /*vehicle*/
 
 REALN tframe=0,xan=0,/*tframe-time necessary for display; xan-number of displayed images*/
-      timp,dstr; /*total time, distance traveled*/
+      timp; /*total time*/
 
 /*for game*/
 REALN vrxmax,vrxmr, /*rot. speed*/
@@ -122,7 +122,7 @@ vrcmax=0.79;
 vrotc=0;
 rotc=0;
 
-timp=0,dstr=0; /*pornit cronometru*/
+timp=0; /*pornit cronometru*/
 tframe=0.5; /*assuming 2 frames/second*/
 
 
@@ -181,8 +181,6 @@ rotc+=vrotc*tframe; if(camflag==2){rotc=0; vrotc=0;}
 if(rotc){rotatx(&camera,objs[car.oid[1]]->transform.vy[0],objs[car.oid[1]]->transform.vz[0],rotc);}
 
 odis(pSurface,zfog,zmax,&camera); /*display image*/
-
-dstr+=(speed*tframe);
 
 
 while(SDL_PollEvent(&event)){
@@ -266,8 +264,7 @@ tframe=(REALN)(SDL_GetTicks()-t0frame)/1000;
 
 
 printf("\r\n\r\n\r\n**********************************************\r\n");
-printf("\r\nDistance: %1.2f km\r\nTime: %1.2f seconds\r\n",dstr/1000,timp);
-printf("Average speed: %1.2f km/h\r\n",3.6*dstr/timp);
+printf("\r\nTime: %1.2f seconds\r\n",timp);
 printf("Average framerate: %1.2f f/s\r\n\r\n",xan/timp);
 printf("**********************************************\r\n\r\n");
 
