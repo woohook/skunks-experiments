@@ -58,8 +58,7 @@ REALN tframe=0,xan=0,/*tframe-time necessary for display; xan-number of displaye
       timp; /*total time*/
 
 /*for game*/
-REALN vrot3, /*rot. speed of level 3 objects*/
-      vrotc,vrcmax,rotc, /*rot. speed and rotation of camera*/
+REALN vrotc,vrcmax,rotc, /*rot. speed and rotation of camera*/
       realstep, /*real time step (s)*/
       sim_speed;
 int turn, /*-1: left; 0: no turn; 1: right*/
@@ -112,7 +111,6 @@ set_width_factor(WIDTHFACTOR);
 
 turn=0;
 dmode=1;
-vrot3=0.5;
 vrcmax=0.79;
 vrotc=0;
 rotc=0;
@@ -141,12 +139,6 @@ for(i=1;i<=nstepsf;i++){
   timp+=realstep;
 }
 
-
-for(i=1;i<=nob;i++){
-  if(objs[i]->lev==3){
-    rotab(&objs[i]->transform,objs[i]->transform.vx[0],objs[i]->transform.vy[0],objs[i]->transform.vz[0],objs[i]->transform.vx[3],objs[i]->transform.vy[3],objs[i]->transform.vz[3],vrot3*tframe);
-  }
-}
 
 setcamg(&camera,&car,camflag,objs[car.oid[1]]);
 
