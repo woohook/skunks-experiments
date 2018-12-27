@@ -32,7 +32,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "trans.h"
 #include "readfile.h"
-#include "sound.h"
 #include "camera.h"
 
 int main(int argc,char *argv[])
@@ -64,7 +63,7 @@ REALN vrxmax,vrxmr, /*rot. speed*/
       vrot3, /*rot. speed of level 3 objects*/
       vrotc,vrcmax,rotc, /*rot. speed and rotation of camera*/
       realstep, /*real time step (s)*/
-      speed,dspeed,rotspeed,acc;
+      speed,dspeed;
 int turn, /*-1: left; 0: no turn; 1: right*/
     dmode, /*1 forward, -1 reverse*/
     nstepsf; /*number of simulation steps/frame*/
@@ -112,8 +111,6 @@ set_double_pixel(DOUBLEPIX);
 #if ASPCOR==1
 set_width_factor(WIDTHFACTOR);
 #endif
-
-sound_initialize();
 
 arx=0;
 vrxmr=vrxmax=0.36;
@@ -177,21 +174,6 @@ for(i=1;i<=nob;i++){
 }
 
 physics_getLinearBodyVelocity(car.parts[1],&speed,&dspeed);
-{
-  int motor_wheel_count=0;
-  for(i=1;i<=car.nob;i++)
-  {
-    if((car.ofc[i]==3)||(car.ofc[i]==5))
-    {
-      motor_wheel_count++;
-      physics_getAngularBodyVelocity(car.parts[i],&rotspeed);
-    }
-  }
-  rotspeed/=motor_wheel_count; // average rot. speed of motor wheels
-}
-acc=dspeed/tframe;
-
-sound_update(rotspeed, acc);
 
 setcamg(&camera,&car,camflag,objs[car.oid[1]]);
 
@@ -289,11 +271,7 @@ printf("Average speed: %1.2f km/h\r\n",3.6*dstr/timp);
 printf("Average framerate: %1.2f f/s\r\n\r\n",xan/timp);
 printf("**********************************************\r\n\r\n");
 
-sound_terminate();
-
 SDL_Quit();
-
-sound_release();
 
 renderer_release();
 for(i=1;i<=nob;i++)
