@@ -49,4 +49,7 @@ REALN brake; /*acceleration and brake torques/wheel*/
 
 REALN camh;
 REALN camd; /*camera position*/
+
+int turn;  // -1: left; 0: no turn; 1: right
+int dmode; // 1 forward, -1 reverse
 } vhc; /*vehicle*/

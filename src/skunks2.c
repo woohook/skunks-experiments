@@ -55,9 +55,7 @@ REALN tframe=0,xan=0,/*tframe-time necessary for display; xan-number of displaye
 /*for game*/
 REALN realstep, /*real time step (s)*/
       sim_speed;
-int turn, /*-1: left; 0: no turn; 1: right*/
-    dmode, /*1 forward, -1 reverse*/
-    nstepsf; /*number of simulation steps/frame*/
+int nstepsf; /*number of simulation steps/frame*/
 /*for game^*/
 
 
@@ -99,8 +97,8 @@ set_double_pixel(DOUBLEPIX);
 set_width_factor(WIDTHFACTOR);
 #endif
 
-turn=0;
-dmode=1;
+car.turn=0;
+car.dmode=1;
 
 timp=0; /*pornit cronometru*/
 tframe=0.5; /*assuming 2 frames/second*/
@@ -112,7 +110,7 @@ while(!quit){
 t0frame=SDL_GetTicks();
 xan++;
 
-car.vrx = ((float)turn)*0.36;
+car.vrx = ((float)car.turn)*0.36;
 
 /*simulation*/
 nstepsf=(int)(tframe/STIMESTEP)+1; /*number of simulation steps/frame*/
@@ -139,7 +137,7 @@ case SDL_KEYDOWN:
   switch(event.key.keysym.sym){
     case SDLK_q:
     case SDLK_UP:
-    case SDLK_t: car.af=car.accel*(float)dmode;
+    case SDLK_t: car.af=car.accel*(float)car.dmode;
                  break;
     case SDLK_a:
     case SDLK_DOWN:
@@ -147,14 +145,14 @@ case SDL_KEYDOWN:
                  break;
     case SDLK_o:
     case SDLK_LEFT:
-    case SDLK_y: turn=-1;
+    case SDLK_y: car.turn=-1;
                  break;
     case SDLK_p:
     case SDLK_RIGHT:
-    case SDLK_u: turn=1;
+    case SDLK_u: car.turn=1;
                  break;
 
-    case SDLK_r: dmode=-dmode;
+    case SDLK_r: car.dmode=-car.dmode;
                  break;
 
     case SDLK_c: camflag++; if(camflag>3){camflag=1;}
@@ -176,11 +174,11 @@ case SDL_KEYUP:
                  break;
     case SDLK_o:
     case SDLK_LEFT:
-    case SDLK_y: if(turn==-1){turn=0;}
+    case SDLK_y: if(car.turn==-1){car.turn=0;}
                  break;
     case SDLK_p:
     case SDLK_RIGHT:
-    case SDLK_u: if(turn==1){turn=0;}
+    case SDLK_u: if(car.turn==1){car.turn=0;}
                  break;
 
     case SDLK_r: car.af=0;
