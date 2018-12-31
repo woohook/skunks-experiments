@@ -45,7 +45,7 @@ struct _surface* pSurface = NULL;
 
 sgob** objs; /*objects*/
 struct _matrix camera;
-int nob,camflag=2; /*number of objects and of object types*/
+int nob; /*number of objects and of object types*/
 
 vhc car; /*vehicle*/
 
@@ -125,7 +125,7 @@ for(i=1;i<=nstepsf;i++){
 }
 
 
-setcamg(&camera,&car,camflag,objs[car.oid[1]]);
+setcamg(&camera,objs[car.oid[1]]);
 
 odis(pSurface,&camera); /*display image*/
 
@@ -153,9 +153,6 @@ case SDL_KEYDOWN:
                  break;
 
     case SDLK_r: car.dmode=-car.dmode;
-                 break;
-
-    case SDLK_c: camflag++; if(camflag>3){camflag=1;}
                  break;
 
     case SDLK_ESCAPE: quit=1;
