@@ -49,6 +49,12 @@ int nob; /*number of objects and of object types*/
 
 vhc car; /*vehicle*/
 
+float action_accelerate = 0;
+float action_brake = 0;
+float action_left = 0;
+float action_right = 0;
+float action_reverse = 0;
+
 REALN tframe=0,xan=0,/*tframe-time necessary for display; xan-number of displayed images*/
       timp; /*total time*/
 
@@ -135,60 +141,65 @@ switch(event.type){
 
 case SDL_KEYDOWN:
   switch(event.key.keysym.sym){
-    case SDLK_q:
     case SDLK_UP:
-    case SDLK_t: car.af=car.accel*(float)car.dmode;
-                 break;
-    case SDLK_a:
+      action_accelerate = 1.0f;
+      break;
     case SDLK_DOWN:
-    case SDLK_f: car.bf=1.01f*car.brake;
-                 break;
-    case SDLK_o:
+      action_brake = 1.0f;
+      break;
     case SDLK_LEFT:
-    case SDLK_y: car.turn=-1;
-                 break;
-    case SDLK_p:
+      action_left = 1.0f;
+      break;
     case SDLK_RIGHT:
-    case SDLK_u: car.turn=1;
-                 break;
-
-    case SDLK_r: car.dmode=-car.dmode;
-                 break;
-
+      action_right = 1.0f;
+      break;
+    case SDLK_r:
+      action_reverse = 1.0f;
+      break;
     case SDLK_ESCAPE: quit=1;
-
-    default: break;
-  } break;
+      break;
+    default:
+      break;
+  }
+  break;
 case SDL_KEYUP:
   switch(event.key.keysym.sym){
-    case SDLK_q:
     case SDLK_UP:
-    case SDLK_t: car.af=0;
-                 break;
-    case SDLK_a:
+      action_accelerate = 0.0f;
+      break;
     case SDLK_DOWN:
-    case SDLK_f: car.bf=0.01f*car.brake;
-                 break;
-    case SDLK_o:
+      action_brake = 0.0f;
+      break;
     case SDLK_LEFT:
-    case SDLK_y: if(car.turn==-1){car.turn=0;}
-                 break;
-    case SDLK_p:
+      action_left = 0.0f;
+      break;
     case SDLK_RIGHT:
-    case SDLK_u: if(car.turn==1){car.turn=0;}
-                 break;
-
-    case SDLK_r: car.af=0;
-                 break;
-
-    default: break;
-  } break;
-
-case SDL_QUIT: quit=1;
-
-default: break;
+      action_right = 0.0f;
+      break;
+    case SDLK_r:
+      action_reverse = 0.0f;
+      break;
+    default:
+      break;
+  }
+  break;
+case SDL_QUIT:
+  quit=1;
+  break;
+default:
+  break;
 }
 }
+
+car.af=action_accelerate*car.accel*(float)car.dmode;
+car.bf=(action_brake+0.01f)*car.brake;
+car.turn=action_right-action_left;
+if(action_reverse>0.0f)
+{
+  car.dmode=-car.dmode;
+  car.af=0;
+}
+
 /*tframe=(REALN)(clock()-t0frame)/CLOCKS_PER_SEC;*/
 tframe=(REALN)(SDL_GetTicks()-t0frame)/1000;
 }
