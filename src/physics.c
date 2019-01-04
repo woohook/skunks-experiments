@@ -7,6 +7,8 @@
 
 #define PHYS_MAXGEOM 55  //maximum number of geoms (ODE) for 1 object (=PHYS_MAXREF/2)
 
+#define GRAVITY -9.81  // gravitational acceleration in m/(s*s)
+
 typedef struct _refpo
 {
   int nref;           //number of reference points
@@ -61,6 +63,9 @@ void physics_init()
 {
   dInitODE();
   wglob=dWorldCreate();
+  physics_setERP(0.2);
+  physics_setCFM(1e-5);
+  physics_setGravity(GRAVITY);
 }
 
 void physics_release()

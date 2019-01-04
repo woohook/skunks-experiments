@@ -77,9 +77,6 @@ if(argc>=4){printf("Error: Too many arguments\r\n");exit(1);}
 
 
 physics_init();
-physics_setERP(0.2);
-physics_setCFM(1e-5);
-physics_setGravity(GRAVITY);
 
 strcpy(numefis,argv[2]);
 objs=readtrack(numefis,&nob); /*read objects from file*/
