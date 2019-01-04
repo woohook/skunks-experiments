@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "surface.h"
 #include "render32.h"
 #include "physics.h"
+#include "input.h"
 
 #include "trans.h"
 #include "readfile.h"
@@ -37,10 +38,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 int main(int argc,char *argv[])
 {char numefis[MAXWLG];
 
-int i,quit=0,
+int i,
     t0frame; /*t0frame - moment when image starts to be displayed*/
 
-SDL_Event event;
 struct _surface* pSurface = NULL;
 
 sgob** objs; /*objects*/
@@ -54,6 +54,7 @@ float action_brake = 0;
 float action_left = 0;
 float action_right = 0;
 float action_reverse = 0;
+float action_quit = 0;
 
 REALN tframe=0,xan=0,/*tframe-time necessary for display; xan-number of displayed images*/
       timp; /*total time*/
@@ -106,11 +107,19 @@ set_width_factor(WIDTHFACTOR);
 car.turn=0;
 car.dmode=1;
 
+input_initialize();
+input_register(SDLK_UP, &action_accelerate);
+input_register(SDLK_DOWN, &action_brake);
+input_register(SDLK_LEFT, &action_left);
+input_register(SDLK_RIGHT, &action_right);
+input_register(SDLK_r, &action_reverse);
+input_register(SDLK_ESCAPE, &action_quit);
+
 timp=0; /*pornit cronometru*/
 tframe=0.5; /*assuming 2 frames/second*/
 
 
-while(!quit){
+while(action_quit == 0){
 
 /*t0frame=clock();*/
 t0frame=SDL_GetTicks();
@@ -135,61 +144,7 @@ setcamg(&camera,objs[car.oid[1]]);
 
 odis(pSurface,&camera); /*display image*/
 
-
-while(SDL_PollEvent(&event)){
-switch(event.type){
-
-case SDL_KEYDOWN:
-  switch(event.key.keysym.sym){
-    case SDLK_UP:
-      action_accelerate = 1.0f;
-      break;
-    case SDLK_DOWN:
-      action_brake = 1.0f;
-      break;
-    case SDLK_LEFT:
-      action_left = 1.0f;
-      break;
-    case SDLK_RIGHT:
-      action_right = 1.0f;
-      break;
-    case SDLK_r:
-      action_reverse = 1.0f;
-      break;
-    case SDLK_ESCAPE: quit=1;
-      break;
-    default:
-      break;
-  }
-  break;
-case SDL_KEYUP:
-  switch(event.key.keysym.sym){
-    case SDLK_UP:
-      action_accelerate = 0.0f;
-      break;
-    case SDLK_DOWN:
-      action_brake = 0.0f;
-      break;
-    case SDLK_LEFT:
-      action_left = 0.0f;
-      break;
-    case SDLK_RIGHT:
-      action_right = 0.0f;
-      break;
-    case SDLK_r:
-      action_reverse = 0.0f;
-      break;
-    default:
-      break;
-  }
-  break;
-case SDL_QUIT:
-  quit=1;
-  break;
-default:
-  break;
-}
-}
+input_process();
 
 car.af=action_accelerate*car.accel*(float)car.dmode;
 car.bf=(action_brake+0.01f)*car.brake;
