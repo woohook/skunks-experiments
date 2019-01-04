@@ -66,10 +66,7 @@ int nstepsf; /*number of simulation steps/frame*/
 /*for game^*/
 
 
-camera.vx[0]=0; camera.vy[0]=0; camera.vz[0]=0;
-camera.vx[1]=1; camera.vy[1]=0; camera.vz[1]=0;
-camera.vx[2]=0; camera.vy[2]=1; camera.vz[2]=0;
-camera.vx[3]=0; camera.vy[3]=0; camera.vz[3]=1; /*set camera parameters*/
+matrix_identity(&camera);
 
 car.af = 0;
 car.bf = 0;

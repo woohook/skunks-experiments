@@ -60,4 +60,6 @@ void rotab(struct _matrix *mtrx,float x,float y,float z,float xb,float yb,float 
 
 void rotate_vector_ab(float* x,float* y,float* z, float xa, float ya, float za, float xb, float yb, float zb, float tt);
 
+void matrix_identity(struct _matrix *mtrx);
+
 #endif // SKUNKS_TRANS_H

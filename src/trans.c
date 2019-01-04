@@ -224,3 +224,11 @@ void rotate_vector_ab(float* x,float* y,float* z, float xa, float ya, float za, 
     *y = ya+(*y-ya)*cosalf+(xtm-xa)*sinalf;
   }
 }
+
+void matrix_identity(struct _matrix *mtrx)
+{
+  mtrx->vx[0] = 0; mtrx->vy[0] = 0; mtrx->vz[0] = 0;
+  mtrx->vx[1] = 1; mtrx->vy[1] = 0; mtrx->vz[1] = 0;
+  mtrx->vx[2] = 0; mtrx->vy[2] = 1; mtrx->vz[2] = 0;
+  mtrx->vx[3] = 0; mtrx->vy[3] = 0; mtrx->vz[3] = 1;
+}
