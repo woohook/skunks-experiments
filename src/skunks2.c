@@ -50,22 +50,23 @@ struct _list* parts = 0;
 struct _matrix camera;
 int nob; /*number of objects and of object types*/
 
-vhc car; /*vehicle*/
+vhc car;
+car.action_accelerate = 0;
+car.action_brake = 0;
+car.action_left = 0;
+car.action_right = 0;
+car.action_reverse = 0;
+car.af = 0;
+car.bf = 0;
+car.vrx = 0;
+car.turn=0;
+car.dmode=1;
 
-float action_accelerate = 0;
-float action_brake = 0;
-float action_left = 0;
-float action_right = 0;
-float action_reverse = 0;
 float action_quit = 0;
 
 REALN tframe=0;  // tframe-time necessary for display
 
 matrix_identity(&camera);
-
-car.af = 0;
-car.bf = 0;
-car.vrx = 0;
 
 if(argc<=2){printf("Error: Input files not specified\r\nExample: ./skunks cars/car1 tracks/track1\r\n");exit(1);}
 if(argc>=4){printf("Error: Too many arguments\r\n");exit(1);}
@@ -93,15 +94,12 @@ set_double_pixel(DOUBLEPIX);
 set_width_factor(WIDTHFACTOR);
 #endif
 
-car.turn=0;
-car.dmode=1;
-
 input_initialize();
-input_register(SDLK_UP, &action_accelerate);
-input_register(SDLK_DOWN, &action_brake);
-input_register(SDLK_LEFT, &action_left);
-input_register(SDLK_RIGHT, &action_right);
-input_register(SDLK_r, &action_reverse);
+input_register(SDLK_UP, &car.action_accelerate);
+input_register(SDLK_DOWN, &car.action_brake);
+input_register(SDLK_LEFT, &car.action_left);
+input_register(SDLK_RIGHT, &car.action_right);
+input_register(SDLK_r, &car.action_reverse);
 input_register(SDLK_ESCAPE, &action_quit);
 
 tframe=0.5; /*assuming 2 frames/second*/
@@ -112,24 +110,23 @@ while(action_quit == 0){
 /*t0frame=clock();*/
 t0frame=SDL_GetTicks();
 
+input_process();
+
+car.af=car.action_accelerate*car.accel*(float)car.dmode;
+car.bf=(car.action_brake+0.01f)*car.brake;
+car.turn=car.action_right-car.action_left;
 car.vrx = ((float)car.turn)*0.36;
+if(car.action_reverse>0.0f)
+{
+  car.dmode=-car.dmode;
+  car.af=0;
+}
 
 physics_process(tframe);
 
 setcamg(&camera,list_get_value(parts,0));
 
 odis(pSurface,&camera); /*display image*/
-
-input_process();
-
-car.af=action_accelerate*car.accel*(float)car.dmode;
-car.bf=(action_brake+0.01f)*car.brake;
-car.turn=action_right-action_left;
-if(action_reverse>0.0f)
-{
-  car.dmode=-car.dmode;
-  car.af=0;
-}
 
 /*tframe=(REALN)(clock()-t0frame)/CLOCKS_PER_SEC;*/
 tframe=(REALN)(SDL_GetTicks()-t0frame)/1000;
