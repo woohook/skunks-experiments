@@ -16,6 +16,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#include "list.h"
+
 int g_numberOfMeshes = 0;
 
 /*functie care returneaza 1 daca i se transmite un caracter de delimitare si 0 daca nu*/
@@ -384,8 +386,12 @@ int previousNumberOfMeshes = g_numberOfMeshes;
 nob=*nrobt;
 sgob* object = 0;
 struct physics_instance* primaryBody = 0, *secondaryBody = 0;
+int part_type_id = 0;
 
 int tjflag=0; // no trailer yet
+
+struct _list* parts = list_create();
+struct _list* parts_types = list_create();
 
   if(!(fis=fopen(numefis,"r"))){printf("Error: File %s could not be open\r\n",numefis);exit(1);}
 s[0]='1';while(s[0]){
@@ -437,13 +443,13 @@ s[0]='1';while(s[0]){
 
                     k=object_index-nob+car->nob; /*1...car->nob*/
                     car->oid[k]=object_index;
-	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); car->ofc[k]=atoi(s);
+	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); part_type_id = atoi(s);
 	            switch(k){
-	              case 1: if(car->ofc[k]!=1){printf("Error: '%s' line %d - second number must be 1\r\n",numefis,lincr); exit(1);}
+	              case 1: if(part_type_id!=1){printf("Error: '%s' line %d - second number must be 1\r\n",numefis,lincr); exit(1);}
 	                      break;
-	              case 2: if(car->ofc[k]==1){printf("Error: '%s' line %d - second number must not be 1\r\n",numefis,lincr); exit(1);}
+	              case 2: if(part_type_id==1){printf("Error: '%s' line %d - second number must not be 1\r\n",numefis,lincr); exit(1);}
 	                      break;
-	              default: if(car->ofc[k]<=2){printf("Error: '%s' line %d - second number must be > 2\r\n",numefis,lincr); exit(1);}
+	              default: if(part_type_id<=2){printf("Error: '%s' line %d - second number must be > 2\r\n",numefis,lincr); exit(1);}
 	                      break;
 	            }
 	            /*^object's function; 1-car; 2-trailer; 3,4,5,6-car wheel; 7-trailer wheel*/
@@ -454,17 +460,18 @@ s[0]='1';while(s[0]){
 	              translat(&object->transform,tx,ty,tz);
 
                     object->physics_object = create_collision_geometry_instance(object->otyp, tx, ty, tz, 0, 0, 0, &object->transform);
-                    car->parts[k] = object->physics_object;
-                    if(car->ofc[k] == 1)
+                    list_add_value(parts, object);
+                    list_add_value(parts_types, (void*)part_type_id);
+                    if(part_type_id == 1)
                     {
                       primaryBody = object->physics_object;
                     }
-                    if(car->ofc[k] == 2)
+                    if(part_type_id == 2)
                     {
                       secondaryBody = object->physics_object;
                     }
 
-                    if((car->ofc[k])>=2){physics_enableImprovedSpinning(object->physics_object, 1);}
+                    if(part_type_id >= 2){physics_enableImprovedSpinning(object->physics_object, 1);}
 
 	            if(!(err=fisgetw(fis,s,&lincr)))
 	            {
@@ -513,7 +520,7 @@ s[0]='1';while(s[0]){
           case 10: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
                    err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
                    err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
-                   if(car->ofc[2]!=2){printf("Error: '%s' line %d - trailer joint without trailer\r\n",numefis,lincr);exit(1);}
+                   if((int)list_get_value(parts_types,1)!=2){printf("Error: '%s' line %d - trailer joint without trailer\r\n",numefis,lincr);exit(1);}
                    if(tjflag==1){printf("Error: '%s' line %d - only one such joint allowed\r\n",numefis,lincr);exit(1);}
                    tjflag=1;
                    physics_createUniversalJoint(primaryBody, secondaryBody,tx,ty,tz);
@@ -529,14 +536,21 @@ s[0]='1';while(s[0]){
 fclose(fis);
 
 /*set joints*/
-for(i=1;i<=car->nob;i++){
-  physics_setBodyFriction(car->parts[i], friction);
+struct _list_item* part = list_get_first(parts);
+struct _list_item* part_type = list_get_first(parts_types);
 
-  if(car->ofc[i]>=3){
+for(i=1;i<=car->nob;i++){
+  int object_type = (int)list_item_get_value(part_type);
+  object = list_item_get_value(part);
+  physics_setBodyFriction(object->physics_object, friction);
+  part = list_item_get_next(part);
+  part_type = list_item_get_next(part_type);
+
+  if(object_type>=3){
 
       struct physics_instance* parentBody = primaryBody;
       float* vrx = 0, *af = 0, *bf = &car->bf;
-      switch(car->ofc[i])
+      switch(object_type)
       {
         case 3:
           af = &car->af;
@@ -555,10 +569,13 @@ for(i=1;i<=car->nob;i++){
           break;
       }
 
-      physics_createHinge2(parentBody,car->parts[i],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0], vrx, af, bf, spring, damper);
+      physics_createHinge2(parentBody,object->physics_object,object->transform.vx[0],object->transform.vy[0],object->transform.vz[0], vrx, af, bf, spring, damper);
   }
 }
 /*^set joints*/
+
+list_release(parts_types, 0);
+list_release(parts, 0);
 
 return objs;}
 

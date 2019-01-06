@@ -35,10 +35,6 @@ typedef struct _vhc
 {int nob; /*number of objects in vehicle*/
 
 int oid[MAXGEOM]; /*number of object (rendering and collision) in 'objs' array from 'simcar.c'*/
-struct physics_instance* parts[MAXGEOM];
-
-int ofc[MAXGEOM]; /*object function: 1-car; 2-trailer; 3-motor wheel; 4-steering wheel;
-                    5-motor and steering wheel; 6-passive wheel; 7-trailer wheel*/
 
 float vrx; // steering speed
 float af;  // acceleration factor
