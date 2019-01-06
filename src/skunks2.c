@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "input.h"
 
 #include "trans.h"
+#include "list.h"
 #include "readfile.h"
 #include "camera.h"
 
@@ -44,6 +45,7 @@ int i,
 struct _surface* pSurface = NULL;
 
 sgob** objs; /*objects*/
+struct _list* parts = 0;
 struct _matrix camera;
 int nob; /*number of objects and of object types*/
 
@@ -74,7 +76,7 @@ strcpy(numefis,argv[2]);
 objs=readtrack(numefis,&nob); /*read objects from file*/
 
 strcpy(numefis,argv[1]);
-objs=readvehicle(numefis,objs,&nob,&car); /*read vehicle from file*/
+parts = readvehicle(numefis,&car); /*read vehicle from file*/
 
 printf("\r\n");
 
@@ -113,7 +115,7 @@ car.vrx = ((float)car.turn)*0.36;
 
 physics_process(tframe);
 
-setcamg(&camera,objs[car.oid[1]]);
+setcamg(&camera,list_get_value(parts,0));
 
 odis(pSurface,&camera); /*display image*/
 
@@ -140,6 +142,7 @@ for(i=1;i<=nob;i++)
   free(objs[i]);
 }
 free(objs);
+list_release(parts,1);
 
 /* printf("Press ENTER: ");getchar();printf("\r\n"); */
 

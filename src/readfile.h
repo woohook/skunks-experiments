@@ -16,8 +16,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "list.h"
-
 int g_numberOfMeshes = 0;
 
 /*functie care returneaza 1 daca i se transmite un caracter de delimitare si 0 daca nu*/
@@ -368,13 +366,11 @@ object->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 
 /*function which reads the vehicle; must be called AFTER readtrack()
 nrtyp,nrobt - number of object types and objects given by readtrack()*/
-sgob** readvehicle(char *numefis,sgob** objs,int *nrobt,vhc *car)
+struct _list* readvehicle(char *numefis,vhc *car)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
-int i,k,nob; /*number of object types and number of objects*/
 int object_type_index = 0;
-int object_index = 0;
 REALN tx,ty,tz, /*initial translations*/
       len;
 float spring = 0;  // hinge spring coefficient
@@ -383,7 +379,6 @@ float damper = 0;  // hinge damper coefficient
 float friction = 0;
 
 int previousNumberOfMeshes = g_numberOfMeshes;
-nob=*nrobt;
 sgob* object = 0;
 struct physics_instance* primaryBody = 0, *secondaryBody = 0;
 int part_type_id = 0;
@@ -419,16 +414,12 @@ s[0]='1';while(s[0]){
                   else {printf("More object types than announced\n"); exit(1);}
 	          break;
 
-	  case 2: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
-	          car->nob=atoi(s); nob+=car->nob; (*nrobt)=nob;
-	          if(!(objs=(sgob**)realloc(objs,(nob+1)*sizeof(sgob*)))){printf("Out of memory");}
-	          object_index=(nob-car->nob+1);
+	  case 2: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);  // ignore number of parts
                   break;
 	  case 18:
-	          if(object_index<=nob){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
                       object=(sgob*)malloc(sizeof(sgob));
-                      objs[object_index] = object;
+                      list_add_value(parts,object);
 	              object->otyp=previousNumberOfMeshes+atoi(s);
                       create_mesh_instance(object->otyp, &object->transform);
 	              if(object->otyp>g_numberOfMeshes){
@@ -441,10 +432,9 @@ s[0]='1';while(s[0]){
 	              object->transform.vz[1]=object->transform.vz[2]=0;
 	              eval_obj(object->otyp,object);
 
-                    k=object_index-nob+car->nob; /*1...car->nob*/
-                    car->oid[k]=object_index;
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); part_type_id = atoi(s);
-	            switch(k){
+	            list_add_value(parts_types, (void*)part_type_id);
+	            switch(list_get_size(parts)){
 	              case 1: if(part_type_id!=1){printf("Error: '%s' line %d - second number must be 1\r\n",numefis,lincr); exit(1);}
 	                      break;
 	              case 2: if(part_type_id==1){printf("Error: '%s' line %d - second number must not be 1\r\n",numefis,lincr); exit(1);}
@@ -460,8 +450,7 @@ s[0]='1';while(s[0]){
 	              translat(&object->transform,tx,ty,tz);
 
                     object->physics_object = create_collision_geometry_instance(object->otyp, tx, ty, tz, 0, 0, 0, &object->transform);
-                    list_add_value(parts, object);
-                    list_add_value(parts_types, (void*)part_type_id);
+
                     if(part_type_id == 1)
                     {
                       primaryBody = object->physics_object;
@@ -497,9 +486,6 @@ s[0]='1';while(s[0]){
                     }
                     physics_setBodyPosition(object->physics_object,object->transform.vx[0],object->transform.vy[0],object->transform.vz[0]);
 	            /*^set mass parameters*/
-                    object_index++;
-	          }
-                  else {printf("More objects than announced\n"); exit(1);}
 	          break;
 
 	  case 5: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->accel=atof(s);
@@ -539,7 +525,7 @@ fclose(fis);
 struct _list_item* part = list_get_first(parts);
 struct _list_item* part_type = list_get_first(parts_types);
 
-for(i=1;i<=car->nob;i++){
+while(part != 0){
   int object_type = (int)list_item_get_value(part_type);
   object = list_item_get_value(part);
   physics_setBodyFriction(object->physics_object, friction);
@@ -575,9 +561,8 @@ for(i=1;i<=car->nob;i++){
 /*^set joints*/
 
 list_release(parts_types, 0);
-list_release(parts, 0);
 
-return objs;}
+return parts;}
 
 
 /*function which reads the track; nrobt - number of objects*/
