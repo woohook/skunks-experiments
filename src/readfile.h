@@ -383,6 +383,7 @@ float friction = 0;
 int previousNumberOfMeshes = g_numberOfMeshes;
 nob=*nrobt;
 sgob* object = 0;
+struct physics_instance* primaryBody = 0, *secondaryBody = 0;
 
 int tjflag=0; // no trailer yet
 
@@ -454,6 +455,14 @@ s[0]='1';while(s[0]){
 
                     object->physics_object = create_collision_geometry_instance(object->otyp, tx, ty, tz, 0, 0, 0, &object->transform);
                     car->parts[k] = object->physics_object;
+                    if(car->ofc[k] == 1)
+                    {
+                      primaryBody = object->physics_object;
+                    }
+                    if(car->ofc[k] == 2)
+                    {
+                      secondaryBody = object->physics_object;
+                    }
 
                     if((car->ofc[k])>=2){physics_enableImprovedSpinning(object->physics_object, 1);}
 
@@ -477,9 +486,9 @@ s[0]='1';while(s[0]){
 
                         default: if(s[0]){printf("Error: '%s' line %d - word '%s' not recognized\r\n",numefis,lincr,s);exit(1);}
 	              }
-                      physics_setBodyMass(car->parts[k],len,distribution_type,tx,ty,tz);
+                      physics_setBodyMass(object->physics_object,len,distribution_type,tx,ty,tz);
                     }
-                    physics_setBodyPosition(car->parts[k],object->transform.vx[0],object->transform.vy[0],object->transform.vz[0]);
+                    physics_setBodyPosition(object->physics_object,object->transform.vx[0],object->transform.vy[0],object->transform.vz[0]);
 	            /*^set mass parameters*/
                     object_index++;
 	          }
@@ -507,7 +516,7 @@ s[0]='1';while(s[0]){
                    if(car->ofc[2]!=2){printf("Error: '%s' line %d - trailer joint without trailer\r\n",numefis,lincr);exit(1);}
                    if(tjflag==1){printf("Error: '%s' line %d - only one such joint allowed\r\n",numefis,lincr);exit(1);}
                    tjflag=1;
-                   physics_createUniversalJoint(car->parts[1], car->parts[2],tx,ty,tz);
+                   physics_createUniversalJoint(primaryBody, secondaryBody,tx,ty,tz);
                    break;
 
           case 11: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2);  // camera position ignored
@@ -525,6 +534,7 @@ for(i=1;i<=car->nob;i++){
 
   if(car->ofc[i]>=3){
 
+      struct physics_instance* parentBody = primaryBody;
       float* vrx = 0, *af = 0, *bf = &car->bf;
       switch(car->ofc[i])
       {
@@ -538,12 +548,14 @@ for(i=1;i<=car->nob;i++){
           vrx = &car->vrx;
           af  = &car->af;
           break;
+        case 7:
+          parentBody = secondaryBody;
+          break;
         default:
           break;
       }
-      k=1; if(car->ofc[i]==7){k=2;}
 
-      physics_createHinge2(car->parts[k],car->parts[i],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0], vrx, af, bf, spring, damper);
+      physics_createHinge2(parentBody,car->parts[i],objs[car->oid[i]]->transform.vx[0],objs[car->oid[i]]->transform.vy[0],objs[car->oid[i]]->transform.vz[0], vrx, af, bf, spring, damper);
   }
 }
 /*^set joints*/
