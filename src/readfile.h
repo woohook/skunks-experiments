@@ -510,8 +510,8 @@ s[0]='1';while(s[0]){
                    physics_createUniversalJoint(car->parts[1], car->parts[2],tx,ty,tz);
                    break;
 
-          case 11: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->camh=atof(s);
-                   err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->camd=atof(s);
+          case 11: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2);  // camera position ignored
+                   err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2);
                    break;
 	
 	  default: if(s[0]){printf("Error: '%s' line %d - word '%s' not recognized\r\n",numefis,lincr,s);exit(1);}
