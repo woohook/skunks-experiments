@@ -29,17 +29,3 @@ matrix transform; /*directions of local axes in global coordinates - v[1]=i, v[2
 int lev; /*level*/
 struct physics_instance* physics_object;
 } sgob; /*3d object*/
-
-
-typedef struct _vhc
-{
-float vrx; // steering speed
-float af;  // acceleration factor
-float bf;  // brake factor
-
-REALN accel;
-REALN brake; /*acceleration and brake torques/wheel*/
-
-int turn;  // -1: left; 0: no turn; 1: right
-int dmode; // 1 forward, -1 reverse
-} vhc; /*vehicle*/

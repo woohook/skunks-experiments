@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "trans.h"
 #include "list.h"
+#include "vehicle.h"
 #include "readfile.h"
 #include "camera.h"
 
