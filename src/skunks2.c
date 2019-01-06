@@ -59,13 +59,6 @@ float action_quit = 0;
 REALN tframe=0,xan=0,/*tframe-time necessary for display; xan-number of displayed images*/
       timp; /*total time*/
 
-/*for game*/
-REALN realstep, /*real time step (s)*/
-      sim_speed;
-int nstepsf; /*number of simulation steps/frame*/
-/*for game^*/
-
-
 matrix_identity(&camera);
 
 car.af = 0;
@@ -121,18 +114,7 @@ xan++;
 
 car.vrx = ((float)car.turn)*0.36;
 
-/*simulation*/
-nstepsf=(int)(tframe/STIMESTEP)+1; /*number of simulation steps/frame*/
-realstep=tframe/nstepsf; /*simulation time step*/
-
-sim_speed=0.1/realstep; /*decrease simulation speed if < 10fps*/
-if(nstepsf>(int)sim_speed){nstepsf=(int)sim_speed;}
-
-for(i=1;i<=nstepsf;i++){
-  runsim(realstep);
-  timp+=realstep;
-}
-
+physics_process(tframe);
 
 setcamg(&camera,objs[car.oid[1]]);
 
@@ -151,6 +133,7 @@ if(action_reverse>0.0f)
 
 /*tframe=(REALN)(clock()-t0frame)/CLOCKS_PER_SEC;*/
 tframe=(REALN)(SDL_GetTicks()-t0frame)/1000;
+timp+=tframe;
 }
 
 
