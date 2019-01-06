@@ -56,8 +56,7 @@ float action_right = 0;
 float action_reverse = 0;
 float action_quit = 0;
 
-REALN tframe=0,xan=0,/*tframe-time necessary for display; xan-number of displayed images*/
-      timp; /*total time*/
+REALN tframe=0;  // tframe-time necessary for display
 
 matrix_identity(&camera);
 
@@ -102,7 +101,6 @@ input_register(SDLK_RIGHT, &action_right);
 input_register(SDLK_r, &action_reverse);
 input_register(SDLK_ESCAPE, &action_quit);
 
-timp=0; /*pornit cronometru*/
 tframe=0.5; /*assuming 2 frames/second*/
 
 
@@ -110,7 +108,6 @@ while(action_quit == 0){
 
 /*t0frame=clock();*/
 t0frame=SDL_GetTicks();
-xan++;
 
 car.vrx = ((float)car.turn)*0.36;
 
@@ -133,14 +130,7 @@ if(action_reverse>0.0f)
 
 /*tframe=(REALN)(clock()-t0frame)/CLOCKS_PER_SEC;*/
 tframe=(REALN)(SDL_GetTicks()-t0frame)/1000;
-timp+=tframe;
 }
-
-
-printf("\r\n\r\n\r\n**********************************************\r\n");
-printf("\r\nTime: %1.2f seconds\r\n",timp);
-printf("Average framerate: %1.2f f/s\r\n\r\n",xan/timp);
-printf("**********************************************\r\n\r\n");
 
 SDL_Quit();
 
