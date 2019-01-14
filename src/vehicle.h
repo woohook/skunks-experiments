@@ -16,3 +16,6 @@ typedef struct _vhc
   int turn;  // -1: left; 0: no turn; 1: right
   int dmode; // 1 forward, -1 reverse
 } vhc;
+
+struct _vhc* vehicle_create();
+void vehicle_process(struct _vhc* pVehicle);
