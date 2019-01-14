@@ -22,15 +22,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define REALD float
 /*this 2*/
 
-#define SCREENWIDTH 800
-/*screen width (pixels)*/
-
-#define SCREENHEIGHT 600
-/*screen height (pixels)*/
-
-#define SDLSCREENFLAG SDL_SWSURFACE
-/*SDL_FULLSCREEN or SDL_SWSURFACE*/
-
 #define MAXREF 109
 /*maximum number of reference points for 1 object*/
 

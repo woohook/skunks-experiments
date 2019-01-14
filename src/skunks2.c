@@ -37,6 +37,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "readfile.h"
 #include "camera.h"
 
+
+#define SCREENWIDTH 800   // screen width (pixels)
+#define SCREENHEIGHT 600  // screen height (pixels)
+
+
 int main(int argc,char *argv[])
 {char numefis[MAXWLG];
 
