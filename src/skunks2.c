@@ -88,11 +88,7 @@ if(SDL_Init(SDL_INIT_VIDEO)<0){printf("Couldn't initialize SDL: %s\n", SDL_GetEr
 // Initialize display
 pSurface = surface_create(SCREENWIDTH,SCREENHEIGHT);
 
-set_view_angle(FOV);
-set_double_pixel(DOUBLEPIX);
-#if ASPCOR==1
-set_width_factor(WIDTHFACTOR);
-#endif
+renderer_initialize();
 
 input_initialize();
 input_register(SDLK_UP, &car.action_accelerate);

@@ -25,6 +25,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "trans.h"
 #include "list.h"
 
+#define DOUBLEPIX 0  // 1 - large pixels; 0 - normal pixels
+
+#define FOV 90  // horizontal viewing angle (in degrees)
+
+#define ASPCOR 0  // 1 - aspect correction; 0 - no aspect correction (WIDTHFACTOR ignored)
+
+#define WIDTHFACTOR 0.78125 // 0.78125 recommended for monitor with 1024x600 resolution, set at 800x600 (if the video driver doesn't support 1024x600)
+
 typedef struct _pixcol
 {int red;int green;int blue; /*culoarea pixelului*/
 } pixcol;
@@ -886,6 +894,15 @@ while(instanceNode != 0){
 finish_frame(pSurface,distmin);
 
 surface_end_rendering(pSurface);
+}
+
+void renderer_initialize()
+{
+  set_view_angle(FOV);
+  set_double_pixel(DOUBLEPIX);
+#if ASPCOR==1
+  set_width_factor(WIDTHFACTOR);
+#endif
 }
 
 void renderer_release()

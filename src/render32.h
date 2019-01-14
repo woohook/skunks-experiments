@@ -65,4 +65,5 @@ nob - total number of objects
 cam - camera*/
 void odis(struct _surface* pSurface,struct _matrix* view_transform);
 
+void renderer_initialize();
 void renderer_release();
