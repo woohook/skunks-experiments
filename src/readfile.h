@@ -565,17 +565,15 @@ list_release(parts_types, 0);
 return parts;}
 
 
-/*function which reads the track; nrobt - number of objects*/
-sgob** readtrack(char *numefis,int *nrobt)
+// function which reads the track
+struct _list* readtrack(char *numefis)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
 int i,j,
-    nob=0, /* number of objects; nob=(*nrobt) */
     bred=130,bgreen=160,bblue=200; /*background color*/
-int object_index = 0;
 int object_type_index = 0;
-sgob** objs = 0;
+struct _list* objs = 0;
 sgob* object = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       fred=1.0,fgreen=1.0,fblue=1.0, /*color multiplication factors*/
@@ -588,6 +586,8 @@ float light_directional=0.5;
 float light_dx=-0.5;
 float light_dy=1;
 float light_dz=1; /*set default values for the light*/
+
+objs = list_create();
 
   if(!(fis=fopen(numefis,"r"))){printf("Error: File %s could not be open\r\n",numefis);exit(1);}
 s[0]='1';while(s[0]){
@@ -625,15 +625,12 @@ s[0]='1';while(s[0]){
                   else {printf("More object types than announced!\r\n"); exit(1);}
 	          break;
 
-	  case 2: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); (*nrobt)=nob=atoi(s);
-	          if(!(objs=(sgob**)malloc((nob+1)*sizeof(sgob*)))){printf("Out of memory");}
-                  object_index=1;
+	  case 2: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); // ignore number of objects
                   break;
 	  case 18:
-	          if(object_index<=nob){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
                       object=(sgob*)malloc(sizeof(sgob));
-                      objs[object_index] = object;
+                      list_add_value(objs,object);
 	              object->otyp=atoi(s);
                       create_mesh_instance(object->otyp, &object->transform);
 	              if(object->otyp>g_numberOfMeshes){
@@ -659,9 +656,6 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); // friction value not used
 
                     object->physics_object = create_collision_geometry_instance(object->otyp, tx, ty, tz, rx, ry, rz, 0);
-                    object_index++;
-	          }
-                  else {printf("More objects than announced!\r\n"); exit(1);}
 	          break;
 
 	  case 12: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_ambient=atof(s); break;

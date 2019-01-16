@@ -41,15 +41,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 int main(int argc,char *argv[])
 {char numefis[MAXWLG];
 
-int i,
-    t0frame; /*t0frame - moment when image starts to be displayed*/
+int t0frame; // t0frame - moment when image starts to be displayed
 
 struct _surface* pSurface = NULL;
 
-sgob** objs; /*objects*/
+struct _list* objs = 0;
 struct _list* parts = 0;
 struct _matrix camera;
-int nob; /*number of objects and of object types*/
 
 vhc* car = vehicle_create();
 
@@ -66,7 +64,7 @@ if(argc>=4){printf("Error: Too many arguments\r\n");exit(1);}
 physics_init();
 
 strcpy(numefis,argv[2]);
-objs=readtrack(numefis,&nob); /*read objects from file*/
+objs = readtrack(numefis); /*read objects from file*/
 
 strcpy(numefis,argv[1]);
 parts = readvehicle(numefis,car); /*read vehicle from file*/
@@ -114,11 +112,8 @@ tframe=(REALN)(SDL_GetTicks()-t0frame)/1000;
 SDL_Quit();
 
 renderer_release();
-for(i=1;i<=nob;i++)
-{
-  free(objs[i]);
-}
-free(objs);
+
+list_release(objs,1);
 list_release(parts,1);
 
 /* printf("Press ENTER: ");getchar();printf("\r\n"); */
