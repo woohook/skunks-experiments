@@ -57,6 +57,8 @@ REALN tframe=0;  // tframe-time necessary for display
 
 char* vehicleName = 0;
 char* worldName = 0;
+int width  = SCREENWIDTH;
+int height = SCREENHEIGHT;
 
 matrix_identity(&camera);
 
@@ -77,6 +79,10 @@ for(int i=1; i<argc; i++)
   if(strncmp("world=",argv[i],6)==0)
   {
     worldName = &argv[i][6];
+  }
+  if(strncmp("resolution=",argv[i],11)==0)
+  {
+    sscanf(argv[i],"resolution=%dx%d",&width,&height);
   }
 }
 
@@ -102,7 +108,7 @@ printf("\r\n");
 /*Initialize SDL*/
 if(SDL_Init(SDL_INIT_VIDEO)<0){printf("Couldn't initialize SDL: %s\n", SDL_GetError());SDL_Quit();return 0;}
 // Initialize display
-pSurface = surface_create(SCREENWIDTH,SCREENHEIGHT);
+pSurface = surface_create(width,height);
 
 renderer_initialize();
 
