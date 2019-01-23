@@ -39,7 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
 int main(int argc,char *argv[])
-{char numefis[MAXWLG];
+{
 
 int t0frame; // t0frame - moment when image starts to be displayed
 
@@ -55,19 +55,46 @@ float action_quit = 0;
 
 REALN tframe=0;  // tframe-time necessary for display
 
+char* vehicleName = 0;
+char* worldName = 0;
+
 matrix_identity(&camera);
 
-if(argc<=2){printf("Error: Input files not specified\r\nExample: ./skunks cars/car1 tracks/track1\r\n");exit(1);}
-if(argc>=4){printf("Error: Too many arguments\r\n");exit(1);}
-
+if(argc<2)
+{
+  printf("Error: parameters required.\r\nExample: %s vehicle=cars/car1 world=tracks/track1\r\n", argv[0]);
+  exit(1);
+}
 
 physics_init();
 
-strcpy(numefis,argv[2]);
-objs = readtrack(numefis); /*read objects from file*/
+for(int i=1; i<argc; i++)
+{
+  if(strncmp("vehicle=",argv[i],8)==0)
+  {
+    vehicleName = &argv[i][8];
+  }
+  if(strncmp("world=",argv[i],6)==0)
+  {
+    worldName = &argv[i][6];
+  }
+}
 
-strcpy(numefis,argv[1]);
-parts = readvehicle(numefis,car); /*read vehicle from file*/
+if(vehicleName==0)
+{
+  printf("Error: No vehicle specified.\r\nExample: %s vehicle=cars/car1 world=tracks/track1\r\n", argv[0]);
+  exit(1);
+}
+
+if(worldName==0)
+{
+  printf("Error: No world specified.\r\nExample: %s vehicle=cars/car1 world=tracks/track1\r\n", argv[0]);
+  exit(1);
+}
+
+objs = readtrack(worldName);
+
+parts = readvehicle(vehicleName,car);
 
 printf("\r\n");
 
