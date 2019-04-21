@@ -33,13 +33,7 @@ int main(int argc,char *argv[])
 
   physics_init();
 
-  // Initialize SDL
-  if(SDL_Init(SDL_INIT_VIDEO)<0)
-  {
-    printf("Couldn't initialize SDL: %s\n", SDL_GetError());
-    SDL_Quit();
-    return 0;
-  }
+  surface_initialize();
 
   renderer_initialize();
 
@@ -62,6 +56,8 @@ int main(int argc,char *argv[])
 
     skunks_process();
 
+    surface_process();
+
     renderer_process();
 
     tframe=(float)(SDL_GetTicks()-t0frame)/1000;
@@ -69,9 +65,9 @@ int main(int argc,char *argv[])
 
   skunks_release();
 
-  SDL_Quit();
-
   renderer_release();
+
+  surface_release();
 
   physics_release();
 
