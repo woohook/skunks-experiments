@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "framework.h"
 #include "surface.h"
+#include "surface_content.h"
 #include "render32.h"
 #include "physics.h"
 #include "input.h"
@@ -41,7 +42,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 struct _list* objs = 0;
 struct _list* parts = 0;
 struct _matrix camera;
-struct _surface* pSurface = NULL;
 
 float action_quit = 0;
 
@@ -55,11 +55,9 @@ void skunks_initialize()
   int height = SCREENHEIGHT;
 
   // Initialize display
-  pSurface = surface_create(width,height);
-
   matrix_identity(&camera);
-
-  renderer_set_surface_camera(pSurface, &camera);
+  struct _surface_content* pContent = surface_content_create(&camera);
+  surface_create(width,height,pContent);
 
   objs = readtrack(worldName);
 

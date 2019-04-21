@@ -17,8 +17,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 struct _surface;
+struct _surface_content;
 
-struct _surface* surface_create(int width, int height);
+struct _surface* surface_create(int width, int height, struct _surface_content* content);
 
 int surface_get_width(struct _surface* pSurface);
 

@@ -89,9 +89,6 @@ float zfog=80;  // fog distance (m)
 float zmin=1e-3;
 float zmax=120; // visibility (m)
 
-struct _surface* gSurface = (struct _surface*)0;
-struct _matrix* gCamera = (struct _matrix*)0;
-
 void create_mesh()
 {
   if(g_meshes==0)
@@ -907,15 +904,8 @@ void renderer_initialize()
 #endif
 }
 
-void renderer_set_surface_camera(struct _surface* pSurface, struct _matrix* view_transform)
-{
-  gSurface = pSurface;
-  gCamera = view_transform;
-}
-
 void renderer_process()
 {
-  odis(gSurface, gCamera);
 }
 
 void renderer_release()

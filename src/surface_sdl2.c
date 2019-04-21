@@ -18,18 +18,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <SDL.h>
 #include "surface.h"
+#include "surface_content.h"
+#include "list.h"
 
 struct _surface
 {
   SDL_Surface *screen;
   Uint8* current_pixel;
+  struct _surface_content* content;
 } surface;
+
+struct _list* surfaces = 0;
 
 SDL_Window *RGLOBwindow = NULL;
 
 const int bits_per_pixel = 32;
 
-struct _surface* surface_create(int width, int height)
+struct _surface* surface_create(int width, int height, struct _surface_content* content)
 {
   struct _surface* pSurface = NULL;
 
@@ -46,6 +51,9 @@ struct _surface* surface_create(int width, int height)
   pSurface = (struct _surface*)malloc(sizeof(struct _surface));
   pSurface->screen = SDL_GetWindowSurface(RGLOBwindow);
   printf("Surface created: %dx%dx%d\n",(pSurface->screen->pitch)/(pSurface->screen->format->BytesPerPixel),height,pSurface->screen->format->BitsPerPixel);
+  pSurface->content = content;
+
+  list_add_value(surfaces, pSurface);
 
   return pSurface;
 }
@@ -109,12 +117,21 @@ void surface_get_current_pixel_color(struct _surface* pSurface, int* red, int* g
 
 void surface_initialize()
 {
+  surfaces = list_create();
 }
 
 void surface_process()
 {
+  struct _list_item* pSurfaceNode = list_get_first(surfaces);
+  while(pSurfaceNode != 0)
+  {
+    struct _surface* pSurface = list_item_get_value(pSurfaceNode);
+    surface_content_render(pSurface->content, pSurface);
+    pSurfaceNode = list_item_get_next(pSurfaceNode);
+  }
 }
 
 void surface_release()
 {
+  list_release(surfaces,1);
 }
