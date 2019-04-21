@@ -18,4 +18,4 @@ typedef struct _vhc
 } vhc;
 
 struct _vhc* vehicle_create();
-void vehicle_process(struct _vhc* pVehicle);
+void vehicle_process();

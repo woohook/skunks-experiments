@@ -66,4 +66,6 @@ cam - camera*/
 void odis(struct _surface* pSurface,struct _matrix* view_transform);
 
 void renderer_initialize();
+void renderer_set_surface_camera(struct _surface* pSurface, struct _matrix* view_transform);
+void renderer_process();
 void renderer_release();
