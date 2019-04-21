@@ -17,6 +17,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <SDL.h>
 
 #include "framework.h"
+#include "clock.h"
 #include "surface.h"
 #include "render32.h"
 #include "physics.h"
@@ -29,13 +30,11 @@ int g_shutdown_request = 0;
 
 int main(int argc,char *argv[])
 {
-  int t0frame; // t0frame - moment when image starts to be displayed
-
-  float tframe = 0;  // tframe-time necessary for display
-
   physics_init();
 
   surface_initialize();
+
+  clock_initialize();  // clock currently depends on SDL and SDL is initialized in surface module so clock must be initialized after surface
 
   renderer_initialize();
 
@@ -43,26 +42,24 @@ int main(int argc,char *argv[])
 
   skunks_initialize();
 
-  tframe=0.5; // assuming 2 frames/second
-
   while(g_shutdown_request == 0)
   {
-    t0frame=SDL_GetTicks();
+    clock_process();
 
     input_process();
 
     vehicle_process();
 
-    physics_process(tframe);
+    physics_process();
 
     skunks_process();
 
     surface_process();
 
     renderer_process();
-
-    tframe=(float)(SDL_GetTicks()-t0frame)/1000;
   }
+
+  clock_release();
 
   skunks_release();
 

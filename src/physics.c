@@ -2,6 +2,7 @@
 #include "trans.h"
 #include "physics.h"
 #include "list.h"
+#include "clock.h"
 
 #define PHYS_MAXREF 109  //maximum number of reference points for 1 object
 
@@ -620,11 +621,12 @@ void physics_getAngularBodyVelocity(struct physics_instance* object, float *rots
   *rotspeed=sqrt(rot[0]*rot[0]+rot[1]*rot[1]+rot[2]*rot[2]);
 }
 
-void physics_process(float tframe)
+void physics_process()
 {
   float realstep,  // real time step (s)
         sim_speed;
   int   nstepsf;   // number of simulation steps/frame
+  float tframe = clock_get_frametime() / 1000.0f;
 
   nstepsf=(int)(tframe/STIMESTEP)+1;
   realstep=tframe/nstepsf;           // simulation time step
