@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "defstr.h"
 
+#include "framework.h"
 #include "surface.h"
 #include "render32.h"
 #include "physics.h"
@@ -41,6 +42,8 @@ struct _list* objs = 0;
 struct _list* parts = 0;
 struct _matrix camera;
 struct _surface* pSurface = NULL;
+
+float action_quit = 0;
 
 void skunks_initialize()
 {
@@ -67,11 +70,17 @@ void skunks_initialize()
   input_register(SDLK_LEFT, &car->action_left);
   input_register(SDLK_RIGHT, &car->action_right);
   input_register(SDLK_r, &car->action_reverse);
+  input_register(SDLK_ESCAPE, &action_quit);
 }
 
 void skunks_process()
 {
   setcamg(&camera,list_get_value(parts,0));
+
+  if(action_quit > 0)
+  {
+    framework_request_shutdown(0);
+  }
 }
 
 void skunks_release()

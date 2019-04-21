@@ -16,6 +16,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <SDL.h>
 
+#include "framework.h"
 #include "surface.h"
 #include "render32.h"
 #include "physics.h"
@@ -23,11 +24,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "skunks2.h"
 #include "vehicle.h"
 
+int g_exitcode = 0;
+int g_shutdown_request = 0;
+
 int main(int argc,char *argv[])
 {
   int t0frame; // t0frame - moment when image starts to be displayed
-
-  float action_quit = 0;
 
   float tframe = 0;  // tframe-time necessary for display
 
@@ -38,13 +40,12 @@ int main(int argc,char *argv[])
   renderer_initialize();
 
   input_initialize();
-  input_register(SDLK_ESCAPE, &action_quit);
 
   skunks_initialize();
 
   tframe=0.5; // assuming 2 frames/second
 
-  while(action_quit == 0)
+  while(g_shutdown_request == 0)
   {
     t0frame=SDL_GetTicks();
 
@@ -73,5 +74,11 @@ int main(int argc,char *argv[])
 
   odis(0,0); // freed static variables from odis() in "camera.h"
 
-  return 0;
+  return g_exitcode;
+}
+
+void framework_request_shutdown(int exitcode)
+{
+  g_exitcode = exitcode;
+  g_shutdown_request = 1;
 }
