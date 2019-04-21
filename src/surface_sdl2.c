@@ -109,12 +109,6 @@ void surface_get_current_pixel_color(struct _surface* pSurface, int* red, int* g
 
 void surface_initialize()
 {
-  if(SDL_Init(SDL_INIT_VIDEO)<0)
-  {
-    printf("Couldn't initialize SDL: %s\n", SDL_GetError());
-    SDL_Quit();
-    exit(-1);
-  }
 }
 
 void surface_process()
@@ -123,5 +117,4 @@ void surface_process()
 
 void surface_release()
 {
-  SDL_Quit();
 }

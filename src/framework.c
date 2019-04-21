@@ -15,6 +15,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include "framework.h"
+#include "platform.h"
 #include "clock.h"
 #include "surface.h"
 #include "render32.h"
@@ -28,6 +29,8 @@ int g_shutdown_request = 0;
 
 int main(int argc,char *argv[])
 {
+  platform_initialize();
+
   physics_init();
 
   surface_initialize();
@@ -44,6 +47,8 @@ int main(int argc,char *argv[])
 
   while(g_shutdown_request == 0)
   {
+    platform_process();
+
     clock_process();
 
     input_process();
@@ -72,6 +77,8 @@ int main(int argc,char *argv[])
   physics_release();
 
   odis(0,0); // freed static variables from odis() in "camera.h"
+
+  platform_release();
 
   return g_exitcode;
 }
