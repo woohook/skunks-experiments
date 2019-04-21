@@ -36,6 +36,8 @@ int main(int argc,char *argv[])
 
   renderer_initialize();
 
+  vehicle_initialize();
+
   input_initialize();
 
   skunks_initialize();
@@ -60,6 +62,8 @@ int main(int argc,char *argv[])
   clock_release();
 
   skunks_release();
+
+  vehicle_release();
 
   renderer_release();
 

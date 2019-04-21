@@ -17,5 +17,7 @@ typedef struct _vhc
   int dmode; // 1 forward, -1 reverse
 } vhc;
 
+void vehicle_initialize();
 struct _vhc* vehicle_create();
 void vehicle_process();
+void vehicle_release();
