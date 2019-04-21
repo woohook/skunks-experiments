@@ -76,8 +76,6 @@ int main(int argc,char *argv[])
 
   physics_release();
 
-  odis(0,0); // freed static variables from odis() in "camera.h"
-
   platform_release();
 
   return g_exitcode;

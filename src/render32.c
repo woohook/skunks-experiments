@@ -920,6 +920,8 @@ void renderer_process()
 
 void renderer_release()
 {
+  odis(0,0); // free static variables
+
   list_release(g_instances, 1);
 
   struct _list_item* meshNode = list_get_first(g_meshes);
