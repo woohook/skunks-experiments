@@ -64,3 +64,7 @@ void input_process()
     }
   }
 }
+
+void input_release()
+{
+}
