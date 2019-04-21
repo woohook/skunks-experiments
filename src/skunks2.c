@@ -75,7 +75,8 @@ void skunks_initialize()
 
 void skunks_process()
 {
-  setcamg(&camera,list_get_value(parts,0));
+  sgob* pVehicle = list_get_value(parts,0);
+  setcamg(&camera,&pVehicle->transform);
 
   if(action_quit > 0)
   {

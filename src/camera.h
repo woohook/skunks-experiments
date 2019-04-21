@@ -1,24 +1,24 @@
-void setcamg(struct _matrix *camera,sgob* object)
+void setcamg(struct _matrix *camera, struct _matrix* object)
 {
 float pos[3];
 float rot[12];
 float x0,y0,z0,a,h,d;
 
-pos[0]  = object->transform.vx[0];
-pos[1]  = object->transform.vy[0];
-pos[2]  = object->transform.vz[0];
+pos[0]  = object->vx[0];
+pos[1]  = object->vy[0];
+pos[2]  = object->vz[0];
 
-rot[0]  = object->transform.vx[1] - object->transform.vx[0];
-rot[1]  = object->transform.vx[2] - object->transform.vx[0];
-rot[2]  = object->transform.vx[3] - object->transform.vx[0];
+rot[0]  = object->vx[1] - object->vx[0];
+rot[1]  = object->vx[2] - object->vx[0];
+rot[2]  = object->vx[3] - object->vx[0];
 
-rot[4]  = object->transform.vy[1] - object->transform.vy[0];
-rot[5]  = object->transform.vy[2] - object->transform.vy[0];
-rot[6]  = object->transform.vy[3] - object->transform.vy[0];
+rot[4]  = object->vy[1] - object->vy[0];
+rot[5]  = object->vy[2] - object->vy[0];
+rot[6]  = object->vy[3] - object->vy[0];
 
-rot[8]  = object->transform.vz[1] - object->transform.vz[0];
-rot[9]  = object->transform.vz[2] - object->transform.vz[0];
-rot[10] = object->transform.vz[3] - object->transform.vz[0];
+rot[8]  = object->vz[1] - object->vz[0];
+rot[9]  = object->vz[2] - object->vz[0];
+rot[10] = object->vz[3] - object->vz[0];
 
           x0=pos[0]+7.0; y0=pos[1]; z0=pos[2]-8.0;
           camera->vx[0]=x0; camera->vy[0]=y0; camera->vz[0]=z0;
