@@ -1,3 +1,4 @@
+struct _matrix;
 struct physics_instance;
 
 void physics_init();
