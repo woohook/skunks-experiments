@@ -17,12 +17,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "framework.h"
 #include "platform.h"
 #include "clock.h"
-#include "surface.h"
-#include "render32.h"
 #include "physics.h"
+#include "vehicle.h"
+#include "render32.h"
+#include "surface.h"
 #include "input.h"
 #include "skunks2.h"
-#include "vehicle.h"
 
 int g_exitcode = 0;
 int g_shutdown_request = 0;
@@ -30,52 +30,34 @@ int g_shutdown_request = 0;
 int main(int argc,char *argv[])
 {
   platform_initialize();
-
+  clock_initialize();
   physics_init();
-
-  surface_initialize();
-
-  clock_initialize();  // clock currently depends on SDL and SDL is initialized in surface module so clock must be initialized after surface
-
-  renderer_initialize();
-
   vehicle_initialize();
-
+  renderer_initialize();
+  surface_initialize();
   input_initialize();
-
   skunks_initialize();
 
   while(g_shutdown_request == 0)
   {
     platform_process();
-
     clock_process();
-
-    input_process();
-
-    vehicle_process();
-
     physics_process();
-
-    skunks_process();
-
-    surface_process();
-
+    vehicle_process();
     renderer_process();
+    surface_process();
+    input_process();
+    skunks_process();
   }
 
-  clock_release();
 
   skunks_release();
-
-  vehicle_release();
-
-  renderer_release();
-
+  input_release();
   surface_release();
-
+  renderer_release();
+  vehicle_release();
   physics_release();
-
+  clock_release();
   platform_release();
 
   return g_exitcode;
