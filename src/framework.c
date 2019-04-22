@@ -24,11 +24,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "input.h"
 #include "skunks2.h"
 
+int g_argc = 0;
+char** g_argv = 0;
 int g_exitcode = 0;
 int g_shutdown_request = 0;
 
 int main(int argc,char *argv[])
 {
+  g_argc = argc;
+  g_argv = argv;
+
   platform_initialize();
   clock_initialize();
   physics_init();
@@ -61,6 +66,12 @@ int main(int argc,char *argv[])
   platform_release();
 
   return g_exitcode;
+}
+
+void framework_get_args(int* argc, char*** argv)
+{
+  *argc = g_argc;
+  *argv = g_argv;
 }
 
 void framework_request_shutdown(int exitcode)
