@@ -47,20 +47,33 @@ float action_quit = 0;
 
 void skunks_initialize()
 {
-  vhc* car = vehicle_create();
-
-  char* vehicleName = "cars/car5";
-  char* worldName = "tracks/track10";
+  char* vehicleName = "cars/car1";
+  char* worldName = "tracks/track1";
   int width  = SCREENWIDTH;
   int height = SCREENHEIGHT;
 
-  // Initialize display
-  matrix_identity(&camera);
-  struct _surface_content* pContent = surface_content_create(&camera);
-  surface_create(width,height,pContent);
+  int argc = 0;
+  char** argv = 0;
+  framework_get_args(&argc,&argv);
+  for(int i=1; i<argc; i++)
+  {
+    if(strncmp("cars/",argv[i],5)==0)
+    {
+      vehicleName = argv[i];
+    }
+    if(strncmp("tracks/",argv[i],7)==0)
+    {
+      worldName = argv[i];
+    }
+    if(strncmp("res=",argv[i],4)==0)
+    {
+      sscanf(argv[i],"res=%dx%d", &width, &height);
+    }
+  }
 
   objs = readtrack(worldName);
 
+  vhc* car = vehicle_create();
   parts = readvehicle(vehicleName,car);
 
   input_register(SDLK_UP, &car->action_accelerate);
@@ -69,6 +82,11 @@ void skunks_initialize()
   input_register(SDLK_RIGHT, &car->action_right);
   input_register(SDLK_r, &car->action_reverse);
   input_register(SDLK_ESCAPE, &action_quit);
+
+  // Initialize display
+  matrix_identity(&camera);
+  struct _surface_content* pContent = surface_content_create(&camera);
+  surface_create(width,height,pContent);
 }
 
 void skunks_process()
