@@ -36,32 +36,31 @@ int main(int argc,char *argv[])
 
   platform_initialize();
   clock_initialize();
+  input_initialize();
   physics_init();
   vehicle_initialize();
   renderer_initialize();
   surface_initialize();
-  input_initialize();
   skunks_initialize();
 
   while(g_shutdown_request == 0)
   {
     platform_process();
     clock_process();
+    input_process();
     physics_process();
     vehicle_process();
+    skunks_process();
     renderer_process();
     surface_process();
-    input_process();
-    skunks_process();
   }
 
-
   skunks_release();
-  input_release();
   surface_release();
   renderer_release();
   vehicle_release();
   physics_release();
+  input_release();
   clock_release();
   platform_release();
 
