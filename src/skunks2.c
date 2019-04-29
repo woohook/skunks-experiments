@@ -72,8 +72,9 @@ void skunks_initialize()
 
   objs = readtrack(worldName);
 
-  vhc* car = vehicle_create();
-  parts = readvehicle(vehicleName,car);
+  parts = readvehicle(vehicleName);
+  sgob* pVehicle = list_get_value(parts,0);
+  vhc* car = pVehicle->vehicle;
 
   input_register(SDLK_UP, &car->action_accelerate);
   input_register(SDLK_DOWN, &car->action_brake);
@@ -84,7 +85,6 @@ void skunks_initialize()
 
   // Initialize display
   matrix_identity(&camera);
-  sgob* pVehicle = list_get_value(parts,0);
   struct _surface_content* pContent = surface_content_create(&camera, &pVehicle->transform);
   surface_create(width,height,pContent);
 }

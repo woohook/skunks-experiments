@@ -380,7 +380,7 @@ object->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 
 /*function which reads the vehicle; must be called AFTER readtrack()
 nrtyp,nrobt - number of object types and objects given by readtrack()*/
-struct _list* readvehicle(char *numefis,vhc *car)
+struct _list* readvehicle(char *numefis)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
@@ -401,6 +401,7 @@ int tjflag=0; // no trailer yet
 
 struct _list* parts = list_create();
 struct _list* parts_types = list_create();
+vhc* car = vehicle_create();
 
   if(!(fis=fopen(numefis,"r"))){printf("Error: File %s could not be open\r\n",numefis);exit(1);}
 s[0]='1';while(s[0]){
@@ -433,6 +434,16 @@ s[0]='1';while(s[0]){
 	  case 18:
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
                       object=(sgob*)malloc(sizeof(sgob));
+                      object->otyp = 0;
+                      object->radius = 0;
+                      object->lev = 0;
+                      object->physics_object = 0;
+                      object->vehicle = 0;
+                      if(list_get_size(parts)==0)
+                      {
+                        object->vehicle = car;
+                      }
+
                       list_add_value(parts,object);
 	              object->otyp=previousNumberOfMeshes+atoi(s);
                       create_mesh_instance(object->otyp, &object->transform);
@@ -644,6 +655,12 @@ s[0]='1';while(s[0]){
 	  case 18:
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
                       object=(sgob*)malloc(sizeof(sgob));
+                      object->otyp = 0;
+                      object->radius = 0;
+                      object->lev = 0;
+                      object->physics_object = 0;
+                      object->vehicle = 0;
+
                       list_add_value(objs,object);
 	              object->otyp=atoi(s);
                       create_mesh_instance(object->otyp, &object->transform);
