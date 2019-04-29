@@ -33,7 +33,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "list.h"
 #include "vehicle.h"
 #include "readfile.h"
-#include "camera.h"
 
 
 #define SCREENWIDTH 800   // screen width (pixels)
@@ -85,15 +84,13 @@ void skunks_initialize()
 
   // Initialize display
   matrix_identity(&camera);
-  struct _surface_content* pContent = surface_content_create(&camera);
+  sgob* pVehicle = list_get_value(parts,0);
+  struct _surface_content* pContent = surface_content_create(&camera, &pVehicle->transform);
   surface_create(width,height,pContent);
 }
 
 void skunks_process()
 {
-  sgob* pVehicle = list_get_value(parts,0);
-  setcamg(&camera,&pVehicle->transform);
-
   if(action_quit > 0)
   {
     framework_request_shutdown(0);
