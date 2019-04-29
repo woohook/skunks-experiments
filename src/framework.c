@@ -50,9 +50,9 @@ int main(int argc,char *argv[])
     input_process();
     physics_process();
     vehicle_process();
-    skunks_process();
     renderer_process();
     surface_process();
+    skunks_process();
   }
 
   skunks_release();
