@@ -24,31 +24,28 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 struct _surface
 {
   SDL_Surface *screen;
+  SDL_Window *RGLOBwindow;
   Uint8* current_pixel;
   struct _surface_content* content;
 } surface;
 
 struct _list* surfaces = 0;
 
-SDL_Window *RGLOBwindow = NULL;
-
 const int bits_per_pixel = 32;
 
 struct _surface* surface_create(int width, int height, struct _surface_content* content)
 {
-  struct _surface* pSurface = NULL;
+  struct _surface* pSurface = 0;
 
+  SDL_Window *RGLOBwindow = SDL_CreateWindow("Skunks-4.2.0 SDL2",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,width,height,SDL_WINDOW_SHOWN);
   if(RGLOBwindow==NULL)
   {
-    RGLOBwindow = SDL_CreateWindow("Skunks-4.2.0 SDL2",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,width,height,SDL_WINDOW_SHOWN);
-    if(RGLOBwindow==NULL)
-    {
-      printf("Couldn't create window: %s\n",SDL_GetError());
-      SDL_Quit();
-      return NULL;
-    }
+    printf("Couldn't create window: %s\n",SDL_GetError());
+    SDL_Quit();
+    return NULL;
   }
   pSurface = (struct _surface*)malloc(sizeof(struct _surface));
+  pSurface->RGLOBwindow = RGLOBwindow;
   pSurface->screen = SDL_GetWindowSurface(RGLOBwindow);
   printf("Surface created: %dx%dx%d\n",(pSurface->screen->pitch)/(pSurface->screen->format->BytesPerPixel),height,pSurface->screen->format->BitsPerPixel);
   pSurface->content = content;
@@ -88,7 +85,7 @@ void surface_end_rendering(struct _surface* pSurface)
     SDL_UnlockSurface(pSurface->screen);
   }
 
-  SDL_UpdateWindowSurface(RGLOBwindow);
+  SDL_UpdateWindowSurface(pSurface->RGLOBwindow);
 }
 
 void surface_set_current_pixel(struct _surface* pSurface, int x, int y)
