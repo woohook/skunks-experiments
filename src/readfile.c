@@ -392,7 +392,7 @@ object->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 
 /*function which reads the vehicle; must be called AFTER readtrack()
 nrtyp,nrobt - number of object types and objects given by readtrack()*/
-struct _list* readvehicle(char *numefis)
+struct _list* readvehicle(struct _entity* parent, char *numefis)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
@@ -445,7 +445,11 @@ s[0]='1';while(s[0]){
                   break;
 	  case 18:
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
+                    prepare_item_name(list_get_size(parts));
+
                       object=(sgob*)malloc(sizeof(sgob));
+                      struct _entity* pCarItemEntity = entity_create(parent,item_name,"car:item",sizeof(struct _entity));
+                      pCarItemEntity->value = object;
                       object->otyp = 0;
                       object->radius = 0;
                       object->lev = 0;

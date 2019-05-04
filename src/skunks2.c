@@ -74,7 +74,8 @@ void skunks_initialize()
   entity_create(pTrackEntity,worldName,"skunks:track:modelname",sizeof(struct _entity));
   readtrack(pTrackEntity, worldName);
 
-  parts = readvehicle(vehicleName);
+  struct _entity* pCarEntity = entity_create(0,"car","skunks:car",sizeof(struct _entity));
+  parts = readvehicle(pCarEntity, vehicleName);
   sgob* pVehicle = list_get_value(parts,0);
   vhc* car = pVehicle->vehicle;
 
