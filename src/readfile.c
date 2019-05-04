@@ -32,7 +32,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "entities.h"
 
 int g_numberOfMeshes = 0;
-char track_item_name[] = "object0000";
+char item_name[] = "object0000";
+
+void prepare_item_name(int id)
+{
+  int index = id;
+  for(int digit_index = 9; digit_index > 5; digit_index--)
+  {
+    item_name[digit_index] = (char)('0' + (index % 10));
+    index = index / 10;
+  }
+}
 
 /*functie care returneaza 1 daca i se transmite un caracter de delimitare si 0 daca nu*/
 int verdel(char s)
@@ -601,7 +611,6 @@ int i,j,
     bred=130,bgreen=160,bblue=200; /*background color*/
 int object_type_index = 0;
 int object_index = 0;
-int object_index_temp = 0;
 sgob* object = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       fred=1.0,fgreen=1.0,fblue=1.0, /*color multiplication factors*/
@@ -655,14 +664,9 @@ s[0]='1';while(s[0]){
                   break;
 	  case 18:
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
-                      object_index_temp = object_index;
-                      for(int digit_index=9; digit_index>5; digit_index--)
-                      {
-                        track_item_name[digit_index] = (char)('0' + (object_index_temp % 10));
-                        object_index_temp = object_index_temp / 10;
-                      }
+                      prepare_item_name(object_index);
 
-                      struct _entity* pTrackItemEntity = entity_create(parent,track_item_name,"track:item",sizeof(struct _entity));
+                      struct _entity* pTrackItemEntity = entity_create(parent,item_name,"track:item",sizeof(struct _entity));
                       object=(sgob*)malloc(sizeof(sgob));
                       object_index++;
                       pTrackItemEntity->value = object;
