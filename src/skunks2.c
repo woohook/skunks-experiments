@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "render32.h"
 #include "physics.h"
 #include "input.h"
+#include "entities.h"
 
 #include "trans.h"
 #include "list.h"
@@ -38,7 +39,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SCREENWIDTH 800   // screen width (pixels)
 #define SCREENHEIGHT 600  // screen height (pixels)
 
-struct _list* objs = 0;
 struct _list* parts = 0;
 struct _matrix camera;
 
@@ -70,7 +70,9 @@ void skunks_initialize()
     }
   }
 
-  objs = readtrack(worldName);
+  struct _entity* pTrackEntity = entity_create(0,"track","skunks:track",sizeof(struct _entity));
+  entity_create(pTrackEntity,worldName,"skunks:track:modelname",sizeof(struct _entity));
+  readtrack(pTrackEntity, worldName);
 
   parts = readvehicle(vehicleName);
   sgob* pVehicle = list_get_value(parts,0);
@@ -99,6 +101,5 @@ void skunks_process()
 
 void skunks_release()
 {
-  list_release(objs,1);
   list_release(parts,1);
 }

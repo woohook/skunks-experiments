@@ -29,8 +29,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "render32.h"
 #include "physics.h"
 #include "vehicle.h"
+#include "entities.h"
 
 int g_numberOfMeshes = 0;
+char track_item_name[] = "object0000";
 
 /*functie care returneaza 1 daca i se transmite un caracter de delimitare si 0 daca nu*/
 int verdel(char s)
@@ -591,14 +593,15 @@ return parts;}
 
 
 // function which reads the track
-struct _list* readtrack(char *numefis)
+void readtrack(struct _entity* parent, char *numefis)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
 int i,j,
     bred=130,bgreen=160,bblue=200; /*background color*/
 int object_type_index = 0;
-struct _list* objs = 0;
+int object_index = 0;
+int object_index_temp = 0;
 sgob* object = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       fred=1.0,fgreen=1.0,fblue=1.0, /*color multiplication factors*/
@@ -611,8 +614,6 @@ float light_directional=0.5;
 float light_dx=-0.5;
 float light_dy=1;
 float light_dz=1; /*set default values for the light*/
-
-objs = list_create();
 
   if(!(fis=fopen(numefis,"r"))){printf("Error: File %s could not be open\r\n",numefis);exit(1);}
 s[0]='1';while(s[0]){
@@ -654,14 +655,23 @@ s[0]='1';while(s[0]){
                   break;
 	  case 18:
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
+                      object_index_temp = object_index;
+                      for(int digit_index=9; digit_index>5; digit_index--)
+                      {
+                        track_item_name[digit_index] = (char)('0' + (object_index_temp % 10));
+                        object_index_temp = object_index_temp / 10;
+                      }
+
+                      struct _entity* pTrackItemEntity = entity_create(parent,track_item_name,"track:item",sizeof(struct _entity));
                       object=(sgob*)malloc(sizeof(sgob));
+                      object_index++;
+                      pTrackItemEntity->value = object;
                       object->otyp = 0;
                       object->radius = 0;
                       object->lev = 0;
                       object->physics_object = 0;
                       object->vehicle = 0;
 
-                      list_add_value(objs,object);
 	              object->otyp=atoi(s);
                       create_mesh_instance(object->otyp, &object->transform);
 	              if(object->otyp>g_numberOfMeshes){
@@ -731,5 +741,4 @@ set_ambient_light(light_ambient);
 set_headlight(light_headlight);
 set_directional_light(light_directional, light_dx, light_dy, light_dz);
 set_background_color(bred,bgreen,bblue);
-
-return objs;}
+}
