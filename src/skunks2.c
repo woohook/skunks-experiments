@@ -39,7 +39,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SCREENWIDTH 800   // screen width (pixels)
 #define SCREENHEIGHT 600  // screen height (pixels)
 
-struct _list* parts = 0;
 struct _matrix camera;
 
 float action_quit = 0;
@@ -75,8 +74,8 @@ void skunks_initialize()
   readtrack(pTrackEntity, worldName);
 
   struct _entity* pCarEntity = entity_create(0,"car","skunks:car",sizeof(struct _entity));
-  parts = readvehicle(pCarEntity, vehicleName);
-  sgob* pVehicle = list_get_value(parts,0);
+  readvehicle(pCarEntity, vehicleName);
+  sgob* pVehicle = (struct _sgob*)entity_get_by_name("/car/object0000")->value;
   vhc* car = pVehicle->vehicle;
 
   input_register(SDLK_UP, &car->action_accelerate);
@@ -88,7 +87,7 @@ void skunks_initialize()
 
   // Initialize display
   matrix_identity(&camera);
-  struct _surface_content* pContent = surface_content_create(&camera, &((struct _sgob*)entity_get_by_name("/car/object0000")->value)->transform);
+  struct _surface_content* pContent = surface_content_create(&camera, &pVehicle->transform);
   surface_create(width,height,pContent);
 }
 
@@ -102,5 +101,4 @@ void skunks_process()
 
 void skunks_release()
 {
-  list_release(parts,1);
 }

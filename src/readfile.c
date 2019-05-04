@@ -392,7 +392,7 @@ object->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 
 /*function which reads the vehicle; must be called AFTER readtrack()
 nrtyp,nrobt - number of object types and objects given by readtrack()*/
-struct _list* readvehicle(struct _entity* parent, char *numefis)
+void readvehicle(struct _entity* parent, char *numefis)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
@@ -602,8 +602,8 @@ while(part != 0){
 /*^set joints*/
 
 list_release(parts_types, 0);
-
-return parts;}
+list_release(parts, 0);
+}
 
 
 // function which reads the track
