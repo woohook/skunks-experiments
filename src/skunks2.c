@@ -88,7 +88,7 @@ void skunks_initialize()
 
   // Initialize display
   matrix_identity(&camera);
-  struct _surface_content* pContent = surface_content_create(&camera, &pVehicle->transform);
+  struct _surface_content* pContent = surface_content_create(&camera, &((struct _sgob*)entity_get_by_name("/car/object0000")->value)->transform);
   surface_create(width,height,pContent);
 }
 
