@@ -1,44 +1,26 @@
-void setcamg(struct _matrix *camera,vhc *car,int flag,sgob* object)
+void setcamg(struct _matrix *camera, struct _matrix* object)
 {
 float pos[3];
 float rot[12];
 float x0,y0,z0,a,h,d;
 
-pos[0]  = object->transform.vx[0];
-pos[1]  = object->transform.vy[0];
-pos[2]  = object->transform.vz[0];
+pos[0]  = object->vx[0];
+pos[1]  = object->vy[0];
+pos[2]  = object->vz[0];
 
-rot[0]  = object->transform.vx[1] - object->transform.vx[0];
-rot[1]  = object->transform.vx[2] - object->transform.vx[0];
-rot[2]  = object->transform.vx[3] - object->transform.vx[0];
+rot[0]  = object->vx[1] - object->vx[0];
+rot[1]  = object->vx[2] - object->vx[0];
+rot[2]  = object->vx[3] - object->vx[0];
 
-rot[4]  = object->transform.vy[1] - object->transform.vy[0];
-rot[5]  = object->transform.vy[2] - object->transform.vy[0];
-rot[6]  = object->transform.vy[3] - object->transform.vy[0];
+rot[4]  = object->vy[1] - object->vy[0];
+rot[5]  = object->vy[2] - object->vy[0];
+rot[6]  = object->vy[3] - object->vy[0];
 
-rot[8]  = object->transform.vz[1] - object->transform.vz[0];
-rot[9]  = object->transform.vz[2] - object->transform.vz[0];
-rot[10] = object->transform.vz[3] - object->transform.vz[0];
+rot[8]  = object->vz[1] - object->vz[0];
+rot[9]  = object->vz[2] - object->vz[0];
+rot[10] = object->vz[3] - object->vz[0];
 
-switch(flag){
-  case 1: a=0.57;
-          x0=pos[0]+12.0; y0=pos[1]; z0=pos[2]-12.0;
-          camera->vx[0]=x0; camera->vy[0]=y0; camera->vz[0]=z0;
-          camera->vx[1]=x0+cos(a); camera->vy[1]=y0; camera->vz[1]=z0+sin(a);
-          camera->vx[2]=x0; camera->vy[2]=y0+1; camera->vz[2]=z0;
-          camera->vx[3]=x0-sin(a); camera->vy[3]=y0; camera->vz[3]=z0+cos(a);
-          break;
-
-  case 2: h=car->camh; d=car->camd;
-          x0=pos[0]; y0=pos[1]; z0=pos[2];
-          camera->vx[0]=x0; camera->vy[0]=y0; camera->vz[0]=z0;
-          camera->vx[1]=x0+rot[0]; camera->vy[1]=y0+rot[4]; camera->vz[1]=z0+rot[8];
-          camera->vx[2]=x0+rot[1]; camera->vy[2]=y0+rot[5]; camera->vz[2]=z0+rot[9];
-          camera->vx[3]=x0+rot[2]; camera->vy[3]=y0+rot[6]; camera->vz[3]=z0+rot[10];
-          translat(camera,h*rot[0]+d*rot[2],h*rot[4]+d*rot[6],h*rot[8]+d*rot[10]);
-          break;
-
-  case 3: x0=pos[0]+7.0; y0=pos[1]; z0=pos[2]-8.0;
+          x0=pos[0]+7.0; y0=pos[1]; z0=pos[2]-8.0;
           camera->vx[0]=x0; camera->vy[0]=y0; camera->vz[0]=z0;
           camera->vx[1]=x0+1; camera->vy[1]=y0; camera->vz[1]=z0;
           camera->vx[2]=x0; camera->vy[2]=y0+1; camera->vz[2]=z0;
@@ -51,8 +33,4 @@ switch(flag){
           if(y0>0){a=acos(a);}else{a=-acos(a);}
           rotatx(camera,pos[1],pos[2],-a);
           rotab(camera,camera->vx[0],camera->vy[0],camera->vz[0],camera->vx[2],camera->vy[2],camera->vz[2],-0.57);
-          break;
-
-  default: break;
-}
 }

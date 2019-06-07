@@ -2,10 +2,15 @@
 #include "trans.h"
 #include "physics.h"
 #include "list.h"
+#include "clock.h"
 
 #define PHYS_MAXREF 109  //maximum number of reference points for 1 object
 
 #define PHYS_MAXGEOM 55  //maximum number of geoms (ODE) for 1 object (=PHYS_MAXREF/2)
+
+#define GRAVITY -9.81  // gravitational acceleration in m/(s*s)
+
+#define STIMESTEP 0.005 // desired simulation time step (seconds)
 
 typedef struct _refpo
 {
@@ -61,6 +66,9 @@ void physics_init()
 {
   dInitODE();
   wglob=dWorldCreate();
+  physics_setERP(0.2);
+  physics_setCFM(1e-5);
+  physics_setGravity(GRAVITY);
 }
 
 void physics_release()
@@ -611,4 +619,26 @@ void physics_getAngularBodyVelocity(struct physics_instance* object, float *rots
 
   rot=dBodyGetAngularVel(object->bodyID);
   *rotspeed=sqrt(rot[0]*rot[0]+rot[1]*rot[1]+rot[2]*rot[2]);
+}
+
+void physics_process()
+{
+  float realstep,  // real time step (s)
+        sim_speed;
+  int   nstepsf;   // number of simulation steps/frame
+  float tframe = clock_get_frametime() / 1000.0f;
+
+  nstepsf=(int)(tframe/STIMESTEP)+1;
+  realstep=tframe/nstepsf;           // simulation time step
+
+  sim_speed=0.1/realstep;            // decrease simulation speed if < 10fps
+  if(nstepsf>(int)sim_speed)
+  {
+    nstepsf=(int)sim_speed;
+  }
+
+  for(int i=1;i<=nstepsf;i++)
+  {
+    runsim(realstep);
+  }
 }
