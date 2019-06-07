@@ -63,6 +63,9 @@ void findplan(float x1, float y1, float z1, float x2, float y2, float z2, float 
 /*function which displays the objcts which are closer than zmax
 nob - total number of objects
 cam - camera*/
-void odis(struct _surface* pSurface,float zfog,float zmax,struct _matrix* view_transform);
+void odis(struct _surface* pSurface,struct _matrix* view_transform);
 
+void renderer_initialize();
+void renderer_set_surface_camera(struct _surface* pSurface, struct _matrix* view_transform);
+void renderer_process();
 void renderer_release();

@@ -28,25 +28,5 @@ matrix transform; /*directions of local axes in global coordinates - v[1]=i, v[2
                and centres; triangles are calculated from vx, vy and vz at rendering*/
 int lev; /*level*/
 struct physics_instance* physics_object;
+struct _vhc* vehicle;
 } sgob; /*3d object*/
-
-
-typedef struct _vhc
-{int nob; /*number of objects in vehicle*/
-
-int oid[MAXGEOM]; /*number of object (rendering and collision) in 'objs' array from 'simcar.c'*/
-struct physics_instance* parts[MAXGEOM];
-
-int ofc[MAXGEOM]; /*object function: 1-car; 2-trailer; 3-motor wheel; 4-steering wheel;
-                    5-motor and steering wheel; 6-passive wheel; 7-trailer wheel*/
-
-float vrx; // steering speed
-float af;  // acceleration factor
-float bf;  // brake factor
-
-REALN accel;
-REALN brake; /*acceleration and brake torques/wheel*/
-
-REALN camh;
-REALN camd; /*camera position*/
-} vhc; /*vehicle*/

@@ -1,7 +1,9 @@
+struct _matrix;
 struct physics_instance;
 
 void physics_init();
 void physics_release();
+void physics_process();
 
 void physics_setERP(float erp);
 void physics_setCFM(float cfm);

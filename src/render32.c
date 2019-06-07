@@ -25,6 +25,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "trans.h"
 #include "list.h"
 
+#define DOUBLEPIX 0  // 1 - large pixels; 0 - normal pixels
+
+#define FOV 90  // horizontal viewing angle (in degrees)
+
+#define ASPCOR 0  // 1 - aspect correction; 0 - no aspect correction (WIDTHFACTOR ignored)
+
+#define WIDTHFACTOR 0.78125 // 0.78125 recommended for monitor with 1024x600 resolution, set at 800x600 (if the video driver doesn't support 1024x600)
+
 typedef struct _pixcol
 {int red;int green;int blue; /*culoarea pixelului*/
 } pixcol;
@@ -77,6 +85,9 @@ lightpr g_light = {0,0,0,0,0,0};
 float g_width_factor = 1.0f;
 float g_view_angle = 90.0f;
 int g_double_pixel = 0;
+float zfog=80;  // fog distance (m)
+float zmin=1e-3;
+float zmax=120; // visibility (m)
 
 void create_mesh()
 {
@@ -312,7 +323,7 @@ void set_double_pixel(int double_pixel)
 void displaysdl(struct _surface* pSurface,tria *face,float *distmin,float focal, lightpr* light);
 
 /*functie care elimina triunghiurile care sunt in plus*/
-void fclip(struct _surface* pSurface, tria *face,float zmin,float zmax,float tgh,float tgv, float* distmin, int focal, lightpr* pRotLight)
+void fclip(struct _surface* pSurface, tria *face,float tgh,float tgv, float* distmin, int focal, lightpr* pRotLight)
 {int j,k,l,kmin,invs;
 float x[4],y[4],z[4],tmp,tmp2;
 tria facedisp;
@@ -480,7 +491,7 @@ void findplan(float x1, float y1, float z1, float x2, float y2, float z2, float 
 	/*ecuatia planului este ax+by+cz=d*/
 }
 
-void clear_depth_buffer(float* depthbuffer, unsigned int width, unsigned int height, float zmax)
+void clear_depth_buffer(float* depthbuffer, unsigned int width, unsigned int height)
 {
   int i;
   unsigned long int area = width*height+1;
@@ -491,7 +502,7 @@ void clear_depth_buffer(float* depthbuffer, unsigned int width, unsigned int hei
   }
 }
 
-void finish_frame(struct _surface* pSurface, float* depthbuffer, float zfog, float zmax)
+void finish_frame(struct _surface* pSurface, float* depthbuffer)
 {
   int i,j;
   unsigned long int crf=0;
@@ -710,7 +721,7 @@ face->blued=blue;
 /*function which displays the objcts which are closer than zmax
 nob - total number of objects
 cam - camera*/
-void odis(struct _surface* pSurface,float zfog,float zmax, struct _matrix* view_transform)
+void odis(struct _surface* pSurface, struct _matrix* view_transform)
 {int j,focal;
 unsigned int width,height;
 unsigned long int area;
@@ -721,7 +732,7 @@ static float *distmin; /*Zbuffer for sending to displaysdl()*/
 
 lightpr rotlight; /*rotated light parameters*/
 
-float tgh,tgv,zmin;
+float tgh,tgv;
 float x,y,z,ix,iy,iz,jx,jy,jz,kx,ky,kz; /*temporary variables for transformations*/
 float xcen,ycen,zcen,radius;
 
@@ -743,13 +754,11 @@ if(g_width_factor != 1.0f)
   tgv*=g_width_factor;
 }
 
-zmin=1e-3;
-
 if(!sem){
   if(!(distmin=(float *)malloc(area*sizeof(float)))){printf("Out of memory");}
   sem=1;}
 
-clear_depth_buffer(distmin,width,height,zmax);
+clear_depth_buffer(distmin,width,height);
 
 surface_begin_rendering(pSurface);
 
@@ -874,20 +883,35 @@ while(instanceNode != 0){
       face.y3=transform.vy[0]+x*fiy+y*fjy+z*fky;
       face.z3=transform.vz[0]+x*fiz+y*fjz+z*fkz; /*updated positions of triangles*/
 
-      fclip(pSurface, &face,zmin,zmax,tgh,tgv, distmin, focal, &rotlight);
+      fclip(pSurface, &face,tgh,tgv, distmin, focal, &rotlight);
 
       faceNode = list_item_get_next(faceNode);
     }
   }
 }
 
-finish_frame(pSurface,distmin,zfog,zmax);
+finish_frame(pSurface,distmin);
 
 surface_end_rendering(pSurface);
 }
 
+void renderer_initialize()
+{
+  set_view_angle(FOV);
+  set_double_pixel(DOUBLEPIX);
+#if ASPCOR==1
+  set_width_factor(WIDTHFACTOR);
+#endif
+}
+
+void renderer_process()
+{
+}
+
 void renderer_release()
 {
+  odis(0,0); // free static variables
+
   list_release(g_instances, 1);
 
   struct _list_item* meshNode = list_get_first(g_meshes);

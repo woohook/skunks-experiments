@@ -17,8 +17,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 struct _surface;
+struct _surface_content;
 
-struct _surface* surface_create(int width, int height);
+struct _surface* surface_create(int width, int height, struct _surface_content* content);
 
 int surface_get_width(struct _surface* pSurface);
 
@@ -35,3 +36,9 @@ void surface_advance_current_pixel(struct _surface* pSurface);
 void surface_set_current_pixel_color(struct _surface* pSurface, int red, int green, int blue);
 
 void surface_get_current_pixel_color(struct _surface* pSurface, int* red, int* green, int* blue);
+
+void surface_initialize();
+
+void surface_process();
+
+void surface_release();
