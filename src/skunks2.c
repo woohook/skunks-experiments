@@ -76,30 +76,6 @@ void skunks_initialize()
   struct _entity* pCarEntity = entity_create(0,"car","skunks:car",sizeof(struct _entity));
   readvehicle(pCarEntity, vehicleName);
   sgob* pVehicle = (struct _sgob*)entity_get_by_name("/car/object0000")->value;
-  vhc* car = pVehicle->vehicle;
-
-  struct _entity* pControls = entity_create(pCarEntity,"controls","skunks:car:controls",sizeof(struct _entity));
-  pControls->children = list_create();
-  struct _entity* pControlItem = entity_create(pControls,"accelerate","skunks:car:controls:item",sizeof(struct _entity));
-  pControlItem->value = &car->action_accelerate;
-  *(float*)pControlItem->value = 0.0f;
-  list_add_value(pControls->children, pControlItem);
-  pControlItem = entity_create(pControls,"brake","skunks:car:controls:item",sizeof(struct _entity));
-  pControlItem->value = &car->action_brake;
-  *(float*)pControlItem->value = 0.0f;
-  list_add_value(pControls->children, pControlItem);
-  pControlItem = entity_create(pControls,"left","skunks:car:controls:item",sizeof(struct _entity));
-  pControlItem->value = &car->action_left;
-  *(float*)pControlItem->value = 0.0f;
-  list_add_value(pControls->children, pControlItem);
-  pControlItem = entity_create(pControls,"right","skunks:car:controls:item",sizeof(struct _entity));
-  pControlItem->value = &car->action_right;
-  *(float*)pControlItem->value = 0.0f;
-  list_add_value(pControls->children, pControlItem);
-  pControlItem = entity_create(pControls,"reverse","skunks:car:controls:item",sizeof(struct _entity));
-  pControlItem->value = &car->action_reverse;
-  *(float*)pControlItem->value = 0.0f;
-  list_add_value(pControls->children, pControlItem);
 
   input_register(SDLK_UP, (float*)entity_get_by_name("/car/controls/accelerate")->value);
   input_register(SDLK_DOWN, (float*)entity_get_by_name("/car/controls/brake")->value);

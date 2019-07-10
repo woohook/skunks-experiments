@@ -603,6 +603,29 @@ while(part != 0){
 
 list_release(parts_types, 0);
 list_release(parts, 0);
+
+  struct _entity* pControls = entity_create(parent,"controls","skunks:car:controls",sizeof(struct _entity));
+  pControls->children = list_create();
+  struct _entity* pControlItem = entity_create(pControls,"accelerate","skunks:car:controls:item",sizeof(struct _entity));
+  pControlItem->value = &car->action_accelerate;
+  *(float*)pControlItem->value = 0.0f;
+  list_add_value(pControls->children, pControlItem);
+  pControlItem = entity_create(pControls,"brake","skunks:car:controls:item",sizeof(struct _entity));
+  pControlItem->value = &car->action_brake;
+  *(float*)pControlItem->value = 0.0f;
+  list_add_value(pControls->children, pControlItem);
+  pControlItem = entity_create(pControls,"left","skunks:car:controls:item",sizeof(struct _entity));
+  pControlItem->value = &car->action_left;
+  *(float*)pControlItem->value = 0.0f;
+  list_add_value(pControls->children, pControlItem);
+  pControlItem = entity_create(pControls,"right","skunks:car:controls:item",sizeof(struct _entity));
+  pControlItem->value = &car->action_right;
+  *(float*)pControlItem->value = 0.0f;
+  list_add_value(pControls->children, pControlItem);
+  pControlItem = entity_create(pControls,"reverse","skunks:car:controls:item",sizeof(struct _entity));
+  pControlItem->value = &car->action_reverse;
+  *(float*)pControlItem->value = 0.0f;
+  list_add_value(pControls->children, pControlItem);
 }
 
 
