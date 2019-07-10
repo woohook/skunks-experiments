@@ -17,7 +17,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include <stdio.h>
-#include <SDL.h>
+#include <string.h>
 #include "config.h"
 
 #include "defstr.h"
@@ -77,12 +77,12 @@ void skunks_initialize()
   readvehicle(pCarEntity, vehicleName);
   sgob* pVehicle = (struct _sgob*)entity_get_by_name("/car/object0000")->value;
 
-  input_register(SDLK_UP, (float*)entity_get_by_name("/car/controls/accelerate")->value);
-  input_register(SDLK_DOWN, (float*)entity_get_by_name("/car/controls/brake")->value);
-  input_register(SDLK_LEFT, (float*)entity_get_by_name("/car/controls/left")->value);
-  input_register(SDLK_RIGHT, (float*)entity_get_by_name("/car/controls/right")->value);
-  input_register(SDLK_r, (float*)entity_get_by_name("/car/controls/reverse")->value);
-  input_register(SDLK_ESCAPE, &action_quit);
+  input_register("Key_Arrow_Up", (float*)entity_get_by_name("/car/controls/accelerate")->value);
+  input_register("Key_Arrow_Down", (float*)entity_get_by_name("/car/controls/brake")->value);
+  input_register("Key_Arrow_Left", (float*)entity_get_by_name("/car/controls/left")->value);
+  input_register("Key_Arrow_Right", (float*)entity_get_by_name("/car/controls/right")->value);
+  input_register("Key_R", (float*)entity_get_by_name("/car/controls/reverse")->value);
+  input_register("Key_Escape", &action_quit);
 
   // Initialize display
   matrix_identity(&camera);
