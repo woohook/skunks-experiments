@@ -78,11 +78,34 @@ void skunks_initialize()
   sgob* pVehicle = (struct _sgob*)entity_get_by_name("/car/object0000")->value;
   vhc* car = pVehicle->vehicle;
 
-  input_register(SDLK_UP, &car->action_accelerate);
-  input_register(SDLK_DOWN, &car->action_brake);
-  input_register(SDLK_LEFT, &car->action_left);
-  input_register(SDLK_RIGHT, &car->action_right);
-  input_register(SDLK_r, &car->action_reverse);
+  struct _entity* pControls = entity_create(pCarEntity,"controls","skunks:car:controls",sizeof(struct _entity));
+  pControls->children = list_create();
+  struct _entity* pControlItem = entity_create(pControls,"accelerate","skunks:car:controls:item",sizeof(struct _entity));
+  pControlItem->value = &car->action_accelerate;
+  *(float*)pControlItem->value = 0.0f;
+  list_add_value(pControls->children, pControlItem);
+  pControlItem = entity_create(pControls,"brake","skunks:car:controls:item",sizeof(struct _entity));
+  pControlItem->value = &car->action_brake;
+  *(float*)pControlItem->value = 0.0f;
+  list_add_value(pControls->children, pControlItem);
+  pControlItem = entity_create(pControls,"left","skunks:car:controls:item",sizeof(struct _entity));
+  pControlItem->value = &car->action_left;
+  *(float*)pControlItem->value = 0.0f;
+  list_add_value(pControls->children, pControlItem);
+  pControlItem = entity_create(pControls,"right","skunks:car:controls:item",sizeof(struct _entity));
+  pControlItem->value = &car->action_right;
+  *(float*)pControlItem->value = 0.0f;
+  list_add_value(pControls->children, pControlItem);
+  pControlItem = entity_create(pControls,"reverse","skunks:car:controls:item",sizeof(struct _entity));
+  pControlItem->value = &car->action_reverse;
+  *(float*)pControlItem->value = 0.0f;
+  list_add_value(pControls->children, pControlItem);
+
+  input_register(SDLK_UP, (float*)entity_get_by_name("/car/controls/accelerate")->value);
+  input_register(SDLK_DOWN, (float*)entity_get_by_name("/car/controls/brake")->value);
+  input_register(SDLK_LEFT, (float*)entity_get_by_name("/car/controls/left")->value);
+  input_register(SDLK_RIGHT, (float*)entity_get_by_name("/car/controls/right")->value);
+  input_register(SDLK_r, (float*)entity_get_by_name("/car/controls/reverse")->value);
   input_register(SDLK_ESCAPE, &action_quit);
 
   // Initialize display
