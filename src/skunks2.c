@@ -45,6 +45,7 @@ float action_quit = 0;
 
 void skunks_initialize()
 {
+  char buffer[1024];
   char* vehicleName = "cars/car1";
   char* worldName = "tracks/track1";
   int width  = SCREENWIDTH;
@@ -52,16 +53,35 @@ void skunks_initialize()
 
   int argc = 0;
   char** argv = 0;
+
+  struct _entity* pVehiclesEntity = entity_create(0,"vehicles","vehicles",sizeof(struct _entity));
+
+  buffer[0] = '\0';
+
   framework_get_args(&argc,&argv);
   for(int i=1; i<argc; i++)
   {
     if(strncmp("cars/",argv[i],5)==0)
     {
+      int vehicle_count = 0;
+      if(pVehiclesEntity->children != 0) vehicle_count = list_get_size(pVehiclesEntity->children);
+      vehicle_count++;
+
       vehicleName = argv[i];
+      strcpy(buffer, "car0000");
+      buffer[strlen(buffer)-1] = (char)(vehicle_count % 10 + '0'); vehicle_count /= 10;
+      buffer[strlen(buffer)-2] = (char)(vehicle_count % 10 + '0'); vehicle_count /= 10;
+      buffer[strlen(buffer)-3] = (char)(vehicle_count % 10 + '0'); vehicle_count /= 10;
+      buffer[strlen(buffer)-4] = (char)(vehicle_count % 10 + '0'); vehicle_count /= 10;
+      struct _entity* pCarEntity = entity_create(pVehiclesEntity, buffer, "skunks:car", sizeof(struct _entity));
+      readvehicle(pCarEntity, vehicleName);
     }
     if(strncmp("tracks/",argv[i],7)==0)
     {
       worldName = argv[i];
+      struct _entity* pTrackEntity = entity_create(0,"track","skunks:track",sizeof(struct _entity));
+      entity_create(pTrackEntity,worldName,"skunks:track:modelname",sizeof(struct _entity));
+      readtrack(pTrackEntity, worldName);
     }
     if(strncmp("res=",argv[i],4)==0)
     {
@@ -69,13 +89,11 @@ void skunks_initialize()
     }
   }
 
-  struct _entity* pTrackEntity = entity_create(0,"track","skunks:track",sizeof(struct _entity));
-  entity_create(pTrackEntity,worldName,"skunks:track:modelname",sizeof(struct _entity));
-  readtrack(pTrackEntity, worldName);
-
-  struct _entity* pCarEntity = entity_create(0,"car","skunks:car",sizeof(struct _entity));
-  readvehicle(pCarEntity, vehicleName);
-  sgob* pVehicle = (struct _sgob*)entity_get_by_name("/car/object0000")->value;
+  if( (pVehiclesEntity->children == 0) || (list_get_size(pVehiclesEntity->children) == 0) )
+  {
+    struct _entity* pCarEntity = entity_create(pVehiclesEntity,"car0001","skunks:car",sizeof(struct _entity));
+    readvehicle(pCarEntity, vehicleName);
+  }
 
   struct _entity* pActorEntity = entity_create(0,"actor","actor",sizeof(struct _entity));
   struct _entity* pCommandEntity = entity_create(pActorEntity,"accelerate","command",sizeof(struct _entity));
@@ -89,8 +107,12 @@ void skunks_initialize()
   pCommandEntity = entity_create(pActorEntity,"reverse","command",sizeof(struct _entity));
   pCommandEntity->value = "Key_R";
 
+  struct _entity* pFirstVehicleEntity = (struct _entity*)list_get_value(pVehiclesEntity->children, 0);
+  strcpy(buffer, pFirstVehicleEntity->name);
+  strcpy(buffer + strlen(buffer), "/controls");
+
   struct _list_item* pCommandItem = list_get_first(pActorEntity->children);
-  struct _entity* pControls = entity_get_by_name("/car/controls");
+  struct _entity* pControls = entity_get_by_name(buffer);
   int offsetCommand = strlen(pActorEntity->name);
   int offsetAction = strlen(pControls->name);
   while(pCommandItem != 0)
@@ -111,6 +133,11 @@ void skunks_initialize()
   }
 
   input_register("Key_Escape", &action_quit);
+
+  strcpy(buffer, pFirstVehicleEntity->name);
+  strcpy(buffer + strlen(buffer), "/object0000");
+  struct _entity* pVehicleObjectEntity = entity_get_by_name(buffer);
+  sgob* pVehicle = (struct _sgob*)pVehicleObjectEntity->value;
 
   // Initialize display
   matrix_identity(&camera);
