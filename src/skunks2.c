@@ -78,22 +78,16 @@ void skunks_initialize()
   sgob* pVehicle = (struct _sgob*)entity_get_by_name("/car/object0000")->value;
 
   struct _entity* pActorEntity = entity_create(0,"actor","actor",sizeof(struct _entity));
-  pActorEntity->children = list_create();
   struct _entity* pCommandEntity = entity_create(pActorEntity,"accelerate","command",sizeof(struct _entity));
   pCommandEntity->value = "Key_Arrow_Up";
-  list_add_value(pActorEntity->children, pCommandEntity);
   pCommandEntity = entity_create(pActorEntity,"brake","command",sizeof(struct _entity));
   pCommandEntity->value = "Key_Arrow_Down";
-  list_add_value(pActorEntity->children, pCommandEntity);
   pCommandEntity = entity_create(pActorEntity,"left","command",sizeof(struct _entity));
   pCommandEntity->value = "Key_Arrow_Left";
-  list_add_value(pActorEntity->children, pCommandEntity);
   pCommandEntity = entity_create(pActorEntity,"right","command",sizeof(struct _entity));
   pCommandEntity->value = "Key_Arrow_Right";
-  list_add_value(pActorEntity->children, pCommandEntity);
   pCommandEntity = entity_create(pActorEntity,"reverse","command",sizeof(struct _entity));
   pCommandEntity->value = "Key_R";
-  list_add_value(pActorEntity->children, pCommandEntity);
 
   struct _list_item* pCommandItem = list_get_first(pActorEntity->children);
   struct _entity* pControls = entity_get_by_name("/car/controls");

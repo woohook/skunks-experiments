@@ -39,6 +39,14 @@ struct _entity* entity_create(struct _entity* parent, char* name, char* entity_t
   pEntity->value = 0;
 
   list_add_value(g_entities, pEntity);
+  if(parent != 0)
+  {
+    if(parent->children == 0)
+    {
+      parent->children = list_create();
+    }
+    list_add_value(parent->children, pEntity);
+  }
 
   return pEntity;
 }
