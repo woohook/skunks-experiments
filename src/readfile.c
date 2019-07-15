@@ -631,12 +631,12 @@ FILE *fis;
 int i,j,
     bred=130,bgreen=160,bblue=200; /*background color*/
 int object_type_index = 0;
-int object_index = 0;
 sgob* object = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       fred=1.0,fgreen=1.0,fblue=1.0, /*color multiplication factors*/
       len;
 int previousNumberOfMeshes = g_numberOfMeshes;
+int object_index = previousNumberOfMeshes+1;
 
 float light_ambient=0.5;
 float light_headlight=0.3;
@@ -697,7 +697,7 @@ s[0]='1';while(s[0]){
                       object->physics_object = 0;
                       object->vehicle = 0;
 
-	              object->otyp=atoi(s);
+	              object->otyp=previousNumberOfMeshes+atoi(s);
                       create_mesh_instance(object->otyp, &object->transform);
 	              if(object->otyp>g_numberOfMeshes){
 	                printf("Error: there is no object type '%d'\r\n",object->otyp-previousNumberOfMeshes);exit(1);
