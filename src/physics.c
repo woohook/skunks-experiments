@@ -452,7 +452,7 @@ struct _list_item* dynamic_instance_node = list_get_first(instances_dynamic);
 while(dynamic_instance_node != 0)
 {
   struct physics_instance* pDynInst = list_item_get_value(dynamic_instance_node);
-  dynamic_instance_node = list_item_get_next(dynamic_instance_node);
+  struct _list_item* dynamic_instance_node_next = list_item_get_next(dynamic_instance_node);
 
   if(pDynInst->isSpinningImproved == 1)
   {
@@ -466,7 +466,20 @@ while(dynamic_instance_node != 0)
   while(static_instance_node != 0)
   {
     struct physics_instance* pStatInst = list_item_get_value(static_instance_node);
-    static_instance_node = list_item_get_next(static_instance_node);
+    struct _list_item* static_instance_node_next = 0;
+    if(static_instance_node == list_get_last(instances_static))
+    {
+      static_instance_node_next = list_get_first(instances_dynamic);
+    }
+    else
+    {
+      static_instance_node_next = list_item_get_next(static_instance_node);
+    }
+
+    if(static_instance_node_next == dynamic_instance_node)
+    {
+      static_instance_node_next = list_item_get_next(static_instance_node_next);
+    }
 
     if(pStatInst->gid_count>1)
     {
@@ -498,7 +511,9 @@ while(dynamic_instance_node != 0)
         }
       }
     }
+    static_instance_node = static_instance_node_next;
   }
+  dynamic_instance_node = dynamic_instance_node_next;
 }
 
 if(unijoint != 0){
