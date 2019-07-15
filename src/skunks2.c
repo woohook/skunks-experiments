@@ -79,15 +79,16 @@ void skunks_initialize()
     if(strncmp("tracks/",argv[i],7)==0)
     {
       worldName = argv[i];
-      struct _entity* pTrackEntity = entity_create(0,"track","skunks:track",sizeof(struct _entity));
-      entity_create(pTrackEntity,worldName,"skunks:track:modelname",sizeof(struct _entity));
-      readtrack(pTrackEntity, worldName);
     }
     if(strncmp("res=",argv[i],4)==0)
     {
       sscanf(argv[i],"res=%dx%d", &width, &height);
     }
   }
+
+  struct _entity* pTrackEntity = entity_create(0,"track","skunks:track",sizeof(struct _entity));
+  entity_create(pTrackEntity,worldName,"skunks:track:modelname",sizeof(struct _entity));
+  readtrack(pTrackEntity, worldName);
 
   if( (pVehiclesEntity->children == 0) || (list_get_size(pVehiclesEntity->children) == 0) )
   {
