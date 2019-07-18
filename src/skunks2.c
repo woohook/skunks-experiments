@@ -66,6 +66,7 @@ void skunks_initialize()
       int vehicle_count = 0;
       if(pVehiclesEntity->children != 0) vehicle_count = list_get_size(pVehiclesEntity->children);
       vehicle_count++;
+      float dz = 20.0f*(vehicle_count-1);
 
       vehicleName = argv[i];
       strcpy(buffer, "car0000");
@@ -74,7 +75,7 @@ void skunks_initialize()
       buffer[strlen(buffer)-3] = (char)(vehicle_count % 10 + '0'); vehicle_count /= 10;
       buffer[strlen(buffer)-4] = (char)(vehicle_count % 10 + '0'); vehicle_count /= 10;
       struct _entity* pCarEntity = entity_create(pVehiclesEntity, buffer, "skunks:car", sizeof(struct _entity));
-      readvehicle(pCarEntity, vehicleName);
+      readvehicle(pCarEntity, vehicleName,0,0,dz);
     }
     if(strncmp("tracks/",argv[i],7)==0)
     {
@@ -93,7 +94,7 @@ void skunks_initialize()
   if( (pVehiclesEntity->children == 0) || (list_get_size(pVehiclesEntity->children) == 0) )
   {
     struct _entity* pCarEntity = entity_create(pVehiclesEntity,"car0001","skunks:car",sizeof(struct _entity));
-    readvehicle(pCarEntity, vehicleName);
+    readvehicle(pCarEntity, vehicleName,0,0,0);
   }
 
   struct _entity* pActorEntity = entity_create(0,"actor","actor",sizeof(struct _entity));
