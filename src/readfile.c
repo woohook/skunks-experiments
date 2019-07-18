@@ -392,7 +392,7 @@ object->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 
 /*function which reads the vehicle; must be called AFTER readtrack()
 nrtyp,nrobt - number of object types and objects given by readtrack()*/
-void readvehicle(struct _entity* parent, char *numefis)
+void readvehicle(struct _entity* parent, char *numefis, float dx, float dy, float dz)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
@@ -487,6 +487,7 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
+	            tx+=dx; ty+=dy; tz+=dz;
 
 	              translat(&object->transform,tx,ty,tz);
 
