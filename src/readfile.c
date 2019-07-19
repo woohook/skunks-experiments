@@ -414,6 +414,7 @@ int tjflag=0; // no trailer yet
 struct _list* parts = list_create();
 struct _list* parts_types = list_create();
 vhc* car = vehicle_create();
+start_physics_group();
 
   if(!(fis=fopen(numefis,"r"))){printf("Error: File %s could not be open\r\n",numefis);exit(1);}
 s[0]='1';while(s[0]){
@@ -621,6 +622,8 @@ list_release(parts, 0);
   pControlItem = entity_create(pControls,"reverse","skunks:car:controls:item",sizeof(struct _entity));
   pControlItem->value = &car->action_reverse;
   *(float*)pControlItem->value = 0.0f;
+
+  end_physics_group();
 }
 
 

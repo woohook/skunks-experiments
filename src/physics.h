@@ -26,6 +26,8 @@ void create_collision_cylinder(float x1, float y1, float z1, float x2, float y2,
 void create_collision_sphere(float x1, float y1, float z1, float x2, float y2, float z2, float radius);
 void create_collision_mesh(float x1, float y1, float z1, float x2, float y2, float z2, int ttip);
 struct physics_instance* create_collision_geometry_instance(int geomtype, float tx, float ty, float tz, float rx, float ry, float rz, struct _matrix* transform);
+void start_physics_group();
+void end_physics_group();
 
 void runsim(float tstep);
 

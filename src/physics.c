@@ -413,11 +413,9 @@ struct physics_instance* create_collision_geometry_instance(int geomtype, float 
 
   if(transform != 0)
   {
-    if(instances_dynamic == 0)
-    {
-      instances_dynamic = list_create();
-    }
-    list_add_value(instances_dynamic, object);
+    struct _list_item* current_group_node = list_get_last(instances_dynamic);
+    struct _list* current_group = list_item_get_value(current_group_node);
+    list_add_value(current_group, object);
     physics_createBody(object, transform);
   }
   else
@@ -430,6 +428,20 @@ struct physics_instance* create_collision_geometry_instance(int geomtype, float 
   }
 
   return object;
+}
+
+void start_physics_group()
+{
+  if(instances_dynamic == 0)
+  {
+    instances_dynamic = list_create();
+  }
+  struct _list* instance_dynamic = list_create();
+  list_add_value(instances_dynamic, instance_dynamic);
+}
+
+void end_physics_group()
+{
 }
 
 /*run 1 simulation step; tstep - time step; af, bf - acceleration and brake factors*/
@@ -448,7 +460,13 @@ dJointID cjid[PHYS_MAXGEOM]; // contact joints
 kps=150; kds=5;
 
 // creating dContactGeom structures
-struct _list_item* dynamic_instance_node = list_get_first(instances_dynamic);
+struct _list_item* dynamic_group_node = list_get_first(instances_dynamic);
+while(dynamic_group_node != 0)
+{
+  struct _list* pGroupInst = (struct _list*)list_item_get_value(dynamic_group_node);
+  struct _list_item* dynamic_group_node_next = list_item_get_next(dynamic_group_node);
+
+struct _list_item* dynamic_instance_node = list_get_first(pGroupInst);
 while(dynamic_instance_node != 0)
 {
   struct physics_instance* pDynInst = list_item_get_value(dynamic_instance_node);
@@ -463,13 +481,26 @@ while(dynamic_instance_node != 0)
   pos=dBodyGetPosition(pDynInst->bodyID); x0=pos[0]; y0=pos[1]; z0=pos[2];
 
   struct _list_item* static_instance_node = list_get_first(instances_static);
+  struct _list_item* group_node = 0;
   while(static_instance_node != 0)
   {
     struct physics_instance* pStatInst = list_item_get_value(static_instance_node);
     struct _list_item* static_instance_node_next = 0;
     if(static_instance_node == list_get_last(instances_static))
     {
-      static_instance_node_next = list_get_first(instances_dynamic);
+      group_node = list_get_first(instances_dynamic);
+      if(group_node != 0)
+      {
+        if(group_node == dynamic_group_node)
+        {
+          group_node = list_item_get_next(group_node);
+        }
+        if(group_node != 0)
+        {
+          struct _list* group = list_item_get_value(group_node);
+          static_instance_node_next = list_get_first(group);
+        }
+      }
     }
     else
     {
@@ -479,6 +510,23 @@ while(dynamic_instance_node != 0)
     if(static_instance_node_next == dynamic_instance_node)
     {
       static_instance_node_next = list_item_get_next(static_instance_node_next);
+    }
+
+    if( (static_instance_node_next == 0) && (group_node != 0) && (list_item_get_next(group_node) != 0) )
+    {
+      group_node = list_item_get_next(group_node);
+      if(group_node != 0)
+      {
+        if(group_node == dynamic_group_node)
+        {
+          group_node = list_item_get_next(group_node);
+        }
+        if(group_node != 0)
+        {
+          struct _list* group = list_item_get_value(group_node);
+          static_instance_node_next = list_get_first(group);
+        }
+      }
     }
 
     if(pStatInst->gid_count>1)
@@ -514,6 +562,8 @@ while(dynamic_instance_node != 0)
     static_instance_node = static_instance_node_next;
   }
   dynamic_instance_node = dynamic_instance_node_next;
+  }
+  dynamic_group_node = dynamic_group_node_next;
 }
 
 if(unijoint != 0){
@@ -558,7 +608,13 @@ for(i=0;i<hinge2_count;i++){
   }
 }
 
-dynamic_instance_node = list_get_first(instances_dynamic);
+dynamic_group_node = list_get_first(instances_dynamic);
+while(dynamic_group_node != 0)
+{
+  struct _list* pGroupInst = list_item_get_value(dynamic_group_node);
+  dynamic_group_node = list_item_get_next(dynamic_group_node);
+
+struct _list_item* dynamic_instance_node = list_get_first(pGroupInst);
 while(dynamic_instance_node != 0)
 {
   struct physics_instance* pDynInst = list_item_get_value(dynamic_instance_node);
@@ -572,6 +628,7 @@ while(dynamic_instance_node != 0)
     fz=-drg*radius*vel[2]*fabs(vel[2]);
     dBodyAddForce(pDynInst->bodyID,fx,fy,fz);
   }
+}
 } /*air resistance*/
 
 dWorldQuickStep(wglob,tstep);
@@ -580,7 +637,13 @@ for(i=1;i<=(ncj);i++){
   dJointDestroy(cjid[i]);
 } ncj=0;
 
-dynamic_instance_node = list_get_first(instances_dynamic);
+dynamic_group_node = list_get_first(instances_dynamic);
+while(dynamic_group_node != 0)
+{
+  struct _list* pGroupInst = list_item_get_value(dynamic_group_node);
+  dynamic_group_node = list_item_get_next(dynamic_group_node);
+
+struct _list_item* dynamic_instance_node = list_get_first(pGroupInst);
 while(dynamic_instance_node != 0)
 {
   struct physics_instance* object = list_item_get_value(dynamic_instance_node);
@@ -604,6 +667,7 @@ while(dynamic_instance_node != 0)
   object->transform->vx[3] = object->transform->vx[0] + rot[2];
   object->transform->vy[3] = object->transform->vy[0] + rot[6];
   object->transform->vz[3] = object->transform->vz[0] + rot[10];
+}
 }
 
 }
