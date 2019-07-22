@@ -5,11 +5,20 @@
 #include "entities.h"
 #include "list.h"
 
+struct _entity
+{
+  char* entity_type;
+  char* name;
+  void* value;
+  struct _entity* parent;
+  struct _list* children;
+};
+
 struct _list* g_entities = 0;
 
-struct _entity* entity_create(struct _entity* parent, char* name, char* entity_type, int size)
+struct _entity* entity_create(struct _entity* parent, char* name, char* entity_type, void* value)
 {
-  struct _entity* pEntity = (struct _entity*)malloc(size);
+  struct _entity* pEntity = (struct _entity*)malloc(sizeof(struct _entity));
   char* fullname = 0;
   int name_length = strlen(name);
   int parent_length = 0;
@@ -36,7 +45,7 @@ struct _entity* entity_create(struct _entity* parent, char* name, char* entity_t
   pEntity->name = fullname;
   pEntity->parent = parent;
   pEntity->children = 0;
-  pEntity->value = 0;
+  pEntity->value = value;
 
   list_add_value(g_entities, pEntity);
   if(parent != 0)
@@ -85,4 +94,24 @@ void entity_list_all()
 
     entity_node = list_item_get_next(entity_node);
   }
+}
+
+void entity_set_value(struct _entity* pEntity, void* value)
+{
+  pEntity->value = value;
+}
+
+void* entity_get_value(struct _entity* pEntity)
+{
+  return pEntity->value;
+}
+
+struct _list* entity_get_children(struct _entity* pEntity)
+{
+  return pEntity->children;
+}
+
+char* entity_get_name(struct _entity* pEntity)
+{
+  return pEntity->name;
 }
