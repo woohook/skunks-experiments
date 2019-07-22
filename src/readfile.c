@@ -414,6 +414,12 @@ int tjflag=0; // no trailer yet
 struct _list* parts = list_create();
 struct _list* parts_types = list_create();
 vhc* car = vehicle_create();
+car->action_accelerate = 0.0f;
+car->action_brake = 0.0f;
+car->action_left = 0.0f;
+car->action_right = 0.0f;
+car->action_reverse = 0.0f;
+
 start_physics_group();
 
   if(!(fis=fopen(numefis,"r"))){printf("Error: File %s could not be open\r\n",numefis);exit(1);}
@@ -449,8 +455,7 @@ s[0]='1';while(s[0]){
                     prepare_item_name(list_get_size(parts));
 
                       object=(sgob*)malloc(sizeof(sgob));
-                      struct _entity* pCarItemEntity = entity_create(parent,item_name,"car:item",sizeof(struct _entity));
-                      pCarItemEntity->value = object;
+                      entity_create(parent,item_name,"car:item",object);
                       object->otyp = 0;
                       object->radius = 0;
                       object->lev = 0;
@@ -606,22 +611,12 @@ while(part != 0){
 list_release(parts_types, 0);
 list_release(parts, 0);
 
-  struct _entity* pControls = entity_create(parent,"controls","skunks:car:controls",sizeof(struct _entity));
-  struct _entity* pControlItem = entity_create(pControls,"accelerate","skunks:car:controls:item",sizeof(struct _entity));
-  pControlItem->value = &car->action_accelerate;
-  *(float*)pControlItem->value = 0.0f;
-  pControlItem = entity_create(pControls,"brake","skunks:car:controls:item",sizeof(struct _entity));
-  pControlItem->value = &car->action_brake;
-  *(float*)pControlItem->value = 0.0f;
-  pControlItem = entity_create(pControls,"left","skunks:car:controls:item",sizeof(struct _entity));
-  pControlItem->value = &car->action_left;
-  *(float*)pControlItem->value = 0.0f;
-  pControlItem = entity_create(pControls,"right","skunks:car:controls:item",sizeof(struct _entity));
-  pControlItem->value = &car->action_right;
-  *(float*)pControlItem->value = 0.0f;
-  pControlItem = entity_create(pControls,"reverse","skunks:car:controls:item",sizeof(struct _entity));
-  pControlItem->value = &car->action_reverse;
-  *(float*)pControlItem->value = 0.0f;
+  struct _entity* pControls = entity_create(parent,"controls","skunks:car:controls",0);
+  entity_create(pControls,"accelerate","skunks:car:controls:item",&car->action_accelerate);
+  entity_create(pControls,"brake","skunks:car:controls:item",&car->action_brake);
+  entity_create(pControls,"left","skunks:car:controls:item",&car->action_left);
+  entity_create(pControls,"right","skunks:car:controls:item",&car->action_right);
+  entity_create(pControls,"reverse","skunks:car:controls:item",&car->action_reverse);
 
   end_physics_group();
 }
@@ -691,10 +686,9 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
                       prepare_item_name(object_index);
 
-                      struct _entity* pTrackItemEntity = entity_create(parent,item_name,"track:item",sizeof(struct _entity));
                       object=(sgob*)malloc(sizeof(sgob));
                       object_index++;
-                      pTrackItemEntity->value = object;
+                      entity_create(parent,item_name,"track:item",object);
                       object->otyp = 0;
                       object->radius = 0;
                       object->lev = 0;
