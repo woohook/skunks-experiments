@@ -555,7 +555,7 @@ s[0]='1';while(s[0]){
 	  case TOTAL_OBJECTS: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);  // ignore number of parts
                   break;
 	  case OBJECT_INSTANCE:
-	            err=fisgetw(fis,s,&lincr);//afermex(numefis,lincr,s,0);
+	            err=fisgetw(fis,s,&lincr);
                     temp_object_type_index = find_object_type(s);
                     if(!temp_object_type_index)
                     {
@@ -747,6 +747,7 @@ REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       len;
 int previousNumberOfMeshes = g_numberOfMeshes;
 int object_index = previousNumberOfMeshes+1;
+int temp_object_type_index = 0;
 
 float light_ambient=0.5;
 float light_headlight=0.3;
@@ -785,7 +786,14 @@ s[0]='1';while(s[0]){
 	  case TOTAL_OBJECTS: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); // ignore number of objects
                   break;
 	  case OBJECT_INSTANCE:
-	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
+	            err=fisgetw(fis,s,&lincr);
+                    temp_object_type_index = find_object_type(s);
+                    if(!temp_object_type_index)
+                    {
+                      load_object_type(s, object_type_index);
+                      temp_object_type_index = object_type_index;
+                      object_type_index++;
+                    }
                       prepare_item_name(object_index);
 
                       object=(sgob*)malloc(sizeof(sgob));
@@ -797,7 +805,7 @@ s[0]='1';while(s[0]){
                       object->physics_object = 0;
                       object->vehicle = 0;
 
-	              object->otyp=previousNumberOfMeshes+atoi(s);
+	              object->otyp=temp_object_type_index;
                       create_mesh_instance(object->otyp, &object->transform);
 	              if(object->otyp>g_numberOfMeshes){
 	                printf("Error: there is no object type '%d'\r\n",object->otyp-previousNumberOfMeshes);exit(1);
