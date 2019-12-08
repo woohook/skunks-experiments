@@ -424,6 +424,39 @@ lenz=zmax-zmin;
 object->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 }
 
+void load_object_type(FILE* object_stream, int object_type_index)
+{
+  int line_number = 1;
+  char filename[MAXWLG];
+  FILE* part_stream = 0;
+
+  fisgetw(object_stream, filename, &line_number);
+  part_stream = fopen(filename, "r");
+  if(!part_stream)
+  {
+    printf("Error: File %s could not be opened\r\n", filename);
+    exit(1);
+  }
+
+  create_mesh();
+
+  fisgetw(part_stream, filename, &line_number); // file with triangles
+  faces(object_type_index, filename);
+
+  fisgetw(part_stream, filename, &line_number); // file with colors
+  readcolor(object_type_index, filename);
+
+  create_collision_geometry();
+  fisgetw(part_stream, filename, &line_number); // file with reference points
+  readref(filename);
+
+  fisgetw(part_stream, filename, &line_number); // file with data for backface culling
+  ordercl(object_type_index, filename);
+
+  complete_mesh();
+
+  fclose(part_stream);
+}
 
 /*function which reads the vehicle; must be called AFTER readtrack()
 nrtyp,nrobt - number of object types and objects given by readtrack()*/
@@ -467,17 +500,7 @@ s[0]='1';while(s[0]){
                   break;
 	  case OBJECT_TYPE:
 	          if(object_type_index<=g_numberOfMeshes){
-                    create_mesh();
-	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
-	            faces(object_type_index,s);
-	              err=fisgetw(fis,s,&lincr); /*file with colors*/
-	              readcolor(object_type_index,s);
-                    create_collision_geometry();
-	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
-	            readref(s);
-	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
-	              ordercl(object_type_index,s);
-                    complete_mesh();
+                    load_object_type(fis, object_type_index);
                     object_type_index++;
 	          }
                   else {printf("More object types than announced\n"); exit(1);}
@@ -699,17 +722,7 @@ s[0]='1';while(s[0]){
                   break;
 	  case OBJECT_TYPE:
 	          if(object_type_index<=g_numberOfMeshes){
-                    create_mesh();
-	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
-	            faces(object_type_index,s);
-	              err=fisgetw(fis,s,&lincr); /*file with colors*/
-	              readcolor(object_type_index,s);
-                    create_collision_geometry();
-	            err=fisgetw(fis,s,&lincr); /*file with reference points*/
-	            readref(s);
-	              err=fisgetw(fis,s,&lincr); /*file with data for backface culling*/
-	              ordercl(object_type_index,s);
-                    complete_mesh();
+                    load_object_type(fis, object_type_index);
                     object_type_index++;
 	          }
                   else {printf("More object types than announced!\r\n"); exit(1);}
