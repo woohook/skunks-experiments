@@ -5,8 +5,8 @@ lightdir -1.0 1.0 1.0
 background 140 160 230
 clfactors 1.1 1.1 1.1
 objtypes 2
-objtype data/roads_low.geo data/roads_low.col data/roads_low.ref data/roads_low.cld
-objtype data/roads_low.geo data/roads_low_alt.col data/roads_low.ref data/roads_low.cld
+objtype data/roads_low
+objtype data/roads_low_alt
 objects 10
 object 1 0.0000 0.0000  0.0000 0 0 0.0000 1 0
 object 2 0.0000 0.0000 20.0000 0 0 0.0000 1 0
