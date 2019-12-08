@@ -31,6 +31,41 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "vehicle.h"
 #include "entities.h"
 
+#define UNKNOWN 0
+
+#define TOTAL_TYPES 1
+#define TOTAL_OBJECTS 2
+#define BACKGROUND_COLOR 3
+#define CLFACTORS 4
+#define ACCELERATION_COEFF 5
+#define BRAKE_COEFF 6
+#define SPRING_COEFF 7
+#define DAMPER_COEFF 8
+#define FRICTION_COEFF 9
+#define TRAILER_JOINT 10
+#define CAMERA_POSITION 11
+#define AMBIENT_LIGHT 12
+#define HEADLIGHT 13
+#define DIRECTIONAL_LIGHT 14
+#define LIGHT_DIRECTION 15
+#define FULLBRIGHT 16
+#define OBJECT_TYPE 17
+#define OBJECT_INSTANCE 18
+
+#define BOX 1
+#define CYLINDER 2
+#define SPHERE 3
+#define TRIANGLE_MESH 4
+
+#define CAR_BODY 1
+#define TRAILER_BODY 2
+
+#define MOTOR_WHEEL 3
+#define STEERING_WHEEL 4
+#define STEERING_MOTOR_WHEEL 5
+#define FREE_WHEEL 6
+#define TRAILER_WHEEL 7
+
 int g_numberOfMeshes = 0;
 char item_name[] = "object0000";
 
@@ -107,34 +142,34 @@ return sem;} /*1 daca s-a depasit lungimea maxima a cuvantului sau sfarsitul fis
 
 /*for readtrack()*/
 int identcom(char *s)
-{if(strcmp(s,"objtypes")==0){return 1;} /*pt. declarat nr. de tipuri de obiecte*/
- if(strcmp(s,"objects")==0){return 2;} /*pt. declarat nr. de obiecte*/
- if(strcmp(s,"background")==0){return 3;}
- if(strcmp(s,"clfactors")==0){return 4;}
- if(strcmp(s,"accel")==0){return 5;}
- if(strcmp(s,"brake")==0){return 6;} /*acceleration and brake torques/wheel*/
- if(strcmp(s,"spring")==0){return 7;}
- if(strcmp(s,"damper")==0){return 8;} /*suspension coefficients*/
- if(strcmp(s,"friction")==0){return 9;}
- if(strcmp(s,"trjoint")==0){return 10;} /*trailer joint*/
- if(strcmp(s,"camera")==0){return 11;} /*camera position*/
- if(strcmp(s,"ambient")==0){return 12;} /*ambient light*/
- if(strcmp(s,"headlight")==0){return 13;} /*forward light*/
- if(strcmp(s,"directional")==0){return 14;} /*intensity of light with fixed direction*/
- if(strcmp(s,"lightdir")==0){return 15;} /*direction of light*/
- if(strcmp(s,"fullbright")==0){return 16;}
- if(strcmp(s,"objtype")==0){return 17;}
- if(strcmp(s,"object")==0){return 18;}
- return 0;}
+{if(strcmp(s,"objtypes")==0){return TOTAL_TYPES;}
+ if(strcmp(s,"objects")==0){return TOTAL_OBJECTS;}
+ if(strcmp(s,"background")==0){return BACKGROUND_COLOR;}
+ if(strcmp(s,"clfactors")==0){return CLFACTORS;}
+ if(strcmp(s,"accel")==0){return ACCELERATION_COEFF;}
+ if(strcmp(s,"brake")==0){return BRAKE_COEFF;}
+ if(strcmp(s,"spring")==0){return SPRING_COEFF;}
+ if(strcmp(s,"damper")==0){return DAMPER_COEFF;}
+ if(strcmp(s,"friction")==0){return FRICTION_COEFF;}
+ if(strcmp(s,"trjoint")==0){return TRAILER_JOINT;}
+ if(strcmp(s,"camera")==0){return CAMERA_POSITION;}
+ if(strcmp(s,"ambient")==0){return AMBIENT_LIGHT;}
+ if(strcmp(s,"headlight")==0){return HEADLIGHT;}
+ if(strcmp(s,"directional")==0){return DIRECTIONAL_LIGHT;}
+ if(strcmp(s,"lightdir")==0){return LIGHT_DIRECTION;}
+ if(strcmp(s,"fullbright")==0){return FULLBRIGHT;}
+ if(strcmp(s,"objtype")==0){return OBJECT_TYPE;}
+ if(strcmp(s,"object")==0){return OBJECT_INSTANCE;}
+ return UNKNOWN;}
 
 
 /*for readref()*/
 int identcmg(char *s)
-{if(strcmp(s,"box")==0){return 1;}
- if(strcmp(s,"cyl")==0){return 2;} /*cylinder*/
- if(strcmp(s,"sph")==0){return 3;} /*sphere*/
- if(strcmp(s,"trim")==0){return 4;} /*triangle mesh*/
- return 0;}
+{if(strcmp(s,"box")==0){return BOX;}
+ if(strcmp(s,"cyl")==0){return CYLINDER;}
+ if(strcmp(s,"sph")==0){return SPHERE;}
+ if(strcmp(s,"trim")==0){return TRIANGLE_MESH;}
+ return UNKNOWN;}
 
 
 /*functie care afiseaza un mesaj de eroare si iese din program daca e cazul*/
@@ -213,7 +248,7 @@ fscanf(fis,"%d %d %d %d %d",&fstart,&fend,&fred,&fgreen,&fblue);
 }
 
 j=fisgetw(fis,s,&i);
-if(identcom(s)==16){ /*fullbright*/
+if(identcom(s)==FULLBRIGHT){
   fscanf(fis,"%d",&colors);
   for(j=1;j<=colors;j++){
     fscanf(fis,"%d %d",&fstart,&fend);
@@ -244,7 +279,7 @@ for(i=1;i<=ngeom;i++){
 	if(!(err=fisgetw(fis,s,&lincr))){afermex(numefis,lincr,s,1);}
 
 	switch(identcmg(s)){
-	  case 1: // box
+	  case BOX:
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); lx=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ly=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); lz=atof(s);
@@ -257,7 +292,7 @@ for(i=1;i<=ngeom;i++){
                   create_collision_box(x1,y1,z1,x2,y2,z2,lx,ly,lz);
 	          break;
 
-          case 2: // cylinder
+          case CYLINDER:
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); lx=atof(s); // radius
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ly=atof(s); // length
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x1=atof(s);
@@ -269,7 +304,7 @@ for(i=1;i<=ngeom;i++){
                   create_collision_cylinder(x1,y1,z1,x2,y2,z2,lx,ly);
 	          break;
 
-          case 3: // sphere
+          case SPHERE:
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); lx=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x1=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y1=atof(s);
@@ -280,7 +315,7 @@ for(i=1;i<=ngeom;i++){
                   create_collision_sphere(x1,y1,z1,x2,y2,z2,lx);
 	          break;
 
-	  case 4: // triangle mesh
+	  case TRIANGLE_MESH:
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ttip=atoi(s); // type
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x1=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y1=atof(s);
@@ -427,10 +462,10 @@ s[0]='1';while(s[0]){
 	if(!(err=fisgetw(fis,s,&lincr))){afermex(numefis,lincr,s,1);}
 
 	switch(identcom(s)){
-	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); g_numberOfMeshes+=atoi(s);
+	  case TOTAL_TYPES: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); g_numberOfMeshes+=atoi(s);
 	          object_type_index = previousNumberOfMeshes+1;
                   break;
-	  case 17:
+	  case OBJECT_TYPE:
 	          if(object_type_index<=g_numberOfMeshes){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
@@ -448,9 +483,9 @@ s[0]='1';while(s[0]){
                   else {printf("More object types than announced\n"); exit(1);}
 	          break;
 
-	  case 2: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);  // ignore number of parts
+	  case TOTAL_OBJECTS: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);  // ignore number of parts
                   break;
-	  case 18:
+	  case OBJECT_INSTANCE:
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
                     prepare_item_name(list_get_size(parts));
 
@@ -482,9 +517,9 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); part_type_id = atoi(s);
 	            list_add_value(parts_types, (void*)part_type_id);
 	            switch(list_get_size(parts)){
-	              case 1: if(part_type_id!=1){printf("Error: '%s' line %d - second number must be 1\r\n",numefis,lincr); exit(1);}
+	              case 1: if(part_type_id!=1){printf("Error: '%s' line %d - Car body not yet defined. Second number must be 1\r\n",numefis,lincr); exit(1);}
 	                      break;
-	              case 2: if(part_type_id==1){printf("Error: '%s' line %d - second number must not be 1\r\n",numefis,lincr); exit(1);}
+	              case 2: if(part_type_id==1){printf("Error: '%s' line %d - Car body already defined. Second number must not be 1\r\n",numefis,lincr); exit(1);}
 	                      break;
 	              default: if(part_type_id<=2){printf("Error: '%s' line %d - second number must be > 2\r\n",numefis,lincr); exit(1);}
 	                      break;
@@ -499,11 +534,11 @@ s[0]='1';while(s[0]){
 
                     object->physics_object = create_collision_geometry_instance(object->otyp, tx, ty, tz, 0, 0, 0, &object->transform);
 
-                    if(part_type_id == 1)
+                    if(part_type_id == CAR_BODY)
                     {
                       primaryBody = object->physics_object;
                     }
-                    if(part_type_id == 2)
+                    if(part_type_id == TRAILER_BODY)
                     {
                       secondaryBody = object->physics_object;
                     }
@@ -518,13 +553,13 @@ s[0]='1';while(s[0]){
 
                       len = 0.0;
 	              switch(distribution_type){
-	                case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); len=atof(s); /*mass*/
+	                case BOX: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); len=atof(s); /*mass*/
 	                        err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
 	                        err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	                        err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s); /*box lengths*/
                                 break;
 
-	                case 3: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); len=atof(s); /*mass*/
+	                case SPHERE: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); len=atof(s); /*mass*/
 	                        err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s); /*sphere radius*/
                                 break;
 
@@ -536,22 +571,22 @@ s[0]='1';while(s[0]){
 	            /*^set mass parameters*/
 	          break;
 
-	  case 5: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->accel=atof(s);
+	  case ACCELERATION_COEFF: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->accel=atof(s);
                   break;
 
-          case 6: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->brake=atof(s);
+          case BRAKE_COEFF: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); car->brake=atof(s);
                   break;
 
-          case 7: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); spring=atof(s);
+          case SPRING_COEFF: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); spring=atof(s);
                   break;
 
-          case 8: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); damper=atof(s);
+          case DAMPER_COEFF: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); damper=atof(s);
                   break;
 
-          case 9: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); friction = atof(s);
+          case FRICTION_COEFF: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); friction = atof(s);
                   break;
 
-          case 10: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
+          case TRAILER_JOINT: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
                    err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
                    err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
                    if((int)list_get_value(parts_types,1)!=2){printf("Error: '%s' line %d - trailer joint without trailer\r\n",numefis,lincr);exit(1);}
@@ -560,7 +595,7 @@ s[0]='1';while(s[0]){
                    physics_createUniversalJoint(primaryBody, secondaryBody,tx,ty,tz);
                    break;
 
-          case 11: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2);  // camera position ignored
+          case CAMERA_POSITION: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2);  // camera position ignored
                    err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2);
                    break;
 	
@@ -586,17 +621,17 @@ while(part != 0){
       float* vrx = 0, *af = 0, *bf = &car->bf;
       switch(object_type)
       {
-        case 3:
+        case MOTOR_WHEEL:
           af = &car->af;
           break;
-        case 4:
+        case STEERING_WHEEL:
           vrx = &car->vrx;
           break;
-        case 5:
+        case STEERING_MOTOR_WHEEL:
           vrx = &car->vrx;
           af  = &car->af;
           break;
-        case 7:
+        case TRAILER_WHEEL:
           parentBody = secondaryBody;
           break;
         default:
@@ -649,20 +684,20 @@ s[0]='1';while(s[0]){
 	if(!(err=fisgetw(fis,s,&lincr))){afermex(numefis,lincr,s,1);}
 
 	switch(identcom(s)){
-	  case 3: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); bred=atoi(s);
+	  case BACKGROUND_COLOR: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); bred=atoi(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); bgreen=atoi(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); bblue=atoi(s);
 	          break;
 
-	  case 4: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); fred=atof(s);
+	  case CLFACTORS: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); fred=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); fgreen=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); fblue=atof(s);
 	          break;
 
-	  case 1: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); g_numberOfMeshes+=atoi(s);
+	  case TOTAL_TYPES: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); g_numberOfMeshes+=atoi(s);
                   object_type_index = previousNumberOfMeshes + 1;
                   break;
-	  case 17:
+	  case OBJECT_TYPE:
 	          if(object_type_index<=g_numberOfMeshes){
                     create_mesh();
 	            err=fisgetw(fis,s,&lincr); /*file with triangles*/
@@ -680,9 +715,9 @@ s[0]='1';while(s[0]){
                   else {printf("More object types than announced!\r\n"); exit(1);}
 	          break;
 
-	  case 2: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); // ignore number of objects
+	  case TOTAL_OBJECTS: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); // ignore number of objects
                   break;
-	  case 18:
+	  case OBJECT_INSTANCE:
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
                       prepare_item_name(object_index);
 
@@ -722,13 +757,13 @@ s[0]='1';while(s[0]){
                     object->physics_object = create_collision_geometry_instance(object->otyp, tx, ty, tz, rx, ry, rz, 0);
 	          break;
 
-	  case 12: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_ambient=atof(s); break;
+	  case AMBIENT_LIGHT: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_ambient=atof(s); break;
 
-	  case 13: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_headlight=atof(s); break;
+	  case HEADLIGHT: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_headlight=atof(s); break;
 
-	  case 14: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_directional=atof(s); break;
+	  case DIRECTIONAL_LIGHT: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_directional=atof(s); break;
 
-	  case 15: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_dx=atof(s);
+	  case LIGHT_DIRECTION: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_dx=atof(s);
 	           err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_dy=atof(s);
 	           err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_dz=atof(s);
 	           break;
