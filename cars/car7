@@ -1,8 +1,8 @@
 camera 0.7 0.65
 objtypes 3
-objtype data/truck.geo data/cdt7.col data/truck.ref data/truck.cld
-objtype data/wheel2.geo data/wheel.col data/wheel2.ref data/wheel.cld
-objtype data/trailer2.geo data/trailer.col data/trailer2.ref data/trailer.cld
+objtype data/truck
+objtype data/wheel2
+objtype data/trailer2
 objects 8
 
 object 1 1 2.9 0 15 box 5 1.5 2.0 6

@@ -1,7 +1,7 @@
 camera 0.8 4.0
 objtypes 2
-objtype data/bus.geo data/bus.col data/bus.ref data/bus.cld
-objtype data/wheel2.geo data/wheel.col data/wheel2.ref data/wheel.cld
+objtype data/bus
+objtype data/wheel2
 objects 5
 object 1 1 2.1 0 12 box 10 1.5 2.0 8
 object 2 3 1.5 -1.0 9.3 sph 0.2 0.6
