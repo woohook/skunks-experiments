@@ -66,8 +66,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define FREE_WHEEL 6
 #define TRAILER_WHEEL 7
 
+struct object_type
+{
+  char name[MAXWLG];
+  int index;
+};
+
 int g_numberOfMeshes = 0;
 char item_name[] = "object0000";
+
+struct _list* g_object_types = 0;
 
 void prepare_item_name(int id)
 {
@@ -424,19 +432,55 @@ lenz=zmax-zmin;
 object->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 }
 
-void load_object_type(FILE* object_stream, int object_type_index)
+int find_object_type(char* name)
+{
+  int object_type_index = 0;
+
+  struct _list_item* pObjectTypeItem = 0;
+
+  if(g_object_types == 0)
+  {
+    g_object_types = list_create();
+  }
+
+  pObjectTypeItem = list_get_first(g_object_types);
+  while(pObjectTypeItem != 0)
+  {
+    struct object_type* pObjectType = list_item_get_value(pObjectTypeItem);
+    pObjectTypeItem = list_item_get_next(pObjectTypeItem);
+
+    if(strcmp(pObjectType->name, name)==0)
+    {
+      object_type_index = pObjectType->index;
+      break;
+    }
+  }
+
+  return object_type_index;
+}
+
+void load_object_type(char* part_name, int object_type_index)
 {
   int line_number = 1;
   char filename[MAXWLG];
   FILE* part_stream = 0;
 
-  fisgetw(object_stream, filename, &line_number);
-  part_stream = fopen(filename, "r");
+  part_stream = fopen(part_name, "r");
   if(!part_stream)
   {
-    printf("Error: File %s could not be opened\r\n", filename);
+    printf("Error: File %s could not be opened\r\n", part_name);
     exit(1);
   }
+
+  if(g_object_types == 0)
+  {
+    g_object_types = list_create();
+  }
+
+  struct object_type* pNewType = (struct object_type*)malloc(sizeof(struct object_type));
+  strcpy(pNewType->name, part_name);
+  pNewType->index = object_type_index;
+  list_add_value(g_object_types, pNewType);
 
   create_mesh();
 
@@ -476,6 +520,7 @@ int previousNumberOfMeshes = g_numberOfMeshes;
 sgob* object = 0;
 struct physics_instance* primaryBody = 0, *secondaryBody = 0;
 int part_type_id = 0;
+int temp_object_type_index = 0;
 
 int tjflag=0; // no trailer yet
 
@@ -500,7 +545,8 @@ s[0]='1';while(s[0]){
                   break;
 	  case OBJECT_TYPE:
 	          if(object_type_index<=g_numberOfMeshes){
-                    load_object_type(fis, object_type_index);
+	            err=fisgetw(fis,s,&lincr);
+                    load_object_type(s, object_type_index);
                     object_type_index++;
 	          }
                   else {printf("More object types than announced\n"); exit(1);}
@@ -509,7 +555,14 @@ s[0]='1';while(s[0]){
 	  case TOTAL_OBJECTS: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);  // ignore number of parts
                   break;
 	  case OBJECT_INSTANCE:
-	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);
+	            err=fisgetw(fis,s,&lincr);//afermex(numefis,lincr,s,0);
+                    temp_object_type_index = find_object_type(s);
+                    if(!temp_object_type_index)
+                    {
+                      load_object_type(s, object_type_index);
+                      temp_object_type_index = object_type_index;
+                      object_type_index++;
+                    }
                     prepare_item_name(list_get_size(parts));
 
                       object=(sgob*)malloc(sizeof(sgob));
@@ -525,7 +578,7 @@ s[0]='1';while(s[0]){
                       }
 
                       list_add_value(parts,object);
-	              object->otyp=previousNumberOfMeshes+atoi(s);
+	              object->otyp = temp_object_type_index;
                       create_mesh_instance(object->otyp, &object->transform);
 	              if(object->otyp>g_numberOfMeshes){
 	                printf("Error: there is no object type '%d'\r\n",object->otyp-previousNumberOfMeshes);exit(1);
@@ -722,7 +775,8 @@ s[0]='1';while(s[0]){
                   break;
 	  case OBJECT_TYPE:
 	          if(object_type_index<=g_numberOfMeshes){
-                    load_object_type(fis, object_type_index);
+	            err=fisgetw(fis,s,&lincr);
+                    load_object_type(s, object_type_index);
                     object_type_index++;
 	          }
                   else {printf("More object types than announced!\r\n"); exit(1);}
