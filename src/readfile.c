@@ -33,8 +33,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #define UNKNOWN 0
 
-#define TOTAL_TYPES 1
-#define TOTAL_OBJECTS 2
 #define BACKGROUND_COLOR 3
 #define CLFACTORS 4
 #define ACCELERATION_COEFF 5
@@ -49,7 +47,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define DIRECTIONAL_LIGHT 14
 #define LIGHT_DIRECTION 15
 #define FULLBRIGHT 16
-#define OBJECT_TYPE 17
 #define OBJECT_INSTANCE 18
 
 #define BOX 1
@@ -150,9 +147,7 @@ return sem;} /*1 daca s-a depasit lungimea maxima a cuvantului sau sfarsitul fis
 
 /*for readtrack()*/
 int identcom(char *s)
-{if(strcmp(s,"objtypes")==0){return TOTAL_TYPES;}
- if(strcmp(s,"objects")==0){return TOTAL_OBJECTS;}
- if(strcmp(s,"background")==0){return BACKGROUND_COLOR;}
+{if(strcmp(s,"background")==0){return BACKGROUND_COLOR;}
  if(strcmp(s,"clfactors")==0){return CLFACTORS;}
  if(strcmp(s,"accel")==0){return ACCELERATION_COEFF;}
  if(strcmp(s,"brake")==0){return BRAKE_COEFF;}
@@ -166,7 +161,6 @@ int identcom(char *s)
  if(strcmp(s,"directional")==0){return DIRECTIONAL_LIGHT;}
  if(strcmp(s,"lightdir")==0){return LIGHT_DIRECTION;}
  if(strcmp(s,"fullbright")==0){return FULLBRIGHT;}
- if(strcmp(s,"objtype")==0){return OBJECT_TYPE;}
  if(strcmp(s,"object")==0){return OBJECT_INSTANCE;}
  return UNKNOWN;}
 
@@ -459,7 +453,7 @@ int find_object_type(char* name)
   return object_type_index;
 }
 
-void load_object_type(char* part_name, int object_type_index)
+int load_object_type(char* part_name)
 {
   int line_number = 1;
   char filename[MAXWLG];
@@ -477,29 +471,32 @@ void load_object_type(char* part_name, int object_type_index)
     g_object_types = list_create();
   }
 
+  g_numberOfMeshes++;
   struct object_type* pNewType = (struct object_type*)malloc(sizeof(struct object_type));
   strcpy(pNewType->name, part_name);
-  pNewType->index = object_type_index;
+  pNewType->index = g_numberOfMeshes;
   list_add_value(g_object_types, pNewType);
 
   create_mesh();
 
   fisgetw(part_stream, filename, &line_number); // file with triangles
-  faces(object_type_index, filename);
+  faces(g_numberOfMeshes, filename);
 
   fisgetw(part_stream, filename, &line_number); // file with colors
-  readcolor(object_type_index, filename);
+  readcolor(g_numberOfMeshes, filename);
 
   create_collision_geometry();
   fisgetw(part_stream, filename, &line_number); // file with reference points
   readref(filename);
 
   fisgetw(part_stream, filename, &line_number); // file with data for backface culling
-  ordercl(object_type_index, filename);
+  ordercl(g_numberOfMeshes, filename);
 
   complete_mesh();
 
   fclose(part_stream);
+
+  return g_numberOfMeshes;
 }
 
 /*function which reads the vehicle; must be called AFTER readtrack()
@@ -516,11 +513,9 @@ float damper = 0;  // hinge damper coefficient
 
 float friction = 0;
 
-int previousNumberOfMeshes = g_numberOfMeshes;
 sgob* object = 0;
 struct physics_instance* primaryBody = 0, *secondaryBody = 0;
 int part_type_id = 0;
-int temp_object_type_index = 0;
 
 int tjflag=0; // no trailer yet
 
@@ -540,28 +535,12 @@ s[0]='1';while(s[0]){
 	if(!(err=fisgetw(fis,s,&lincr))){afermex(numefis,lincr,s,1);}
 
 	switch(identcom(s)){
-	  case TOTAL_TYPES: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); g_numberOfMeshes+=atoi(s);
-	          object_type_index = previousNumberOfMeshes+1;
-                  break;
-	  case OBJECT_TYPE:
-	          if(object_type_index<=g_numberOfMeshes){
-	            err=fisgetw(fis,s,&lincr);
-                    load_object_type(s, object_type_index);
-                    object_type_index++;
-	          }
-                  else {printf("More object types than announced\n"); exit(1);}
-	          break;
-
-	  case TOTAL_OBJECTS: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0);  // ignore number of parts
-                  break;
 	  case OBJECT_INSTANCE:
 	            err=fisgetw(fis,s,&lincr);
-                    temp_object_type_index = find_object_type(s);
-                    if(!temp_object_type_index)
+                    object_type_index = find_object_type(s);
+                    if(!object_type_index)
                     {
-                      load_object_type(s, object_type_index);
-                      temp_object_type_index = object_type_index;
-                      object_type_index++;
+                      object_type_index = load_object_type(s);
                     }
                     prepare_item_name(list_get_size(parts));
 
@@ -578,11 +557,8 @@ s[0]='1';while(s[0]){
                       }
 
                       list_add_value(parts,object);
-	              object->otyp = temp_object_type_index;
+	              object->otyp = object_type_index;
                       create_mesh_instance(object->otyp, &object->transform);
-	              if(object->otyp>g_numberOfMeshes){
-	                printf("Error: there is no object type '%d'\r\n",object->otyp-previousNumberOfMeshes);exit(1);
-	              }
 	              object->transform.vx[0]=object->transform.vy[0]=object->transform.vz[0]=0;
 	              object->transform.vx[1]=object->transform.vy[2]=object->transform.vz[3]=1;
 	              object->transform.vx[2]=object->transform.vx[3]=0;
@@ -747,7 +723,6 @@ REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       len;
 int previousNumberOfMeshes = g_numberOfMeshes;
 int object_index = previousNumberOfMeshes+1;
-int temp_object_type_index = 0;
 
 float light_ambient=0.5;
 float light_headlight=0.3;
@@ -771,28 +746,12 @@ s[0]='1';while(s[0]){
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); fblue=atof(s);
 	          break;
 
-	  case TOTAL_TYPES: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); g_numberOfMeshes+=atoi(s);
-                  object_type_index = previousNumberOfMeshes + 1;
-                  break;
-	  case OBJECT_TYPE:
-	          if(object_type_index<=g_numberOfMeshes){
-	            err=fisgetw(fis,s,&lincr);
-                    load_object_type(s, object_type_index);
-                    object_type_index++;
-	          }
-                  else {printf("More object types than announced!\r\n"); exit(1);}
-	          break;
-
-	  case TOTAL_OBJECTS: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); // ignore number of objects
-                  break;
 	  case OBJECT_INSTANCE:
 	            err=fisgetw(fis,s,&lincr);
-                    temp_object_type_index = find_object_type(s);
-                    if(!temp_object_type_index)
+                    object_type_index = find_object_type(s);
+                    if(!object_type_index)
                     {
-                      load_object_type(s, object_type_index);
-                      temp_object_type_index = object_type_index;
-                      object_type_index++;
+                      object_type_index = load_object_type(s);
                     }
                       prepare_item_name(object_index);
 
@@ -805,11 +764,8 @@ s[0]='1';while(s[0]){
                       object->physics_object = 0;
                       object->vehicle = 0;
 
-	              object->otyp=temp_object_type_index;
+	              object->otyp=object_type_index;
                       create_mesh_instance(object->otyp, &object->transform);
-	              if(object->otyp>g_numberOfMeshes){
-	                printf("Error: there is no object type '%d'\r\n",object->otyp-previousNumberOfMeshes);exit(1);
-	              }
 	              object->transform.vx[0]=object->transform.vy[0]=object->transform.vz[0]=0;
 	              object->transform.vx[1]=object->transform.vy[2]=object->transform.vz[3]=1;
 	              object->transform.vx[2]=object->transform.vx[3]=0;
