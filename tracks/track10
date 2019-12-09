@@ -4,8 +4,6 @@ directional 0.3
 lightdir -1.0 1.0 1.0
 background 80 100 120
 clfactors 1.1 1.1 1.1
-objtypes 19
-objects 444
 object data/ground  -6.5  0.0  0.0  0.0  0.0  0.0  2  0
 object data/start -1.2000 0.0000 20.0000 0 0 0.0000 2 0
 object data/trs -1.2000 0.0000 0.0000 0 0 3.1416 5 0

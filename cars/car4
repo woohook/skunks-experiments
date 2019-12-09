@@ -1,6 +1,4 @@
 camera 0.9 1.0
-objtypes 2
-objects 5
 object data/czil 1 2.8 0 14 box 3 0.7 1.0 5.0
 object data/wheel3 3 2.65 -0.85 12.14 sph 0.05 0.4
 object data/wheel3 3 2.65 0.85 12.14 sph 0.05 0.4

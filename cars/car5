@@ -1,6 +1,4 @@
 camera 1.05 0.2
-objtypes 2
-objects 5
 object data/jeep1 1 2.95 0 14 box 1.4 0.7 1.2 4.0
 object data/wheel3 3 2.6 -0.87 12.6 sph 0.05 0.4
 object data/wheel3 3 2.6 0.87 12.6 sph 0.05 0.4

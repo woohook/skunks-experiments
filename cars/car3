@@ -1,6 +1,4 @@
 camera 0.80 1.75
-objtypes 2
-objects 5
 object data/rocar 1 2.8 0 14 box 2.0 0.8 1.2 4
 object data/wheel3 3 2.45 -0.8 12.74 sph 0.05 0.4
 object data/wheel3 3 2.45 0.8 12.74 sph 0.05 0.4

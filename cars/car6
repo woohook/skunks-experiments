@@ -1,6 +1,4 @@
 camera 0.8 4.0
-objtypes 2
-objects 5
 object data/bus 1 2.1 0 12 box 10 1.5 2.0 8
 object data/wheel2 3 1.5 -1.0 9.3 sph 0.2 0.6
 object data/wheel2 3 1.5 1.0 9.3 sph 0.2 0.6
