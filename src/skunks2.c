@@ -96,44 +96,19 @@ void skunks_initialize()
     readvehicle(pCarEntity, vehicleName,0,0,0);
   }
 
-  struct _entity* pActorEntity = entity_create(0,"actor","actor",0);
-  entity_create(pActorEntity,"accelerate","command","Key_Arrow_Up");
-  entity_create(pActorEntity,"brake","command","Key_Arrow_Down");
-  entity_create(pActorEntity,"left","command","Key_Arrow_Left");
-  entity_create(pActorEntity,"right","command","Key_Arrow_Right");
-  entity_create(pActorEntity,"reverse","command","Key_R");
-
-  struct _entity* pFirstVehicleEntity = (struct _entity*)list_get_value(entity_get_children(pVehiclesEntity), 0);
-  strcpy(buffer, entity_get_name(pFirstVehicleEntity));
-  strcpy(buffer + strlen(buffer), "/controls");
-
-  struct _list_item* pCommandItem = list_get_first(entity_get_children(pActorEntity));
-  struct _entity* pControls = entity_get_by_name(buffer);
-  int offsetCommand = strlen(entity_get_name(pActorEntity));
-  int offsetAction = strlen(entity_get_name(pControls));
-  while(pCommandItem != 0)
-  {
-    struct _entity* pCommand = (struct _entity*)list_item_get_value(pCommandItem);
-    struct _list_item* pActionItem = list_get_first(entity_get_children(pControls));
-    while(pActionItem != 0)
-    {
-      struct _entity* pAction = (struct _entity*)list_item_get_value(pActionItem);
-      if(strcmp(entity_get_name(pCommand)+offsetCommand, entity_get_name(pAction)+offsetAction)==0)
-      {
-        input_register(entity_get_value(pCommand), (float*)entity_get_value(pAction));
-        break;
-      }
-      pActionItem = list_item_get_next(pActionItem);
-    }
-    pCommandItem = list_item_get_next(pCommandItem);
-  }
-
   input_register("Key_Escape", &action_quit);
 
+  struct _entity* pFirstVehicleEntity = (struct _entity*)list_get_value(entity_get_children(pVehiclesEntity), 0);
   strcpy(buffer, entity_get_name(pFirstVehicleEntity));
   strcpy(buffer + strlen(buffer), "/object0000");
   struct _entity* pVehicleObjectEntity = entity_get_by_name(buffer);
   sgob* pVehicle = (struct _sgob*)entity_get_value(pVehicleObjectEntity);
+
+  input_register("Key_Arrow_Up", &pVehicle->vehicle->action_accelerate);
+  input_register("Key_Arrow_Down", &pVehicle->vehicle->action_brake);
+  input_register("Key_Arrow_Left", &pVehicle->vehicle->action_left);
+  input_register("Key_Arrow_Right", &pVehicle->vehicle->action_right);
+  input_register("Key_R", &pVehicle->vehicle->action_reverse);
 
   // Initialize display
   struct _camera* camera = create_camera();
