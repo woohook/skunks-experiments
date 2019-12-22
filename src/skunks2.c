@@ -28,7 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "render32.h"
 #include "physics.h"
 #include "input.h"
-#include "entities.h"
 
 #include "trans.h"
 #include "list.h"
@@ -44,7 +43,6 @@ float action_quit = 0;
 
 void skunks_initialize()
 {
-  char buffer[1024];
   char* vehicleName = "cars/car1";
   char* worldName = "tracks/track1";
   int width  = SCREENWIDTH;
@@ -52,29 +50,19 @@ void skunks_initialize()
 
   int argc = 0;
   char** argv = 0;
-
-  struct _entity* pVehiclesEntity = entity_create(0,"vehicles","vehicles",0);
-
-  buffer[0] = '\0';
+  int vehicle_count = 0;
+  struct _sgob* pVehicle = 0;
 
   framework_get_args(&argc,&argv);
   for(int i=1; i<argc; i++)
   {
     if(strncmp("cars/",argv[i],5)==0)
     {
-      int vehicle_count = 0;
-      if(entity_get_children(pVehiclesEntity) != 0) vehicle_count = list_get_size(entity_get_children(pVehiclesEntity));
+      float dz = 20.0f*(vehicle_count);
       vehicle_count++;
-      float dz = 20.0f*(vehicle_count-1);
 
       vehicleName = argv[i];
-      strcpy(buffer, "car0000");
-      buffer[strlen(buffer)-1] = (char)(vehicle_count % 10 + '0'); vehicle_count /= 10;
-      buffer[strlen(buffer)-2] = (char)(vehicle_count % 10 + '0'); vehicle_count /= 10;
-      buffer[strlen(buffer)-3] = (char)(vehicle_count % 10 + '0'); vehicle_count /= 10;
-      buffer[strlen(buffer)-4] = (char)(vehicle_count % 10 + '0'); vehicle_count /= 10;
-      struct _entity* pCarEntity = entity_create(pVehiclesEntity, buffer, "skunks:car", 0);
-      readvehicle(pCarEntity, vehicleName,0,0,dz);
+      pVehicle = readvehicle(vehicleName,0,0,dz);
     }
     if(strncmp("tracks/",argv[i],7)==0)
     {
@@ -86,54 +74,20 @@ void skunks_initialize()
     }
   }
 
-  struct _entity* pTrackEntity = entity_create(0,"track","skunks:track",0);
-  entity_create(pTrackEntity,worldName,"skunks:track:modelname",0);
-  readtrack(pTrackEntity, worldName);
+  readtrack(worldName);
 
-  if( (entity_get_children(pVehiclesEntity) == 0) || (list_get_size(entity_get_children(pVehiclesEntity)) == 0) )
+  if(pVehicle == 0)
   {
-    struct _entity* pCarEntity = entity_create(pVehiclesEntity,"car0001","skunks:car",0);
-    readvehicle(pCarEntity, vehicleName,0,0,0);
-  }
-
-  struct _entity* pActorEntity = entity_create(0,"actor","actor",0);
-  entity_create(pActorEntity,"accelerate","command","Key_Arrow_Up");
-  entity_create(pActorEntity,"brake","command","Key_Arrow_Down");
-  entity_create(pActorEntity,"left","command","Key_Arrow_Left");
-  entity_create(pActorEntity,"right","command","Key_Arrow_Right");
-  entity_create(pActorEntity,"reverse","command","Key_R");
-
-  struct _entity* pFirstVehicleEntity = (struct _entity*)list_get_value(entity_get_children(pVehiclesEntity), 0);
-  strcpy(buffer, entity_get_name(pFirstVehicleEntity));
-  strcpy(buffer + strlen(buffer), "/controls");
-
-  struct _list_item* pCommandItem = list_get_first(entity_get_children(pActorEntity));
-  struct _entity* pControls = entity_get_by_name(buffer);
-  int offsetCommand = strlen(entity_get_name(pActorEntity));
-  int offsetAction = strlen(entity_get_name(pControls));
-  while(pCommandItem != 0)
-  {
-    struct _entity* pCommand = (struct _entity*)list_item_get_value(pCommandItem);
-    struct _list_item* pActionItem = list_get_first(entity_get_children(pControls));
-    while(pActionItem != 0)
-    {
-      struct _entity* pAction = (struct _entity*)list_item_get_value(pActionItem);
-      if(strcmp(entity_get_name(pCommand)+offsetCommand, entity_get_name(pAction)+offsetAction)==0)
-      {
-        input_register(entity_get_value(pCommand), (float*)entity_get_value(pAction));
-        break;
-      }
-      pActionItem = list_item_get_next(pActionItem);
-    }
-    pCommandItem = list_item_get_next(pCommandItem);
+    pVehicle = readvehicle(vehicleName,0,0,0);
   }
 
   input_register("Key_Escape", &action_quit);
 
-  strcpy(buffer, entity_get_name(pFirstVehicleEntity));
-  strcpy(buffer + strlen(buffer), "/object0000");
-  struct _entity* pVehicleObjectEntity = entity_get_by_name(buffer);
-  sgob* pVehicle = (struct _sgob*)entity_get_value(pVehicleObjectEntity);
+  input_register("Key_Arrow_Up", &pVehicle->vehicle->action_accelerate);
+  input_register("Key_Arrow_Down", &pVehicle->vehicle->action_brake);
+  input_register("Key_Arrow_Left", &pVehicle->vehicle->action_left);
+  input_register("Key_Arrow_Right", &pVehicle->vehicle->action_right);
+  input_register("Key_R", &pVehicle->vehicle->action_reverse);
 
   // Initialize display
   struct _camera* camera = create_camera();
