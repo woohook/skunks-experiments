@@ -1,8 +1,8 @@
 struct _list;
-struct _entity;
+struct _sgob;
 
 // function which reads the vehicle; must be called AFTER readtrack()
-void readvehicle(struct _entity* parent, char *numefis, float dx, float dy, float dz);
+struct _sgob* readvehicle(char *numefis, float dx, float dy, float dz);
 
 // function which reads the track
-void readtrack(struct _entity* parent, char *numefis);
+void readtrack(char *numefis);

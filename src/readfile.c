@@ -29,7 +29,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "render32.h"
 #include "physics.h"
 #include "vehicle.h"
-#include "entities.h"
 
 #define UNKNOWN 0
 
@@ -501,7 +500,7 @@ int load_object_type(char* part_name)
 
 /*function which reads the vehicle; must be called AFTER readtrack()
 nrtyp,nrobt - number of object types and objects given by readtrack()*/
-void readvehicle(struct _entity* parent, char *numefis, float dx, float dy, float dz)
+struct _sgob* readvehicle(char *numefis, float dx, float dy, float dz)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
@@ -545,7 +544,6 @@ s[0]='1';while(s[0]){
                     prepare_item_name(list_get_size(parts));
 
                       object=(sgob*)malloc(sizeof(sgob));
-                      entity_create(parent,item_name,"car:item",object);
                       object->otyp = 0;
                       object->radius = 0;
                       object->lev = 0;
@@ -695,22 +693,19 @@ while(part != 0){
 }
 /*^set joints*/
 
+  object = list_get_value(parts,0);
+
 list_release(parts_types, 0);
 list_release(parts, 0);
 
-  struct _entity* pControls = entity_create(parent,"controls","skunks:car:controls",0);
-  entity_create(pControls,"accelerate","skunks:car:controls:item",&car->action_accelerate);
-  entity_create(pControls,"brake","skunks:car:controls:item",&car->action_brake);
-  entity_create(pControls,"left","skunks:car:controls:item",&car->action_left);
-  entity_create(pControls,"right","skunks:car:controls:item",&car->action_right);
-  entity_create(pControls,"reverse","skunks:car:controls:item",&car->action_reverse);
-
   end_physics_group();
+
+  return object;
 }
 
 
 // function which reads the track
-void readtrack(struct _entity* parent, char *numefis)
+void readtrack(char *numefis)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
@@ -757,7 +752,6 @@ s[0]='1';while(s[0]){
 
                       object=(sgob*)malloc(sizeof(sgob));
                       object_index++;
-                      entity_create(parent,item_name,"track:item",object);
                       object->otyp = 0;
                       object->radius = 0;
                       object->lev = 0;
