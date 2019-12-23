@@ -66,6 +66,7 @@ struct object_type
 {
   char name[MAXWLG];
   int index;
+  struct _mesh* pMesh;
 };
 
 int g_numberOfMeshes = 0;
@@ -197,7 +198,7 @@ return nrfaces;}
 
 
 /*functie care afla coordonatele varfurilor triunghiurilor*/
-void faces(int mesh_id, char *numefis)
+void faces(struct _mesh* pMesh, char *numefis)
 {int lincr=0,i,j,k,l,nrfaces,nvert;
 FILE *fis;
 REALN *x,*y,*z;
@@ -221,7 +222,7 @@ for(i=1;i<=nvert;i++){
 for(i=1;i<=nrfaces;i++){
   fisgetw(fis,s,&lincr); /*sarit peste "f"*/
   fscanf(fis,"%d %d %d", &j, &k, &l);
-  add_face(mesh_id, x[j], y[j], z[j], x[k], y[k], z[k], x[l], y[l], z[l]);
+  add_face(pMesh, x[j], y[j], z[j], x[k], y[k], z[k], x[l], y[l], z[l]);
 }
 
 free(x);free(y);free(z);
@@ -230,7 +231,7 @@ fclose(fis);}
 
 /*function which reads colors of triangles
 *bred,*bgreen,*bblue - background color*/
-void readcolor(int mesh_id,char *numefis)
+void readcolor(struct _mesh* pMesh,char *numefis)
 {int i,j,colors,fstart,fend,fred,fgreen,fblue; /*colors - number of colors*/
 /*fstart si fend - first and last triangle with color(fred,fgreen,fblue)*/
 FILE *fis;
@@ -244,7 +245,7 @@ for(j=1;j<=colors;j++){
 fscanf(fis,"%d %d %d %d %d",&fstart,&fend,&fred,&fgreen,&fblue);
   for(i=fstart;i<=fend;i++)
   {
-    set_face_color(mesh_id, i, fred, fgreen, fblue);
+    set_face_color(pMesh, i, fred, fgreen, fblue);
   }
 }
 
@@ -254,7 +255,7 @@ if(identcom(s)==FULLBRIGHT){
   for(j=1;j<=colors;j++){
     fscanf(fis,"%d %d",&fstart,&fend);
     for(i=fstart;i<=fend;i++){
-      set_face_fullbright(mesh_id, i);
+      set_face_fullbright(pMesh, i);
     }
   }
 }
@@ -336,7 +337,7 @@ fclose(fis);
 
 
 /*order vertices, so triangles can be culled correctly*/
-void ordercl(int mesh_id,char *numefis)
+void ordercl(struct _mesh* pMesh,char *numefis)
 {int i,j,nrcmd,nf1,nf2;
 REALN x,y,z,dx,dy,dz,a,b,c,d,prodscal;
 REALN x1,y1,z1, x2,y2,z2, x3,y3,z3;
@@ -351,23 +352,23 @@ for(i=1;i<=nrcmd;i++){
   fscanf(fis,"%d %d %c %f %f %f",&nf1,&nf2,&vis,&x,&y,&z);
 
   for(j=nf1;j<=nf2;j++){
-    get_face_vertex(mesh_id,j,1,&x1,&y1,&z1);
-    get_face_vertex(mesh_id,j,2,&x2,&y2,&z2);
-    get_face_vertex(mesh_id,j,3,&x3,&y3,&z3);
+    get_face_vertex(pMesh,j,1,&x1,&y1,&z1);
+    get_face_vertex(pMesh,j,2,&x2,&y2,&z2);
+    get_face_vertex(pMesh,j,3,&x3,&y3,&z3);
     findplan(x1,y1,z1,x2,y2,z2,x3,y3,z3,&a,&b,&c,&d);
      dx=x1-x;
      dy=y1-y;
      dz=z1-z;
     prodscal=a*dx+b*dy+c*dz;
     switch(vis){
-      case 'v': enable_face_culling(mesh_id,j);
+      case 'v': enable_face_culling(pMesh,j);
         if(prodscal<0){
-          flip_face(mesh_id,j);
+          flip_face(pMesh,j);
         } break;
 
-      case 'i': enable_face_culling(mesh_id,j);
+      case 'i': enable_face_culling(pMesh,j);
         if(prodscal>=0){
-          flip_face(mesh_id,j);
+          flip_face(pMesh,j);
         } break;
 
       default: break;
@@ -380,22 +381,22 @@ fclose(fis);
 
 
 /*function which finds the center and size of the object*/
-void eval_obj(int mesh_id,sgob *object)
+void eval_obj(struct _mesh* pMesh,sgob *object)
 {int i,nrfaces;
 REALD xmin,xmax,ymin,ymax,zmin,zmax,lenx,leny,lenz;
 REALN x1,y1,z1, x2,y2,z2, x3,y3,z3;
 
-nrfaces=get_face_count(mesh_id);
+nrfaces=get_face_count(pMesh);
 
-get_face_vertex(mesh_id,1,1,&x1,&y1,&z1);
+get_face_vertex(pMesh,1,1,&x1,&y1,&z1);
 xmin=xmax=x1;
 ymin=ymax=y1;
 zmin=zmax=z1;
 
 for(i=1;i<=nrfaces;i++){
-get_face_vertex(mesh_id,i,1,&x1,&y1,&z1);
-get_face_vertex(mesh_id,i,2,&x2,&y2,&z2);
-get_face_vertex(mesh_id,i,3,&x3,&y3,&z3);
+get_face_vertex(pMesh,i,1,&x1,&y1,&z1);
+get_face_vertex(pMesh,i,2,&x2,&y2,&z2);
+get_face_vertex(pMesh,i,3,&x3,&y3,&z3);
 
 if(xmin>x1){xmin=x1;}
 if(xmin>x2){xmin=x2;}
@@ -476,22 +477,23 @@ struct object_type* load_object_type(char* part_name)
   pNewType->index = g_numberOfMeshes;
   list_add_value(g_object_types, pNewType);
 
-  create_mesh();
+  struct _mesh* pMesh = create_mesh();
+  pNewType->pMesh = pMesh;
 
   fisgetw(part_stream, filename, &line_number); // file with triangles
-  faces(g_numberOfMeshes, filename);
+  faces(pMesh, filename);
 
   fisgetw(part_stream, filename, &line_number); // file with colors
-  readcolor(g_numberOfMeshes, filename);
+  readcolor(pMesh, filename);
 
   create_collision_geometry();
   fisgetw(part_stream, filename, &line_number); // file with reference points
   readref(filename);
 
   fisgetw(part_stream, filename, &line_number); // file with data for backface culling
-  ordercl(g_numberOfMeshes, filename);
+  ordercl(pMesh, filename);
 
-  complete_mesh();
+  complete_mesh(pMesh);
 
   fclose(part_stream);
 
@@ -556,13 +558,13 @@ s[0]='1';while(s[0]){
 
                       list_add_value(parts,object);
 	              object->otyp = pObjectType->index;
-                      create_mesh_instance(pObjectType->index, &object->transform);
+                      create_mesh_instance(pObjectType->pMesh, &object->transform);
 	              object->transform.vx[0]=object->transform.vy[0]=object->transform.vz[0]=0;
 	              object->transform.vx[1]=object->transform.vy[2]=object->transform.vz[3]=1;
 	              object->transform.vx[2]=object->transform.vx[3]=0;
 	              object->transform.vy[1]=object->transform.vy[3]=0;
 	              object->transform.vz[1]=object->transform.vz[2]=0;
-	              eval_obj(object->otyp,object);
+	              eval_obj(pObjectType->pMesh,object);
 
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); part_type_id = atoi(s);
 	            list_add_value(parts_types, (void*)part_type_id);
@@ -759,13 +761,13 @@ s[0]='1';while(s[0]){
                       object->vehicle = 0;
 
 	              object->otyp=pObjectType->index;
-                      create_mesh_instance(pObjectType->index, &object->transform);
+                      create_mesh_instance(pObjectType->pMesh, &object->transform);
 	              object->transform.vx[0]=object->transform.vy[0]=object->transform.vz[0]=0;
 	              object->transform.vx[1]=object->transform.vy[2]=object->transform.vz[3]=1;
 	              object->transform.vx[2]=object->transform.vx[3]=0;
 	              object->transform.vy[1]=object->transform.vy[3]=0;
 	              object->transform.vz[1]=object->transform.vz[2]=0;
-	              eval_obj(object->otyp,object);
+	              eval_obj(pObjectType->pMesh,object);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
@@ -798,10 +800,12 @@ s[0]='1';while(s[0]){
 }
 fclose(fis);
 
-for(i=previousNumberOfMeshes+1;i<=g_numberOfMeshes;i++){
-  for(j=1;j<=get_face_count(i);j++){
+for(i=previousNumberOfMeshes;i<g_numberOfMeshes;i++){
+  pObjectType = list_get_value(g_object_types,i);
+  struct _mesh* pMesh = pObjectType->pMesh;
+  for(j=1;j<=get_face_count(pMesh);j++){
     int red, green, blue;
-    get_face_color(i,j,&red,&green,&blue);
+    get_face_color(pMesh,j,&red,&green,&blue);
     len=red*fred;
     if(len>255){len=255;}
     red=(int)len;
@@ -811,7 +815,7 @@ for(i=previousNumberOfMeshes+1;i<=g_numberOfMeshes;i++){
     len=blue*fblue;
     if(len>255){len=255;}
     blue=(int)len;
-    set_face_color(i, j, red, green, blue);
+    set_face_color(pMesh, j, red, green, blue);
   }
 }
 
