@@ -425,9 +425,9 @@ lenz=zmax-zmin;
 object->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 }
 
-int find_object_type(char* name)
+struct object_type* find_object_type(char* name)
 {
-  int object_type_index = 0;
+  struct object_type* pFoundObjectType = 0;
 
   struct _list_item* pObjectTypeItem = 0;
 
@@ -444,15 +444,15 @@ int find_object_type(char* name)
 
     if(strcmp(pObjectType->name, name)==0)
     {
-      object_type_index = pObjectType->index;
+      pFoundObjectType = pObjectType;
       break;
     }
   }
 
-  return object_type_index;
+  return pFoundObjectType;
 }
 
-int load_object_type(char* part_name)
+struct object_type* load_object_type(char* part_name)
 {
   int line_number = 1;
   char filename[MAXWLG];
@@ -495,7 +495,7 @@ int load_object_type(char* part_name)
 
   fclose(part_stream);
 
-  return g_numberOfMeshes;
+  return pNewType;
 }
 
 /*function which reads the vehicle; must be called AFTER readtrack()
@@ -504,7 +504,7 @@ struct _sgob* readvehicle(char *numefis, float dx, float dy, float dz)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
-int object_type_index = 0;
+struct object_type* pObjectType = 0;
 REALN tx,ty,tz, /*initial translations*/
       len;
 float spring = 0;  // hinge spring coefficient
@@ -536,10 +536,10 @@ s[0]='1';while(s[0]){
 	switch(identcom(s)){
 	  case OBJECT_INSTANCE:
 	            err=fisgetw(fis,s,&lincr);
-                    object_type_index = find_object_type(s);
-                    if(!object_type_index)
+                    pObjectType = find_object_type(s);
+                    if(!pObjectType)
                     {
-                      object_type_index = load_object_type(s);
+                      pObjectType = load_object_type(s);
                     }
                     prepare_item_name(list_get_size(parts));
 
@@ -555,8 +555,8 @@ s[0]='1';while(s[0]){
                       }
 
                       list_add_value(parts,object);
-	              object->otyp = object_type_index;
-                      create_mesh_instance(object->otyp, &object->transform);
+	              object->otyp = pObjectType->index;
+                      create_mesh_instance(pObjectType->index, &object->transform);
 	              object->transform.vx[0]=object->transform.vy[0]=object->transform.vz[0]=0;
 	              object->transform.vx[1]=object->transform.vy[2]=object->transform.vz[3]=1;
 	              object->transform.vx[2]=object->transform.vx[3]=0;
@@ -711,7 +711,7 @@ char s[MAXWLG]; /*a word*/
 FILE *fis;
 int i,j,
     bred=130,bgreen=160,bblue=200; /*background color*/
-int object_type_index = 0;
+struct object_type* pObjectType = 0;
 sgob* object = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       fred=1.0,fgreen=1.0,fblue=1.0, /*color multiplication factors*/
@@ -743,10 +743,10 @@ s[0]='1';while(s[0]){
 
 	  case OBJECT_INSTANCE:
 	            err=fisgetw(fis,s,&lincr);
-                    object_type_index = find_object_type(s);
-                    if(!object_type_index)
+                    pObjectType = find_object_type(s);
+                    if(!pObjectType)
                     {
-                      object_type_index = load_object_type(s);
+                      pObjectType = load_object_type(s);
                     }
                       prepare_item_name(object_index);
 
@@ -758,8 +758,8 @@ s[0]='1';while(s[0]){
                       object->physics_object = 0;
                       object->vehicle = 0;
 
-	              object->otyp=object_type_index;
-                      create_mesh_instance(object->otyp, &object->transform);
+	              object->otyp=pObjectType->index;
+                      create_mesh_instance(pObjectType->index, &object->transform);
 	              object->transform.vx[0]=object->transform.vy[0]=object->transform.vz[0]=0;
 	              object->transform.vx[1]=object->transform.vy[2]=object->transform.vz[3]=1;
 	              object->transform.vx[2]=object->transform.vx[3]=0;
