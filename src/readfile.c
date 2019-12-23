@@ -66,6 +66,8 @@ struct object_type
 {
   char name[MAXWLG];
   int index;
+  struct _mesh* pMesh;
+  struct _refpo* geom;
 };
 
 int g_numberOfMeshes = 0;
@@ -197,7 +199,7 @@ return nrfaces;}
 
 
 /*functie care afla coordonatele varfurilor triunghiurilor*/
-void faces(int mesh_id, char *numefis)
+void faces(struct _mesh* pMesh, char *numefis)
 {int lincr=0,i,j,k,l,nrfaces,nvert;
 FILE *fis;
 REALN *x,*y,*z;
@@ -221,7 +223,7 @@ for(i=1;i<=nvert;i++){
 for(i=1;i<=nrfaces;i++){
   fisgetw(fis,s,&lincr); /*sarit peste "f"*/
   fscanf(fis,"%d %d %d", &j, &k, &l);
-  add_face(mesh_id, x[j], y[j], z[j], x[k], y[k], z[k], x[l], y[l], z[l]);
+  add_face(pMesh, x[j], y[j], z[j], x[k], y[k], z[k], x[l], y[l], z[l]);
 }
 
 free(x);free(y);free(z);
@@ -230,7 +232,7 @@ fclose(fis);}
 
 /*function which reads colors of triangles
 *bred,*bgreen,*bblue - background color*/
-void readcolor(int mesh_id,char *numefis)
+void readcolor(struct _mesh* pMesh,char *numefis)
 {int i,j,colors,fstart,fend,fred,fgreen,fblue; /*colors - number of colors*/
 /*fstart si fend - first and last triangle with color(fred,fgreen,fblue)*/
 FILE *fis;
@@ -244,7 +246,7 @@ for(j=1;j<=colors;j++){
 fscanf(fis,"%d %d %d %d %d",&fstart,&fend,&fred,&fgreen,&fblue);
   for(i=fstart;i<=fend;i++)
   {
-    set_face_color(mesh_id, i, fred, fgreen, fblue);
+    set_face_color(pMesh, i, fred, fgreen, fblue);
   }
 }
 
@@ -254,7 +256,7 @@ if(identcom(s)==FULLBRIGHT){
   for(j=1;j<=colors;j++){
     fscanf(fis,"%d %d",&fstart,&fend);
     for(i=fstart;i<=fend;i++){
-      set_face_fullbright(mesh_id, i);
+      set_face_fullbright(pMesh, i);
     }
   }
 }
@@ -264,7 +266,7 @@ fclose(fis);
 
 
 /*function which reads the reference points and geom types of an object*/
-void readref(char *numefis)
+void readref(struct _refpo* geom,char *numefis)
 {int i,err,lincr,ngeom; /*number of geoms*/
 char s[MAXWLG];
 FILE *fis;
@@ -290,7 +292,7 @@ for(i=1;i<=ngeom;i++){
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x2=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y2=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z2=atof(s);
-                  create_collision_box(x1,y1,z1,x2,y2,z2,lx,ly,lz);
+                  create_collision_box(geom, x1,y1,z1,x2,y2,z2,lx,ly,lz);
 	          break;
 
           case CYLINDER:
@@ -302,7 +304,7 @@ for(i=1;i<=ngeom;i++){
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x2=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y2=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z2=atof(s);
-                  create_collision_cylinder(x1,y1,z1,x2,y2,z2,lx,ly);
+                  create_collision_cylinder(geom, x1,y1,z1,x2,y2,z2,lx,ly);
 	          break;
 
           case SPHERE:
@@ -313,7 +315,7 @@ for(i=1;i<=ngeom;i++){
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x2=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y2=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z2=atof(s);
-                  create_collision_sphere(x1,y1,z1,x2,y2,z2,lx);
+                  create_collision_sphere(geom, x1,y1,z1,x2,y2,z2,lx);
 	          break;
 
 	  case TRIANGLE_MESH:
@@ -324,7 +326,7 @@ for(i=1;i<=ngeom;i++){
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x2=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y2=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z2=atof(s);
-                  create_collision_mesh(x1,y1,z1,x2,y2,z2,ttip);
+                  create_collision_mesh(geom, x1,y1,z1,x2,y2,z2,ttip);
 	          break;
 
 	  default: if(s[0]){printf("Error: '%s' line %d - word '%s' not recognized\r\n",numefis,lincr,s);exit(1);}
@@ -336,7 +338,7 @@ fclose(fis);
 
 
 /*order vertices, so triangles can be culled correctly*/
-void ordercl(int mesh_id,char *numefis)
+void ordercl(struct _mesh* pMesh,char *numefis)
 {int i,j,nrcmd,nf1,nf2;
 REALN x,y,z,dx,dy,dz,a,b,c,d,prodscal;
 REALN x1,y1,z1, x2,y2,z2, x3,y3,z3;
@@ -351,23 +353,23 @@ for(i=1;i<=nrcmd;i++){
   fscanf(fis,"%d %d %c %f %f %f",&nf1,&nf2,&vis,&x,&y,&z);
 
   for(j=nf1;j<=nf2;j++){
-    get_face_vertex(mesh_id,j,1,&x1,&y1,&z1);
-    get_face_vertex(mesh_id,j,2,&x2,&y2,&z2);
-    get_face_vertex(mesh_id,j,3,&x3,&y3,&z3);
+    get_face_vertex(pMesh,j,1,&x1,&y1,&z1);
+    get_face_vertex(pMesh,j,2,&x2,&y2,&z2);
+    get_face_vertex(pMesh,j,3,&x3,&y3,&z3);
     findplan(x1,y1,z1,x2,y2,z2,x3,y3,z3,&a,&b,&c,&d);
      dx=x1-x;
      dy=y1-y;
      dz=z1-z;
     prodscal=a*dx+b*dy+c*dz;
     switch(vis){
-      case 'v': enable_face_culling(mesh_id,j);
+      case 'v': enable_face_culling(pMesh,j);
         if(prodscal<0){
-          flip_face(mesh_id,j);
+          flip_face(pMesh,j);
         } break;
 
-      case 'i': enable_face_culling(mesh_id,j);
+      case 'i': enable_face_culling(pMesh,j);
         if(prodscal>=0){
-          flip_face(mesh_id,j);
+          flip_face(pMesh,j);
         } break;
 
       default: break;
@@ -380,22 +382,22 @@ fclose(fis);
 
 
 /*function which finds the center and size of the object*/
-void eval_obj(int mesh_id,sgob *object)
+void eval_obj(struct _mesh* pMesh,sgob *object)
 {int i,nrfaces;
 REALD xmin,xmax,ymin,ymax,zmin,zmax,lenx,leny,lenz;
 REALN x1,y1,z1, x2,y2,z2, x3,y3,z3;
 
-nrfaces=get_face_count(mesh_id);
+nrfaces=get_face_count(pMesh);
 
-get_face_vertex(mesh_id,1,1,&x1,&y1,&z1);
+get_face_vertex(pMesh,1,1,&x1,&y1,&z1);
 xmin=xmax=x1;
 ymin=ymax=y1;
 zmin=zmax=z1;
 
 for(i=1;i<=nrfaces;i++){
-get_face_vertex(mesh_id,i,1,&x1,&y1,&z1);
-get_face_vertex(mesh_id,i,2,&x2,&y2,&z2);
-get_face_vertex(mesh_id,i,3,&x3,&y3,&z3);
+get_face_vertex(pMesh,i,1,&x1,&y1,&z1);
+get_face_vertex(pMesh,i,2,&x2,&y2,&z2);
+get_face_vertex(pMesh,i,3,&x3,&y3,&z3);
 
 if(xmin>x1){xmin=x1;}
 if(xmin>x2){xmin=x2;}
@@ -425,9 +427,9 @@ lenz=zmax-zmin;
 object->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 }
 
-int find_object_type(char* name)
+struct object_type* find_object_type(char* name)
 {
-  int object_type_index = 0;
+  struct object_type* pFoundObjectType = 0;
 
   struct _list_item* pObjectTypeItem = 0;
 
@@ -444,15 +446,15 @@ int find_object_type(char* name)
 
     if(strcmp(pObjectType->name, name)==0)
     {
-      object_type_index = pObjectType->index;
+      pFoundObjectType = pObjectType;
       break;
     }
   }
 
-  return object_type_index;
+  return pFoundObjectType;
 }
 
-int load_object_type(char* part_name)
+struct object_type* load_object_type(char* part_name)
 {
   int line_number = 1;
   char filename[MAXWLG];
@@ -476,26 +478,29 @@ int load_object_type(char* part_name)
   pNewType->index = g_numberOfMeshes;
   list_add_value(g_object_types, pNewType);
 
-  create_mesh();
+  struct _mesh* pMesh = create_mesh();
+  pNewType->pMesh = pMesh;
 
   fisgetw(part_stream, filename, &line_number); // file with triangles
-  faces(g_numberOfMeshes, filename);
+  faces(pMesh, filename);
 
   fisgetw(part_stream, filename, &line_number); // file with colors
-  readcolor(g_numberOfMeshes, filename);
+  readcolor(pMesh, filename);
 
-  create_collision_geometry();
+  struct _refpo* geom = create_collision_geometry();
+  pNewType->geom = geom;
+
   fisgetw(part_stream, filename, &line_number); // file with reference points
-  readref(filename);
+  readref(geom, filename);
 
   fisgetw(part_stream, filename, &line_number); // file with data for backface culling
-  ordercl(g_numberOfMeshes, filename);
+  ordercl(pMesh, filename);
 
-  complete_mesh();
+  complete_mesh(pMesh);
 
   fclose(part_stream);
 
-  return g_numberOfMeshes;
+  return pNewType;
 }
 
 /*function which reads the vehicle; must be called AFTER readtrack()
@@ -504,7 +509,7 @@ struct _sgob* readvehicle(char *numefis, float dx, float dy, float dz)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
-int object_type_index = 0;
+struct object_type* pObjectType = 0;
 REALN tx,ty,tz, /*initial translations*/
       len;
 float spring = 0;  // hinge spring coefficient
@@ -536,15 +541,14 @@ s[0]='1';while(s[0]){
 	switch(identcom(s)){
 	  case OBJECT_INSTANCE:
 	            err=fisgetw(fis,s,&lincr);
-                    object_type_index = find_object_type(s);
-                    if(!object_type_index)
+                    pObjectType = find_object_type(s);
+                    if(!pObjectType)
                     {
-                      object_type_index = load_object_type(s);
+                      pObjectType = load_object_type(s);
                     }
                     prepare_item_name(list_get_size(parts));
 
                       object=(sgob*)malloc(sizeof(sgob));
-                      object->otyp = 0;
                       object->radius = 0;
                       object->lev = 0;
                       object->physics_object = 0;
@@ -555,14 +559,13 @@ s[0]='1';while(s[0]){
                       }
 
                       list_add_value(parts,object);
-	              object->otyp = object_type_index;
-                      create_mesh_instance(object->otyp, &object->transform);
+                      create_mesh_instance(pObjectType->pMesh, &object->transform);
 	              object->transform.vx[0]=object->transform.vy[0]=object->transform.vz[0]=0;
 	              object->transform.vx[1]=object->transform.vy[2]=object->transform.vz[3]=1;
 	              object->transform.vx[2]=object->transform.vx[3]=0;
 	              object->transform.vy[1]=object->transform.vy[3]=0;
 	              object->transform.vz[1]=object->transform.vz[2]=0;
-	              eval_obj(object->otyp,object);
+	              eval_obj(pObjectType->pMesh,object);
 
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); part_type_id = atoi(s);
 	            list_add_value(parts_types, (void*)part_type_id);
@@ -582,7 +585,7 @@ s[0]='1';while(s[0]){
 
 	              translat(&object->transform,tx,ty,tz);
 
-                    object->physics_object = create_collision_geometry_instance(object->otyp, tx, ty, tz, 0, 0, 0, &object->transform);
+                    object->physics_object = create_collision_geometry_instance(pObjectType->geom, tx, ty, tz, 0, 0, 0, &object->transform);
 
                     if(part_type_id == CAR_BODY)
                     {
@@ -711,7 +714,7 @@ char s[MAXWLG]; /*a word*/
 FILE *fis;
 int i,j,
     bred=130,bgreen=160,bblue=200; /*background color*/
-int object_type_index = 0;
+struct object_type* pObjectType = 0;
 sgob* object = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       fred=1.0,fgreen=1.0,fblue=1.0, /*color multiplication factors*/
@@ -743,29 +746,27 @@ s[0]='1';while(s[0]){
 
 	  case OBJECT_INSTANCE:
 	            err=fisgetw(fis,s,&lincr);
-                    object_type_index = find_object_type(s);
-                    if(!object_type_index)
+                    pObjectType = find_object_type(s);
+                    if(!pObjectType)
                     {
-                      object_type_index = load_object_type(s);
+                      pObjectType = load_object_type(s);
                     }
                       prepare_item_name(object_index);
 
                       object=(sgob*)malloc(sizeof(sgob));
                       object_index++;
-                      object->otyp = 0;
                       object->radius = 0;
                       object->lev = 0;
                       object->physics_object = 0;
                       object->vehicle = 0;
 
-	              object->otyp=object_type_index;
-                      create_mesh_instance(object->otyp, &object->transform);
+                      create_mesh_instance(pObjectType->pMesh, &object->transform);
 	              object->transform.vx[0]=object->transform.vy[0]=object->transform.vz[0]=0;
 	              object->transform.vx[1]=object->transform.vy[2]=object->transform.vz[3]=1;
 	              object->transform.vx[2]=object->transform.vx[3]=0;
 	              object->transform.vy[1]=object->transform.vy[3]=0;
 	              object->transform.vz[1]=object->transform.vz[2]=0;
-	              eval_obj(object->otyp,object);
+	              eval_obj(pObjectType->pMesh,object);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
@@ -779,7 +780,7 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); object->lev=atoi(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); // friction value not used
 
-                    object->physics_object = create_collision_geometry_instance(object->otyp, tx, ty, tz, rx, ry, rz, 0);
+                    object->physics_object = create_collision_geometry_instance(pObjectType->geom, tx, ty, tz, rx, ry, rz, 0);
 	          break;
 
 	  case AMBIENT_LIGHT: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_ambient=atof(s); break;
@@ -798,10 +799,12 @@ s[0]='1';while(s[0]){
 }
 fclose(fis);
 
-for(i=previousNumberOfMeshes+1;i<=g_numberOfMeshes;i++){
-  for(j=1;j<=get_face_count(i);j++){
+for(i=previousNumberOfMeshes;i<g_numberOfMeshes;i++){
+  pObjectType = list_get_value(g_object_types,i);
+  struct _mesh* pMesh = pObjectType->pMesh;
+  for(j=1;j<=get_face_count(pMesh);j++){
     int red, green, blue;
-    get_face_color(i,j,&red,&green,&blue);
+    get_face_color(pMesh,j,&red,&green,&blue);
     len=red*fred;
     if(len>255){len=255;}
     red=(int)len;
@@ -811,7 +814,7 @@ for(i=previousNumberOfMeshes+1;i<=g_numberOfMeshes;i++){
     len=blue*fblue;
     if(len>255){len=255;}
     blue=(int)len;
-    set_face_color(i, j, red, green, blue);
+    set_face_color(pMesh, j, red, green, blue);
   }
 }
 

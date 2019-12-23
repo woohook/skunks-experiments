@@ -18,26 +18,27 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 struct _surface;
 struct _matrix;
+struct _mesh;
 
-void create_mesh();
+struct _mesh* create_mesh();
 
-void create_mesh_instance(int mesh_id, struct _matrix* transform);
-void complete_mesh();
-void add_face(int mesh_id, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3);
+void create_mesh_instance(struct _mesh* pMesh, struct _matrix* transform);
+void complete_mesh(struct _mesh* pMesh);
+void add_face(struct _mesh* pMesh, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3);
 
-void set_face_color(int mesh_id, int face_id, int red, int green, int blue);
+void set_face_color(struct _mesh* pMesh, int face_id, int red, int green, int blue);
 
-void get_face_color(int mesh_id, int face_id, int* red, int* green, int* blue);
+void get_face_color(struct _mesh* pMesh, int face_id, int* red, int* green, int* blue);
 
-void set_face_fullbright(int mesh_id, int face_id);
+void set_face_fullbright(struct _mesh* pMesh, int face_id);
 
-void get_face_vertex(int mesh_id, int face_id, int vertex_id, float *x, float *y, float *z);
+void get_face_vertex(struct _mesh* pMesh, int face_id, int vertex_id, float *x, float *y, float *z);
 
-void flip_face(int mesh_id, int face_id);
+void flip_face(struct _mesh* pMesh, int face_id);
 
-void enable_face_culling(int mesh_id, int face_id);
+void enable_face_culling(struct _mesh* pMesh, int face_id);
 
-int get_face_count(int mesh_id);
+int get_face_count(struct _mesh* pMesh);
 
 void set_background_color(int red, int green, int blue);
 

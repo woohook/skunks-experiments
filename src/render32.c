@@ -72,7 +72,7 @@ typedef struct _mesh
 
 typedef struct mesh_instance
 {
-  int iMesh;
+  struct _mesh* pMesh;
   matrix* transform;
 } mesh_instance;
 
@@ -89,7 +89,7 @@ float zfog=80;  // fog distance (m)
 float zmin=1e-3;
 float zmax=120; // visibility (m)
 
-void create_mesh()
+struct _mesh* create_mesh()
 {
   if(g_meshes==0)
   {
@@ -107,9 +107,11 @@ void create_mesh()
     pMesh->faces = list_create();
     list_add_value(g_meshes, pMesh);
   }
+
+  return pMesh;
 }
 
-void create_mesh_instance(int mesh_id, matrix* transform)
+void create_mesh_instance(struct _mesh* pMesh, matrix* transform)
 {
   if(g_instances==0)
   {
@@ -124,20 +126,18 @@ void create_mesh_instance(int mesh_id, matrix* transform)
   }
   else
   {
-    pInstance->iMesh = mesh_id;
+    pInstance->pMesh = pMesh;
     pInstance->transform = transform;
     list_add_value(g_instances, pInstance);
   }
 }
 
 // function which finds the center and size of the current mesh
-void complete_mesh()
+void complete_mesh(struct _mesh* pMesh)
 {
   float xmin,xmax,ymin,ymax,zmin,zmax,lenx,leny,lenz;
   float x1,y1,z1, x2,y2,z2, x3,y3,z3;
 
-  struct _list_item* meshNode = list_get_last(g_meshes);
-  mesh* pMesh = list_item_get_value(meshNode);
   struct _list_item* faceNode = list_get_first(pMesh->faces);
   tria* face = list_item_get_value(faceNode);
   x1 = face->x1; y1 = face->y1; z1 = face->z1;
@@ -189,7 +189,7 @@ void complete_mesh()
   pMesh->radius=sqrt(lenx*lenx+leny*leny+lenz*lenz)/2;
 }
 
-void add_face(int mesh_id, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3)
+void add_face(struct _mesh* pMesh, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3)
 {
   tria* face = malloc(sizeof(tria));
 
@@ -202,38 +202,33 @@ void add_face(int mesh_id, float x1, float y1, float z1, float x2, float y2, flo
 
   face->cull = 0; /*no culling and no fullbright if not specified*/
 
-  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
   list_add_value(pMesh->faces, face);
 }
 
-void set_face_color(int mesh_id, int face_id, int red, int green, int blue)
+void set_face_color(struct _mesh* pMesh, int face_id, int red, int green, int blue)
 {
-  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
   tria* face = list_get_value(pMesh->faces, face_id-1);
   face->red   = red;
   face->green = green;
   face->blue  = blue;
 }
 
-void get_face_color(int mesh_id, int face_id, int* red, int* green, int* blue)
+void get_face_color(struct _mesh* pMesh, int face_id, int* red, int* green, int* blue)
 {
-  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
   tria* face = list_get_value(pMesh->faces, face_id-1);
   *red   = face->red;
   *green = face->green;
   *blue  = face->blue;
 }
 
-void set_face_fullbright(int mesh_id, int face_id)
+void set_face_fullbright(struct _mesh* pMesh, int face_id)
 {
-  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
   tria* face = list_get_value(pMesh->faces, face_id-1);
   face->cull = ((face->cull)&1)+2;
 }
 
-void get_face_vertex(int mesh_id, int face_id, int vertex_id, float *x, float *y, float *z)
+void get_face_vertex(struct _mesh* pMesh, int face_id, int vertex_id, float *x, float *y, float *z)
 {
-  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
   tria* face = list_get_value(pMesh->faces, face_id-1);
   switch(vertex_id)
   {
@@ -257,9 +252,8 @@ void get_face_vertex(int mesh_id, int face_id, int vertex_id, float *x, float *y
   }
 }
 
-void flip_face(int mesh_id, int face_id)
+void flip_face(struct _mesh* pMesh, int face_id)
 {
-  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
   tria* face = list_get_value(pMesh->faces, face_id-1);
   float tmp;
   tmp = face->x1; face->x1 = face->x2; face->x2 = tmp;
@@ -267,16 +261,14 @@ void flip_face(int mesh_id, int face_id)
   tmp = face->z1; face->z1 = face->z2; face->z2 = tmp;
 }
 
-void enable_face_culling(int mesh_id, int face_id)
+void enable_face_culling(struct _mesh* pMesh, int face_id)
 {
-  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
   tria* face = list_get_value(pMesh->faces, face_id-1);
   face->cull = ((face->cull)&2)+1;
 }
 
-int get_face_count(int mesh_id)
+int get_face_count(struct _mesh* pMesh)
 {
-  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
   return list_get_size(pMesh->faces);
 }
 
@@ -785,7 +777,7 @@ rotlight.directional=g_light.directional;
 struct _list_item* instanceNode = list_get_first(g_instances);
 while(instanceNode != 0){
   mesh_instance* pInstance = list_item_get_value(instanceNode);
-  int mesh_id = pInstance->iMesh;
+  mesh* pMesh = pInstance->pMesh;
   transform = *pInstance->transform;
   instanceNode = list_item_get_next(instanceNode);
 
@@ -799,7 +791,6 @@ while(instanceNode != 0){
         float fjz=transform.vz[2]-transform.vz[0];
         float fkz=transform.vz[3]-transform.vz[0]; /*unit vectors of the local axes in global system*/
 
-  mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
   xcen=pMesh->xcen;
   ycen=pMesh->ycen;
   zcen=pMesh->zcen;
@@ -858,7 +849,6 @@ while(instanceNode != 0){
         fjz=transform.vz[2]-transform.vz[0];
         fkz=transform.vz[3]-transform.vz[0]; /*unit vectors of the local axes in global system*/
 
-    mesh* pMesh = list_get_value(g_meshes, mesh_id-1);
     struct _list_item* faceNode = list_get_first(pMesh->faces);
 
     while(faceNode != 0){
