@@ -65,12 +65,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 struct object_type
 {
   char name[MAXWLG];
-  int index;
   struct _mesh* pMesh;
   struct _refpo* geom;
 };
 
-int g_numberOfMeshes = 0;
 char item_name[] = "object0000";
 
 struct _list* g_object_types = 0;
@@ -472,10 +470,8 @@ struct object_type* load_object_type(char* part_name)
     g_object_types = list_create();
   }
 
-  g_numberOfMeshes++;
   struct object_type* pNewType = (struct object_type*)malloc(sizeof(struct object_type));
   strcpy(pNewType->name, part_name);
-  pNewType->index = g_numberOfMeshes;
   list_add_value(g_object_types, pNewType);
 
   struct _mesh* pMesh = create_mesh();
@@ -719,7 +715,7 @@ sgob* object = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       fred=1.0,fgreen=1.0,fblue=1.0, /*color multiplication factors*/
       len;
-int previousNumberOfMeshes = g_numberOfMeshes;
+int previousNumberOfMeshes = 0;
 int object_index = previousNumberOfMeshes+1;
 
 float light_ambient=0.5;
@@ -728,6 +724,11 @@ float light_directional=0.5;
 float light_dx=-0.5;
 float light_dy=1;
 float light_dz=1; /*set default values for the light*/
+
+  if(0 != g_object_types)
+  {
+    previousNumberOfMeshes = list_get_size(g_object_types);
+  }
 
   if(!(fis=fopen(numefis,"r"))){printf("Error: File %s could not be open\r\n",numefis);exit(1);}
 s[0]='1';while(s[0]){
@@ -799,7 +800,7 @@ s[0]='1';while(s[0]){
 }
 fclose(fis);
 
-for(i=previousNumberOfMeshes;i<g_numberOfMeshes;i++){
+for(i=previousNumberOfMeshes;i<list_get_size(g_object_types);i++){
   pObjectType = list_get_value(g_object_types,i);
   struct _mesh* pMesh = pObjectType->pMesh;
   for(j=1;j<=get_face_count(pMesh);j++){
