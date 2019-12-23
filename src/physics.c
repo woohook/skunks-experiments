@@ -27,7 +27,7 @@ typedef struct _refpo
 
 struct physics_instance
 {
-  int gtip;
+  refpo* geom;
   // geoms for collision; axis z of geom[i] is defined by
   //   (x[i*2-1],y[i*2-1],z[i*2-1]) and (x[i*2],y[i*2],z[i*2])
   int gid_count;
@@ -55,12 +55,11 @@ int hinge2_count = 0;
 struct hinge2* hinge2s[PHYS_MAXGEOM];
 
 dWorldID wglob; // world for ODE
-refpo *refglob; // array with reference points of object types
-int refcount = 0;
 int dynStart = 0;
 
 struct _list* instances_static = 0;
 struct _list* instances_dynamic = 0;
+struct _list* g_geometries = 0;
 
 void physics_init()
 {
@@ -73,7 +72,7 @@ void physics_init()
 
 void physics_release()
 {
-  free (refglob);
+  list_release(g_geometries,1);
   dWorldDestroy(wglob);
   dCloseODE();
 }
@@ -99,24 +98,25 @@ void physics_createBody(struct physics_instance* object, struct _matrix* transfo
   dBodyID bid = dBodyCreate(wglob);
   dMatrix3 rotmt; // rotation matrix
 
-  for(i=1;i<=refglob[object->gtip].nref/2;i++)
+  refpo* geom = object->geom;
+  for(i=1;i<=geom->nref/2;i++)
   {
     dGeomSetBody(object->gid[i],bid);
     float lx = 0, ly = 0, lz = 0, radius = 0.0f;
-    switch(refglob[object->gtip].gtip[i])
+    switch(geom->gtip[i])
     {
       case 'b':
-        lx = refglob[object->gtip].lx[i];
-        ly = refglob[object->gtip].ly[i];
-        lz = refglob[object->gtip].lz[i];
+        lx = geom->lx[i];
+        ly = geom->ly[i];
+        lz = geom->lz[i];
         break;
       case 'c':
-        lx = refglob[object->gtip].lx[i]*2;
-        ly = refglob[object->gtip].ly[i];
-        lz = refglob[object->gtip].lx[i]*2;
+        lx = geom->lx[i]*2;
+        ly = geom->ly[i];
+        lz = geom->lx[i]*2;
         break;
       case 's':
-        radius = refglob[object->gtip].lx[i];
+        radius = geom->lx[i];
         break;
       default:
         break;
@@ -228,22 +228,29 @@ void physics_createHinge2(struct physics_instance* object1, struct physics_insta
   hinge2_count++;
 }
 
-void create_collision_geometry()
+struct _refpo* create_collision_geometry()
 {
-  refcount++;
-  if(0!=(refglob=(refpo *)realloc(refglob,(refcount+1)*sizeof(refpo))))
+  if(g_geometries == 0)
   {
-    refglob[refcount].nref = 0;
+    g_geometries = list_create();
+  }
+
+  refpo* geom = (refpo*)malloc(sizeof(refpo));
+  if(0!=geom)
+  {
+    geom->nref = 0;
   }
   else
   {
     printf("Out of memory");
   }
+  list_add_value(g_geometries, geom);
+
+  return geom;
 }
 
-void create_collision_box(float x1, float y1, float z1, float x2, float y2, float z2, float lx, float ly, float lz)
+void create_collision_box(struct _refpo* geom, float x1, float y1, float z1, float x2, float y2, float z2, float lx, float ly, float lz)
 {
-  refpo* geom = &refglob[refcount];
   geom->nref++;
   geom->x[geom->nref] = x1;
   geom->y[geom->nref] = y1;
@@ -258,9 +265,8 @@ void create_collision_box(float x1, float y1, float z1, float x2, float y2, floa
   geom->lz[geom->nref/2] = lz;
 }
 
-void create_collision_cylinder(float x1, float y1, float z1, float x2, float y2, float z2, float radius, float height)
+void create_collision_cylinder(struct _refpo* geom, float x1, float y1, float z1, float x2, float y2, float z2, float radius, float height)
 {
-  refpo* geom = &refglob[refcount];
   geom->nref++;
   geom->x[geom->nref] = x1;
   geom->y[geom->nref] = y1;
@@ -274,9 +280,8 @@ void create_collision_cylinder(float x1, float y1, float z1, float x2, float y2,
   geom->ly[geom->nref/2] = height;
 }
 
-void create_collision_sphere(float x1, float y1, float z1, float x2, float y2, float z2, float radius)
+void create_collision_sphere(struct _refpo* geom, float x1, float y1, float z1, float x2, float y2, float z2, float radius)
 {
-  refpo* geom = &refglob[refcount];
   geom->nref++;
   geom->x[geom->nref] = x1;
   geom->y[geom->nref] = y1;
@@ -289,9 +294,8 @@ void create_collision_sphere(float x1, float y1, float z1, float x2, float y2, f
   geom->lx[geom->nref/2] = radius;
 }
 
-void create_collision_mesh(float x1, float y1, float z1, float x2, float y2, float z2, int ttip)
+void create_collision_mesh(struct _refpo* geom, float x1, float y1, float z1, float x2, float y2, float z2, int ttip)
 {
-  refpo* geom = &refglob[refcount];
   geom->nref++;
   geom->x[geom->nref] = x1;
   geom->y[geom->nref] = y1;
@@ -312,7 +316,7 @@ dReal vert1glob[12]={0,-12.732,0,0,0,12.5,0.02,0,0,5.10,17.80,0},
 dTriIndex indexlglob[3]={0,1,2},
           indexrglob[3]={0,2,1};
 
-struct physics_instance* create_collision_geometry_instance(int geomtype, float tx, float ty, float tz, float rx, float ry, float rz, struct _matrix* transform)
+struct physics_instance* create_collision_geometry_instance(struct _refpo* geom, float tx, float ty, float tz, float rx, float ry, float rz, struct _matrix* transform)
 {
   int j;
   float xref1, yref1, zref1, xref2, yref2, zref2;
@@ -336,10 +340,9 @@ struct physics_instance* create_collision_geometry_instance(int geomtype, float 
   dGeomTriMeshDataBuildSimple(trid[3],vert3glob,3,indexlglob,3);
   dGeomTriMeshDataBuildSimple(trid[4],vert4glob,3,indexrglob,3);
 
-  object->gtip = geomtype;
+  object->geom = geom;
 
   // translated and rotated object; set geometry parameters
-  refpo* geom = &refglob[geomtype];
   for(j=1;j<=(geom->nref/2);j++)
   {
     xref1=geom->x[2*j-1];
