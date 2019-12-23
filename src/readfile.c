@@ -67,6 +67,7 @@ struct object_type
   char name[MAXWLG];
   int index;
   struct _mesh* pMesh;
+  struct _refpo* geom;
 };
 
 int g_numberOfMeshes = 0;
@@ -265,7 +266,7 @@ fclose(fis);
 
 
 /*function which reads the reference points and geom types of an object*/
-void readref(char *numefis)
+void readref(struct _refpo* geom,char *numefis)
 {int i,err,lincr,ngeom; /*number of geoms*/
 char s[MAXWLG];
 FILE *fis;
@@ -291,7 +292,7 @@ for(i=1;i<=ngeom;i++){
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x2=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y2=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z2=atof(s);
-                  create_collision_box(x1,y1,z1,x2,y2,z2,lx,ly,lz);
+                  create_collision_box(geom, x1,y1,z1,x2,y2,z2,lx,ly,lz);
 	          break;
 
           case CYLINDER:
@@ -303,7 +304,7 @@ for(i=1;i<=ngeom;i++){
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x2=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y2=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z2=atof(s);
-                  create_collision_cylinder(x1,y1,z1,x2,y2,z2,lx,ly);
+                  create_collision_cylinder(geom, x1,y1,z1,x2,y2,z2,lx,ly);
 	          break;
 
           case SPHERE:
@@ -314,7 +315,7 @@ for(i=1;i<=ngeom;i++){
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x2=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y2=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z2=atof(s);
-                  create_collision_sphere(x1,y1,z1,x2,y2,z2,lx);
+                  create_collision_sphere(geom, x1,y1,z1,x2,y2,z2,lx);
 	          break;
 
 	  case TRIANGLE_MESH:
@@ -325,7 +326,7 @@ for(i=1;i<=ngeom;i++){
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); x2=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); y2=atof(s);
 	          err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); z2=atof(s);
-                  create_collision_mesh(x1,y1,z1,x2,y2,z2,ttip);
+                  create_collision_mesh(geom, x1,y1,z1,x2,y2,z2,ttip);
 	          break;
 
 	  default: if(s[0]){printf("Error: '%s' line %d - word '%s' not recognized\r\n",numefis,lincr,s);exit(1);}
@@ -486,9 +487,11 @@ struct object_type* load_object_type(char* part_name)
   fisgetw(part_stream, filename, &line_number); // file with colors
   readcolor(pMesh, filename);
 
-  create_collision_geometry();
+  struct _refpo* geom = create_collision_geometry();
+  pNewType->geom = geom;
+
   fisgetw(part_stream, filename, &line_number); // file with reference points
-  readref(filename);
+  readref(geom, filename);
 
   fisgetw(part_stream, filename, &line_number); // file with data for backface culling
   ordercl(pMesh, filename);
@@ -546,7 +549,6 @@ s[0]='1';while(s[0]){
                     prepare_item_name(list_get_size(parts));
 
                       object=(sgob*)malloc(sizeof(sgob));
-                      object->otyp = 0;
                       object->radius = 0;
                       object->lev = 0;
                       object->physics_object = 0;
@@ -557,7 +559,6 @@ s[0]='1';while(s[0]){
                       }
 
                       list_add_value(parts,object);
-	              object->otyp = pObjectType->index;
                       create_mesh_instance(pObjectType->pMesh, &object->transform);
 	              object->transform.vx[0]=object->transform.vy[0]=object->transform.vz[0]=0;
 	              object->transform.vx[1]=object->transform.vy[2]=object->transform.vz[3]=1;
@@ -584,7 +585,7 @@ s[0]='1';while(s[0]){
 
 	              translat(&object->transform,tx,ty,tz);
 
-                    object->physics_object = create_collision_geometry_instance(object->otyp, tx, ty, tz, 0, 0, 0, &object->transform);
+                    object->physics_object = create_collision_geometry_instance(pObjectType->geom, tx, ty, tz, 0, 0, 0, &object->transform);
 
                     if(part_type_id == CAR_BODY)
                     {
@@ -754,13 +755,11 @@ s[0]='1';while(s[0]){
 
                       object=(sgob*)malloc(sizeof(sgob));
                       object_index++;
-                      object->otyp = 0;
                       object->radius = 0;
                       object->lev = 0;
                       object->physics_object = 0;
                       object->vehicle = 0;
 
-	              object->otyp=pObjectType->index;
                       create_mesh_instance(pObjectType->pMesh, &object->transform);
 	              object->transform.vx[0]=object->transform.vy[0]=object->transform.vz[0]=0;
 	              object->transform.vx[1]=object->transform.vy[2]=object->transform.vz[3]=1;
@@ -781,7 +780,7 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); object->lev=atoi(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); // friction value not used
 
-                    object->physics_object = create_collision_geometry_instance(object->otyp, tx, ty, tz, rx, ry, rz, 0);
+                    object->physics_object = create_collision_geometry_instance(pObjectType->geom, tx, ty, tz, rx, ry, rz, 0);
 	          break;
 
 	  case AMBIENT_LIGHT: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_ambient=atof(s); break;
