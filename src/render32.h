@@ -26,11 +26,9 @@ void create_mesh_instance(struct _mesh* pMesh, struct _matrix* transform);
 void complete_mesh(struct _mesh* pMesh);
 void add_face(struct _mesh* pMesh, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3);
 
-void set_face_color(struct _mesh* pMesh, int face_id, int red, int green, int blue);
+void add_material(struct _mesh* pMesh, int red, int green, int blue, int fullbright);
 
-void get_face_color(struct _mesh* pMesh, int face_id, int* red, int* green, int* blue);
-
-void set_face_fullbright(struct _mesh* pMesh, int face_id);
+void set_face_material(struct _mesh* pMesh, int face_id, int material_id);
 
 void get_face_vertex(struct _mesh* pMesh, int face_id, int vertex_id, float *x, float *y, float *z);
 
@@ -39,6 +37,8 @@ void flip_face(struct _mesh* pMesh, int face_id);
 void enable_face_culling(struct _mesh* pMesh, int face_id);
 
 int get_face_count(struct _mesh* pMesh);
+
+void adjust_material_colors(float red, float green, float blue);
 
 void set_background_color(int red, int green, int blue);
 

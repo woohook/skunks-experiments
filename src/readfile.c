@@ -231,7 +231,7 @@ fclose(fis);}
 /*function which reads colors of triangles
 *bred,*bgreen,*bblue - background color*/
 void readcolor(struct _mesh* pMesh,char *numefis)
-{int i,j,colors,fstart,fend,fred,fgreen,fblue; /*colors - number of colors*/
+{int i,j,colors,brightcolors,fstart,fend,fred,fgreen,fblue; /*colors - number of colors*/
 /*fstart si fend - first and last triangle with color(fred,fgreen,fblue)*/
 FILE *fis;
 char s[MAXWLG];
@@ -241,20 +241,22 @@ if(!(fis=fopen(numefis,"r"))){printf("File '%s' could not be open\r\n",numefis);
 fscanf(fis,"%d",&colors); /*found number of colors*/
 
 for(j=1;j<=colors;j++){
-fscanf(fis,"%d %d %d %d %d",&fstart,&fend,&fred,&fgreen,&fblue);
+  fscanf(fis,"%d %d %d %d %d",&fstart,&fend,&fred,&fgreen,&fblue);
+  add_material(pMesh, fred, fgreen, fblue, 0);
   for(i=fstart;i<=fend;i++)
   {
-    set_face_color(pMesh, i, fred, fgreen, fblue);
+    set_face_material(pMesh,i,j);
   }
 }
 
 j=fisgetw(fis,s,&i);
 if(identcom(s)==FULLBRIGHT){
-  fscanf(fis,"%d",&colors);
-  for(j=1;j<=colors;j++){
-    fscanf(fis,"%d %d",&fstart,&fend);
+  fscanf(fis,"%d",&brightcolors);
+  for(j=colors+1;j<=colors+brightcolors;j++){
+    fscanf(fis,"%d %d %d %d %d",&fstart,&fend,&fred,&fgreen,&fblue);
+    add_material(pMesh, fred, fgreen, fblue, 1);
     for(i=fstart;i<=fend;i++){
-      set_face_fullbright(pMesh, i);
+      set_face_material(pMesh,i,j);
     }
   }
 }
@@ -708,8 +710,7 @@ void readtrack(char *numefis)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
 FILE *fis;
-int i,j,
-    bred=130,bgreen=160,bblue=200; /*background color*/
+int bred=130,bgreen=160,bblue=200; /*background color*/
 struct object_type* pObjectType = 0;
 sgob* object = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
@@ -800,24 +801,7 @@ s[0]='1';while(s[0]){
 }
 fclose(fis);
 
-for(i=previousNumberOfMeshes;i<list_get_size(g_object_types);i++){
-  pObjectType = list_get_value(g_object_types,i);
-  struct _mesh* pMesh = pObjectType->pMesh;
-  for(j=1;j<=get_face_count(pMesh);j++){
-    int red, green, blue;
-    get_face_color(pMesh,j,&red,&green,&blue);
-    len=red*fred;
-    if(len>255){len=255;}
-    red=(int)len;
-    len=green*fgreen;
-    if(len>255){len=255;}
-    green=(int)len;
-    len=blue*fblue;
-    if(len>255){len=255;}
-    blue=(int)len;
-    set_face_color(pMesh, j, red, green, blue);
-  }
-}
+adjust_material_colors(fred, fgreen, fblue);
 
 len=sqrt(light_dx*light_dx+light_dy*light_dy+light_dz*light_dz);
 light_dx/=len;

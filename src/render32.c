@@ -37,13 +37,19 @@ typedef struct _pixcol
 {int red;int green;int blue; /*culoarea pixelului*/
 } pixcol;
 
+struct material
+{
+  int red; int green; int blue;
+  int redd; int greend; int blued;
+  unsigned char fullbright; // 1 = fullbright; 0 = usual
+};
+
 typedef struct _tria
 {float x1; float y1;float z1;
 float x2; float y2;float z2;
 float x3; float y3;float z3;
-int red; int green; int blue; /*culoarea triunghiului*/
-int redd; int greend; int blued;
-unsigned char cull; /*first bit(&1):1-cull;0-no cull;second bit(&2):1-fullbright;0-usual*/
+unsigned char cull; // 1 = cull face; 0 = no culling
+int material_id;
 } tria;
 
 typedef struct _tripf
@@ -68,6 +74,7 @@ typedef struct _mesh
 {
   struct _list* faces;
   float xcen, ycen, zcen, radius;
+  struct _list* materials;
 } mesh;
 
 typedef struct mesh_instance
@@ -105,6 +112,13 @@ struct _mesh* create_mesh()
   else
   {
     pMesh->faces = list_create();
+    pMesh->materials = list_create();
+    struct material* pMaterial = (struct material*)malloc(sizeof(struct material));
+    pMaterial->red = 255;
+    pMaterial->green = 200;
+    pMaterial->blue = 0;
+    pMaterial->fullbright = 0;
+    list_add_value(pMesh->materials, pMaterial);
     list_add_value(g_meshes, pMesh);
   }
 
@@ -196,35 +210,27 @@ void add_face(struct _mesh* pMesh, float x1, float y1, float z1, float x2, float
   face->x1 = x1; face->y1 = y1; face->z1 = z1;
   face->x2 = x2; face->y2 = y2; face->z2 = z2;
   face->x3 = x3; face->y3 = y3; face->z3 = z3;
-  face->red = 255;
-  face->green = 200;
-  face->blue = 0;
+  face->material_id = 0;
 
-  face->cull = 0; /*no culling and no fullbright if not specified*/
+  face->cull = 0; // no culling
 
   list_add_value(pMesh->faces, face);
 }
 
-void set_face_color(struct _mesh* pMesh, int face_id, int red, int green, int blue)
+void add_material(struct _mesh* pMesh, int red, int green, int blue, int fullbright)
 {
-  tria* face = list_get_value(pMesh->faces, face_id-1);
-  face->red   = red;
-  face->green = green;
-  face->blue  = blue;
+  struct material* pMaterial = (struct material*)malloc(sizeof(struct material));
+  pMaterial->red   = red;
+  pMaterial->green = green;
+  pMaterial->blue  = blue;
+  pMaterial->fullbright = fullbright;
+  list_add_value(pMesh->materials, pMaterial);
 }
 
-void get_face_color(struct _mesh* pMesh, int face_id, int* red, int* green, int* blue)
+void set_face_material(struct _mesh* pMesh, int face_id, int material_id)
 {
   tria* face = list_get_value(pMesh->faces, face_id-1);
-  *red   = face->red;
-  *green = face->green;
-  *blue  = face->blue;
-}
-
-void set_face_fullbright(struct _mesh* pMesh, int face_id)
-{
-  tria* face = list_get_value(pMesh->faces, face_id-1);
-  face->cull = ((face->cull)&1)+2;
+  face->material_id = material_id;
 }
 
 void get_face_vertex(struct _mesh* pMesh, int face_id, int vertex_id, float *x, float *y, float *z)
@@ -264,12 +270,49 @@ void flip_face(struct _mesh* pMesh, int face_id)
 void enable_face_culling(struct _mesh* pMesh, int face_id)
 {
   tria* face = list_get_value(pMesh->faces, face_id-1);
-  face->cull = ((face->cull)&2)+1;
+  face->cull = 1;
 }
 
 int get_face_count(struct _mesh* pMesh)
 {
   return list_get_size(pMesh->faces);
+}
+
+void adjust_material_colors(float fred, float fgreen, float fblue)
+{
+  struct _list_item* pMeshItem = list_get_first(g_meshes);
+  while(pMeshItem != 0)
+  {
+    struct _mesh* pMesh = list_item_get_value(pMeshItem);
+
+    struct _list_item* pMaterialItem = list_get_first(pMesh->materials);
+    while(pMaterialItem != 0)
+    {
+      struct material* pMaterial = list_item_get_value(pMaterialItem);
+
+      pMaterial->red *= fred;
+      if(pMaterial->red > 255)
+      {
+        pMaterial->red = 255;
+      }
+
+      pMaterial->green *= fgreen;
+      if(pMaterial->green > 255)
+      {
+        pMaterial->green = 255;
+      }
+
+      pMaterial->blue *= fblue;
+      if(pMaterial->blue > 255)
+      {
+        pMaterial->blue = 255;
+      }
+
+      pMaterialItem = list_item_get_next(pMaterialItem);
+    }
+
+    pMeshItem = list_item_get_next(pMeshItem);
+  }
 }
 
 void set_background_color(int red, int green, int blue)
@@ -312,10 +355,10 @@ void set_double_pixel(int double_pixel)
   g_double_pixel = double_pixel;
 }
 
-void displaysdl(struct _surface* pSurface,tria *face,float *distmin,float focal, lightpr* light);
+void displaysdl(struct _surface* pSurface,struct _list* materials,tria *face,float *distmin,float focal, lightpr* light);
 
 /*functie care elimina triunghiurile care sunt in plus*/
-void fclip(struct _surface* pSurface, tria *face,float tgh,float tgv, float* distmin, int focal, lightpr* pRotLight)
+void fclip(struct _surface* pSurface, struct _list* materials, tria *face,float tgh,float tgv, float* distmin, int focal, lightpr* pRotLight)
 {int j,k,l,kmin,invs;
 float x[4],y[4],z[4],tmp,tmp2;
 tria facedisp;
@@ -330,7 +373,7 @@ tria facedisp;
   if((face->z1>zmin)&&(face->z2>zmin)&&(face->z3>zmin))
   {
     j++;facedisp=*face;
-    displaysdl(pSurface,&facedisp,distmin,focal,pRotLight);
+    displaysdl(pSurface,materials,&facedisp,distmin,focal,pRotLight);
   }
   else{
     x[1]=face->x1;x[2]=face->x2;x[3]=face->x3;
@@ -361,7 +404,7 @@ tria facedisp;
 	  facedisp.y3=y[3];
 	    facedisp.z1=facedisp.z2=zmin;
 	    facedisp.z3=z[3];
-	      facedisp.red=face->red;facedisp.green=face->green;facedisp.blue=face->blue;
+	      facedisp.material_id = face->material_id;
 
 	      facedisp.cull=face->cull;
 	      if(invs==(-1)){
@@ -369,7 +412,7 @@ tria facedisp;
                 tmp2=facedisp.y1; facedisp.y1=facedisp.y2; facedisp.y2=tmp2;
                 tmp2=facedisp.z1; facedisp.z1=facedisp.z2; facedisp.z2=tmp2;
 	      }
-              displaysdl(pSurface,&facedisp,distmin,focal,pRotLight);
+              displaysdl(pSurface,materials,&facedisp,distmin,focal,pRotLight);
   }else{
     j++;
       tmp=(zmin-z[1])/(z[2]-z[1]);
@@ -382,7 +425,7 @@ tria facedisp;
 	      facedisp.z1=zmin;
 	      facedisp.z2=z[2];
 	      facedisp.z3=z[3];
-	        facedisp.red=face->red;facedisp.green=face->green;facedisp.blue=face->blue;
+	        facedisp.material_id = face->material_id;
 
 	        facedisp.cull=face->cull;
 	        if(invs==(-1)){
@@ -390,7 +433,7 @@ tria facedisp;
                   tmp2=facedisp.y1; facedisp.y1=facedisp.y2; facedisp.y2=tmp2;
                   tmp2=facedisp.z1; facedisp.z1=facedisp.z2; facedisp.z2=tmp2;
 	        }
-                displaysdl(pSurface,&facedisp,distmin,focal,pRotLight);
+                displaysdl(pSurface,materials,&facedisp,distmin,focal,pRotLight);
     j++;
         facedisp.x1=tmp*(x[2]-x[1])+x[1];
 	facedisp.y1=tmp*(y[2]-y[1])+y[1];
@@ -401,7 +444,7 @@ tria facedisp;
 	  facedisp.y3=y[3];
 	    facedisp.z1=facedisp.z2=zmin;
 	    facedisp.z3=z[3];
-	      facedisp.red=face->red;facedisp.green=face->green;facedisp.blue=face->blue;
+	      facedisp.material_id = face->material_id;
 
 	      facedisp.cull=face->cull;
 	      if(invs==(1)){
@@ -409,7 +452,7 @@ tria facedisp;
                 tmp2=facedisp.y1; facedisp.y1=facedisp.y2; facedisp.y2=tmp2;
                 tmp2=facedisp.z1; facedisp.z1=facedisp.z2; facedisp.z2=tmp2;
 	      }
-              displaysdl(pSurface,&facedisp,distmin,focal,pRotLight);
+              displaysdl(pSurface,materials,&facedisp,distmin,focal,pRotLight);
   }
   }
 }
@@ -548,7 +591,7 @@ void finish_frame(struct _surface* pSurface, float* depthbuffer)
   }
 }
 
-void render_triangle(struct _surface* pSurface, float *distmin, tria *face, float zf, float aizf, float bizf, float id, float c)
+void render_triangle(struct _surface* pSurface, float *distmin, struct _list* materials, tria *face, float zf, float aizf, float bizf, float id, float c)
 {
   float aizfxcr;
   float tmp;
@@ -562,6 +605,7 @@ void render_triangle(struct _surface* pSurface, float *distmin, tria *face, floa
   float dist;
   int i, j, jmin, jmax, xcr, ycr;
   unsigned long int idx;
+  struct material* pMaterial = 0;
 
   // find trangle limits
   ftr.x1=face->x1*zf/face->z1;
@@ -639,7 +683,8 @@ void render_triangle(struct _surface* pSurface, float *distmin, tria *face, floa
       if(distmin[idx]<dist)
       {
         distmin[idx]=dist;
-        surface_set_current_pixel_color(pSurface,face->redd,face->greend,face->blued);
+        pMaterial = list_get_value(materials, face->material_id);
+        surface_set_current_pixel_color(pSurface,pMaterial->redd,pMaterial->greend,pMaterial->blued);
       }
 
       surface_advance_current_pixel(pSurface);
@@ -647,7 +692,7 @@ void render_triangle(struct _surface* pSurface, float *distmin, tria *face, floa
   }
 }
 
-void displaysdl(struct _surface* pSurface,tria *face,float *distmin,float focal, lightpr* light)
+void displaysdl(struct _surface* pSurface, struct _list* materials,tria *face,float *distmin,float focal, lightpr* light)
 {
 int red,green,blue;
 float zf,dist;
@@ -657,6 +702,7 @@ float a,b,c,d,izf, /*izf=1/zf - pt. marit viteza; ecuatia planului este ax+by+cz
       aizf,bizf,id;
 unsigned int width = surface_get_width(pSurface);
 unsigned int height = surface_get_height(pSurface);
+struct material* pMaterial = 0;
 
 if(g_double_pixel == 1)
 {
@@ -675,14 +721,16 @@ if(g_width_factor != 1.0f)
   bizf/=g_width_factor;
 }
 
+pMaterial = list_get_value(materials,face->material_id);
+
 /*start lighting and backface culling*/
 tmp=a*face->x1+b*face->y1+c*face->z1;
 /*dot product used for lighting and backface culling*/
-if((face->cull)&1){ /*backface culling*/
+if(face->cull==1){ // backface culling
   if(tmp<0){return;}
 }
 
-if((face->cull)&2){ /*fullbright*/
+if(pMaterial->fullbright==1){
   a1=1;
 }else{
   dist=sqrt(a*a+b*b+c*c);
@@ -697,17 +745,17 @@ if((face->cull)&2){ /*fullbright*/
 
 bright=a1; if(bright<0){bright=0;}
 
-red=(int)(bright*face->red); green=(int)(bright*face->green); blue=(int)(bright*face->blue);
+red=(int)(bright*pMaterial->red); green=(int)(bright*pMaterial->green); blue=(int)(bright*pMaterial->blue);
 if(red>255){red=255;}
 if(green>255){green=255;}
 if(blue>255){blue=255;}
 
-face->redd=red;
-face->greend=green;
-face->blued=blue;
+pMaterial->redd=red;
+pMaterial->greend=green;
+pMaterial->blued=blue;
 /*finished lighting and backface culling*/
 
-  render_triangle(pSurface, distmin, face, zf, aizf, bizf, id, c);
+  render_triangle(pSurface, distmin, materials, face, zf, aizf, bizf, id, c);
 }
 
 /*function which displays the objcts which are closer than zmax
@@ -873,7 +921,7 @@ while(instanceNode != 0){
       face.y3=transform.vy[0]+x*fiy+y*fjy+z*fky;
       face.z3=transform.vz[0]+x*fiz+y*fjz+z*fkz; /*updated positions of triangles*/
 
-      fclip(pSurface, &face,tgh,tgv, distmin, focal, &rotlight);
+      fclip(pSurface, pMesh->materials, &face,tgh,tgv, distmin, focal, &rotlight);
 
       faceNode = list_item_get_next(faceNode);
     }
