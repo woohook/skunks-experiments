@@ -230,7 +230,7 @@ fclose(fis);}
 
 /*function which reads colors of triangles
 *bred,*bgreen,*bblue - background color*/
-void readcolor(struct _mesh* pMesh,char *numefis)
+void readcolor(struct _mesh* pMesh,char *numefis, vhc* car)
 {int i,j,colors,brightcolors,fstart,fend,fred,fgreen,fblue; /*colors - number of colors*/
 /*fstart si fend - first and last triangle with color(fred,fgreen,fblue)*/
 FILE *fis;
@@ -243,6 +243,17 @@ fscanf(fis,"%d",&colors); /*found number of colors*/
 for(j=1;j<=colors;j++){
   fscanf(fis,"%d %d %d %d %d",&fstart,&fend,&fred,&fgreen,&fblue);
   add_material(pMesh, fred, fgreen, fblue, 0);
+  if(car != 0)
+  {
+    if( (fred==255) && (fgreen==255) && (fblue==200) )
+    {
+      add_material_action(pMesh,&car->action_lights,j);
+    }
+    if( (fred==200) && (fgreen==0) && (fblue==0) )
+    {
+      add_material_action(pMesh,&car->action_brake,j);
+    }
+  }
   for(i=fstart;i<=fend;i++)
   {
     set_face_material(pMesh,i,j);
@@ -454,7 +465,7 @@ struct object_type* find_object_type(char* name)
   return pFoundObjectType;
 }
 
-struct object_type* load_object_type(char* part_name)
+struct object_type* load_object_type(char* part_name, vhc* car)
 {
   int line_number = 1;
   char filename[MAXWLG];
@@ -483,7 +494,7 @@ struct object_type* load_object_type(char* part_name)
   faces(pMesh, filename);
 
   fisgetw(part_stream, filename, &line_number); // file with colors
-  readcolor(pMesh, filename);
+  readcolor(pMesh, filename, car);
 
   struct _refpo* geom = create_collision_geometry();
   pNewType->geom = geom;
@@ -542,7 +553,7 @@ s[0]='1';while(s[0]){
                     pObjectType = find_object_type(s);
                     if(!pObjectType)
                     {
-                      pObjectType = load_object_type(s);
+                      pObjectType = load_object_type(s,car);
                     }
                     prepare_item_name(list_get_size(parts));
 
@@ -751,7 +762,7 @@ s[0]='1';while(s[0]){
                     pObjectType = find_object_type(s);
                     if(!pObjectType)
                     {
-                      pObjectType = load_object_type(s);
+                      pObjectType = load_object_type(s,0);
                     }
                       prepare_item_name(object_index);
 

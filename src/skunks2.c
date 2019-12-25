@@ -88,6 +88,7 @@ void skunks_initialize()
   input_register("Key_Arrow_Left", &pVehicle->vehicle->action_left);
   input_register("Key_Arrow_Right", &pVehicle->vehicle->action_right);
   input_register("Key_R", &pVehicle->vehicle->action_reverse);
+  input_register("Key_L", &pVehicle->vehicle->action_lights);
 
   // Initialize display
   struct _camera* camera = create_camera();

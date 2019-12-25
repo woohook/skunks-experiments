@@ -63,6 +63,7 @@ typedef struct _trilim
 
 typedef struct _lightpr
 {float ambient;
+float headlight_intensity;
 float headlight;
 float directional;
 float dx;
@@ -83,12 +84,21 @@ typedef struct mesh_instance
   matrix* transform;
 } mesh_instance;
 
+struct material_action
+{
+  float* input;
+  float last_input_state;
+  struct material* pMaterial;
+};
+
 struct _list* g_meshes = 0;
 
 struct _list* g_instances = 0;
 
+struct _list* g_actions = 0;
+
 pixcol g_backcol = {0,0,0};
-lightpr g_light = {0,0,0,0,0,0};
+lightpr g_light = {0,1.0f,0,0,0,0,0};
 float g_width_factor = 1.0f;
 float g_view_angle = 90.0f;
 int g_double_pixel = 0;
@@ -233,6 +243,20 @@ void set_face_material(struct _mesh* pMesh, int face_id, int material_id)
   face->material_id = material_id;
 }
 
+void add_material_action(struct _mesh* pMesh, float* input, int material_id)
+{
+  if(g_actions == 0)
+  {
+    g_actions = list_create();
+  }
+
+  struct material_action* action = (struct material_action*)malloc(sizeof(struct material_action));
+  action->input = input;
+  action->last_input_state = *input;
+  action->pMaterial = list_get_value(pMesh->materials,material_id);
+  list_add_value(g_actions, action);
+}
+
 void get_face_vertex(struct _mesh* pMesh, int face_id, int vertex_id, float *x, float *y, float *z)
 {
   tria* face = list_get_value(pMesh->faces, face_id-1);
@@ -330,6 +354,7 @@ void set_ambient_light(float ambient_light)
 void set_headlight(float headlight)
 {
   g_light.headlight = headlight;
+  g_light.headlight_intensity = 1.0f;
 }
 
 void set_directional_light(float directional_light, float dx, float dy, float dz)
@@ -740,7 +765,7 @@ if(pMaterial->fullbright==1){
   }else{
     if(a1<0){a1=-a1;}else{a1=0;}
   }
-  a1=light->ambient+fabs(light->headlight*c/dist)+light->directional*a1;
+  a1=light->ambient+fabs(light->headlight*light->headlight_intensity*c/dist)+light->directional*a1;
 }
 
 bright=a1; if(bright<0){bright=0;}
@@ -776,8 +801,51 @@ float tgh,tgv;
 float x,y,z,ix,iy,iz,jx,jy,jz,kx,ky,kz; /*temporary variables for transformations*/
 float xcen,ycen,zcen,radius;
 
+struct _list_item* pActionItem;
+
 if(pSurface==0){free(distmin); return;}
 /*to free static variables, call odis(0,0,0,0,0,0,0)*/
+
+pActionItem = 0;
+if(g_actions != 0)
+{
+  pActionItem = list_get_first(g_actions);
+}
+while(pActionItem != 0)
+{
+  struct material_action* action = list_item_get_value(pActionItem);
+  if( (action->pMaterial->red==255) && (action->pMaterial->green==255) && (action->pMaterial->blue==200) )
+  {
+    if( (action->last_input_state < 0.5f) && (*action->input > 0.5f) )
+    {
+      if(g_light.headlight_intensity > 0.5f)
+      {
+        g_light.headlight_intensity = 0.0f;
+        action->pMaterial->fullbright = 0;
+      }
+      else
+      {
+        g_light.headlight_intensity = 1.0f;
+        action->pMaterial->fullbright = 1;
+      }
+    }
+  }
+  if( (action->pMaterial->red==200) && (action->pMaterial->green==0) && (action->pMaterial->blue==0) )
+  {
+    if(*action->input == 0)
+    {
+      action->pMaterial->fullbright = 0;
+    }
+    else
+    {
+      action->pMaterial->fullbright = 1;
+    }
+  }
+
+  action->last_input_state = *action->input;
+
+  pActionItem = list_item_get_next(pActionItem);
+}
 
 width=surface_get_width(pSurface);
 height=surface_get_height(pSurface);
@@ -820,6 +888,7 @@ rotlight.dy=x*jx+y*jy+z*jz;
 rotlight.dz=x*kx+y*ky+z*kz; /*rotated light*/
 rotlight.ambient=g_light.ambient;
 rotlight.headlight=g_light.headlight;
+rotlight.headlight_intensity=g_light.headlight_intensity;
 rotlight.directional=g_light.directional;
 
 struct _list_item* instanceNode = list_get_first(g_instances);
