@@ -5,6 +5,7 @@ typedef struct _vhc
   float action_left;
   float action_right;
   float action_reverse;
+  float action_lights;
 
   float vrx; // steering speed
   float af;  // acceleration factor
