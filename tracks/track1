@@ -3,7 +3,7 @@ headlight 0.4
 directional 0.6
 lightdir -1.0 1.0 1.0
 background 140 160 230
-clfactors 1.1 1.1 1.1
+clfactors 1.0 1.0 1.0
 object data/ground  -5.0  0.0  0.0  0.0  0.0  0.0  2  0
 object data/hill2 -20 42 110 0 0 0 2 0
 object data/hill2 -20 -150 -180 0 0 0 2 0

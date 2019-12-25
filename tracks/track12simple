@@ -3,7 +3,7 @@ headlight 0.4
 directional 0.6
 lightdir -1.0 1.0 1.0
 background 140 160 230
-clfactors 1.1 1.1 1.1
+clfactors 1.0 1.0 1.0
 object data/roads_low 0.0000 0.0000  0.0000 0 0 0.0000 1 0
 object data/roads_low_alt 0.0000 0.0000 20.0000 0 0 0.0000 1 0
 object data/roads_low 0.0000 0.0000 40.0000 0 0 0.0000 1 0
