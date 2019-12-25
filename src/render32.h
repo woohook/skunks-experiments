@@ -30,6 +30,8 @@ void add_material(struct _mesh* pMesh, int red, int green, int blue, int fullbri
 
 void set_face_material(struct _mesh* pMesh, int face_id, int material_id);
 
+void add_material_action(struct _mesh* pMesh, float* input, int material_id);
+
 void get_face_vertex(struct _mesh* pMesh, int face_id, int vertex_id, float *x, float *y, float *z);
 
 void flip_face(struct _mesh* pMesh, int face_id);
