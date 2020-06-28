@@ -12,4 +12,5 @@ gcc -c src/surface_sdl2.c -o surface_sdl2.o `sdl2-config --cflags --libs` -lm -l
 gcc -c src/surface_content.c -o surface_content.o -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
 gcc -c src/input.c -o input.o `sdl2-config --cflags --libs` -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
 gcc -c src/render32.c -o render32.o -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
-gcc src/framework.c list.o trans.o readfile.o platform.o clock.o render32.o surface_sdl2.o surface_content.o physics.o input.o vehicle.o camera.o skunks2.o -o skunks2 `sdl2-config --cflags --libs` -I./ODE/local/include -L./ODE/local/lib -lode -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W
+gcc -c src/participant.c -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
+gcc src/framework.c participant.o list.o trans.o readfile.o platform.o clock.o render32.o surface_sdl2.o surface_content.o physics.o input.o vehicle.o camera.o skunks2.o -o skunks2 `sdl2-config --cflags --libs` -I./ODE/local/include -L./ODE/local/lib -lode -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W

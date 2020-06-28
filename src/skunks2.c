@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "vehicle.h"
 #include "readfile.h"
 #include "camera.h"
+#include "participant.h"
 
 
 #define SCREENWIDTH 800   // screen width (pixels)
@@ -83,18 +84,8 @@ void skunks_initialize()
 
   input_register("Key_Escape", &action_quit);
 
-  input_register("Key_Arrow_Up", &pVehicle->vehicle->action_accelerate);
-  input_register("Key_Arrow_Down", &pVehicle->vehicle->action_brake);
-  input_register("Key_Arrow_Left", &pVehicle->vehicle->action_left);
-  input_register("Key_Arrow_Right", &pVehicle->vehicle->action_right);
-  input_register("Key_R", &pVehicle->vehicle->action_reverse);
-  input_register("Key_L", &pVehicle->vehicle->action_lights);
-
-  // Initialize display
-  struct _camera* camera = create_camera();
-  camera_set_focus(camera, &pVehicle->transform);
-  struct _surface_content* pContent = surface_content_create(camera);
-  surface_create(width,height,pContent);
+  struct participant* player = participant_create();
+  participant_assign_entity(player, pVehicle);
 }
 
 void skunks_process()
