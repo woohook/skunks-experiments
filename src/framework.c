@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "render32.h"
 #include "surface.h"
 #include "input.h"
+#include "participant.h"
 #include "skunks2.h"
 
 int g_argc = 0;
@@ -41,6 +42,7 @@ int main(int argc,char *argv[])
   vehicle_initialize();
   renderer_initialize();
   surface_initialize();
+  participant_initialize();
   skunks_initialize();
 
   while(g_shutdown_request == 0)
@@ -52,10 +54,12 @@ int main(int argc,char *argv[])
     vehicle_process();
     renderer_process();
     surface_process();
+    participant_process();
     skunks_process();
   }
 
   skunks_release();
+  participant_release();
   surface_release();
   renderer_release();
   vehicle_release();

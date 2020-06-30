@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "render32.h"
 #include "physics.h"
 #include "vehicle.h"
+#include "entity.h"
 
 #define UNKNOWN 0
 
@@ -557,7 +558,7 @@ s[0]='1';while(s[0]){
                     }
                     prepare_item_name(list_get_size(parts));
 
-                      object=(sgob*)malloc(sizeof(sgob));
+                      object=entity_create();
                       object->radius = 0;
                       object->lev = 0;
                       object->physics_object = 0;
@@ -766,7 +767,7 @@ s[0]='1';while(s[0]){
                     }
                       prepare_item_name(object_index);
 
-                      object=(sgob*)malloc(sizeof(sgob));
+                      object=entity_create();
                       object_index++;
                       object->radius = 0;
                       object->lev = 0;
