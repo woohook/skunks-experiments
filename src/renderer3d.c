@@ -195,7 +195,7 @@ int clip_triangle(struct renderer_triangle* face, struct renderer_triangle* extr
   return 2;
 }
 
-void shade_triangle(struct renderer_triangle* face)
+int shade_triangle(struct renderer_triangle* face)
 {
 int red,green,blue;
 float zf,dist;
@@ -224,7 +224,7 @@ aizf=a*izf; bizf=b*izf; id=1/d;
 tmp=a*face->x1+b*face->y1+c*face->z1;
 //dot product used for lighting and backface culling
 if(face->cull==1){ // backface culling
-  if(tmp<0){return;}
+  if(tmp<0){return -1;}
 }
 
 if(face->fullbright==1){
@@ -252,6 +252,8 @@ if(blue>255){blue=255;}
 face->red=red;
 face->green=green;
 face->blue=blue;
+
+  return 0;
 }
 
 void rasterize_triangle(struct renderer_triangle* face)
@@ -361,7 +363,10 @@ void renderer3d_render_triangle(struct renderer_triangle* pTriangle)
     return;
   }
 
-  shade_triangle(pTriangle);
+  if(shade_triangle(pTriangle) != 0)
+  {
+    return;
+  }
 
   rasterize_triangle(pTriangle);
   if(triangle_count == 2)
