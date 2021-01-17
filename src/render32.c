@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "trans.h"
 #include "list.h"
 
+#include "renderer3d.h"
+
 #define DOUBLEPIX 0  // 1 - large pixels; 0 - normal pixels
 
 #define FOV 90  // horizontal viewing angle (in degrees)
@@ -856,6 +858,8 @@ area=(width+1)*(height+1);
 tgh=(float)width/(2*(float)focal);
 tgv=(float)height/(2*(float)focal);
 
+struct frustum aFrustum = {zmin, zmax, tgh, tgv};
+
 if(g_width_factor != 1.0f)
 {
   focal=(int)((float)focal/g_width_factor);
@@ -863,10 +867,12 @@ if(g_width_factor != 1.0f)
 }
 
 if(!sem){
-  if(!(distmin=(float *)malloc(area*sizeof(float)))){printf("Out of memory");}
+  renderer3d_initialize(pSurface);
+  //if(!(distmin=(float *)malloc(area*sizeof(float)))){printf("Out of memory");}
   sem=1;}
 
-clear_depth_buffer(distmin,width,height);
+//clear_depth_buffer(distmin,width,height);
+renderer3d_clear_depth_buffer(&aFrustum);
 
 surface_begin_rendering(pSurface);
 
@@ -990,14 +996,18 @@ while(instanceNode != 0){
       face.y3=transform.vy[0]+x*fiy+y*fjy+z*fky;
       face.z3=transform.vz[0]+x*fiz+y*fjz+z*fkz; /*updated positions of triangles*/
 
-      fclip(pSurface, pMesh->materials, &face,tgh,tgv, distmin, focal, &rotlight);
+      //fclip(pSurface, pMesh->materials, &face,tgh,tgv, distmin, focal, &rotlight);
+      struct material* pMat = list_get_value(pMesh->materials, face.material_id);
+struct renderer_triangle tri = {face.x1,face.y1,face.z1,face.x2,face.y2,face.z2,face.x3,face.y3,face.z3,pMat->red,pMat->green,pMat->blue};
+      struct lights theLights;
+      renderer3d_render_triangle(&tri, &aFrustum, pSurface, &theLights);
 
       faceNode = list_item_get_next(faceNode);
     }
   }
 }
 
-finish_frame(pSurface,distmin);
+//finish_frame(pSurface,distmin);
 
 surface_end_rendering(pSurface);
 }
