@@ -22,8 +22,13 @@ struct renderer_triangle
   float x2, y2, z2;
   float x3, y3, z3;
   int red, green, blue;
+  int fullbright;
+  int cull;
 };
 
-void renderer3d_initialize(struct _surface* pSurface);
-void renderer3d_clear_depth_buffer(struct frustum* pFrustum);
-void renderer3d_render_triangle(struct renderer_triangle* pTriangle, struct frustum* pFrustum, struct _surface* pSurface, struct lights* pLights);
+void renderer3d_initialize(struct _surface* pSurface, struct frustum* pFrustum, struct lights* pLights);
+
+void renderer3d_start_frame();
+void renderer3d_finish_frame(int red, int green, int blue);
+
+void renderer3d_render_triangle(struct renderer_triangle* pTriangle);

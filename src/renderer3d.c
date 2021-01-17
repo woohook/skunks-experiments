@@ -49,11 +49,20 @@ float bizf = 0;
 float id = 0;
 float c;
 float* distmin = 0;
+float g_zfog=80;  // fog distance (m)
 
-void renderer3d_initialize(struct _surface* pSurface)
+struct _surface* g_surface = 0;
+struct frustum* g_frustum = 0;
+struct lights* g_lights = 0;
+
+void renderer3d_initialize(struct _surface* pSurface, struct frustum* pFrustum, struct lights* pLights)
 {
-  width = surface_get_width(pSurface);
-  height = surface_get_height(pSurface);
+  g_surface = pSurface;
+  g_frustum = pFrustum;
+  g_lights  = pLights;
+
+  width = surface_get_width(g_surface);
+  height = surface_get_height(g_surface);
 
 /*  if(g_double_pixel == 1)
   {
@@ -70,10 +79,10 @@ void renderer3d_initialize(struct _surface* pSurface)
   if(!(distmin=(float *)malloc(area*sizeof(float)))){printf("Out of memory");}
 }
 
-void renderer3d_clear_depth_buffer(struct frustum* pFrustum)
+void clear_depth_buffer()
 {
-  float izmax=1/pFrustum->zmax;
-  for(int i=0; i<area; ++i)
+  float izmax=1/g_frustum->zmax;
+  for(unsigned long int i=0; i<area; ++i)
   {
     distmin[i] = izmax;
   }
@@ -90,14 +99,14 @@ void renderer3d_findplan(float x1, float y1, float z1, float x2, float y2, float
 	/*ecuatia planului este ax+by+cz=d*/
 }
 
-int clip_triangle(struct renderer_triangle* face, struct frustum* pFrustum, struct renderer_triangle* extra_face)
+int clip_triangle(struct renderer_triangle* face, struct renderer_triangle* extra_face)
 {
   int k,l,kmin,invs;
   float x[4],y[4],z[4],tmp,tmp2;
-  float zmin = pFrustum->zmin;
-  float zmax = pFrustum->zmax;
-  float tgh  = pFrustum->tgh;
-  float tgv  = pFrustum->tgv;
+  float zmin = g_frustum->zmin;
+  float zmax = g_frustum->zmax;
+  float tgh  = g_frustum->tgh;
+  float tgv  = g_frustum->tgv;
 
   if((face->z1<=zmin)&&(face->z2<=zmin)&&(face->z3<=zmin)){return 0;}
   if((face->z1>=zmax)&&(face->z2>=zmax)&&(face->z3>=zmax)){return 0;}
@@ -139,9 +148,6 @@ int clip_triangle(struct renderer_triangle* face, struct frustum* pFrustum, stru
 	    face->z1=face->z2=zmin;
 	    face->z3=z[3];
 
-//	      face->material_id = face->material_id;
-//	      face->cull=face->cull;
-
 	      if(invs==(-1)){
 	        tmp2=face->x1; face->x1=face->x2; face->x2=tmp2;
                 tmp2=face->y1; face->y1=face->y2; face->y2=tmp2;
@@ -161,15 +167,12 @@ int clip_triangle(struct renderer_triangle* face, struct frustum* pFrustum, stru
 	      face->z2=z[2];
 	      face->z3=z[3];
 
-//	        face->material_id = face->material_id;
-//	        face->cull=face->cull;
-
 	        if(invs==(-1)){
 	          tmp2=face->x1; face->x1=face->x2; face->x2=tmp2;
                   tmp2=face->y1; face->y1=face->y2; face->y2=tmp2;
                   tmp2=face->z1; face->z1=face->z2; face->z2=tmp2;
 	        }
-//                displaysdl(pSurface,materials,&facedisp,distmin,focal,pRotLight);
+
         extra_face->x1=tmp*(x[2]-x[1])+x[1];
 	extra_face->y1=tmp*(y[2]-y[1])+y[1];
       tmp=(zmin-z[1])/(z[3]-z[1]);
@@ -181,8 +184,7 @@ int clip_triangle(struct renderer_triangle* face, struct frustum* pFrustum, stru
             extra_face->z2=zmin;
 	    extra_face->z3=z[3];
 
-//	      extra_face->material_id = face->material_id;
-//	      extra_face->cull=face->cull;
+	      extra_face->cull=face->cull;
 
 	      if(invs==(1)){
 	        tmp2=extra_face->x1; extra_face->x1=extra_face->x2; extra_face->x2=tmp2;
@@ -195,18 +197,64 @@ int clip_triangle(struct renderer_triangle* face, struct frustum* pFrustum, stru
 
 void shade_triangle(struct renderer_triangle* face)
 {
-  float a, b, /*c*/ d;
-  renderer3d_findplan(face->x1,face->y1,face->z1,face->x2,face->y2,face->z2,face->x3,face->y3,face->z3,&a,&b,&c,&d);
+int red,green,blue;
+float zf,dist;
+float tmp;
+float a,b,d,izf, //izf=1/zf - pt. marit viteza; ecuatia planului este ax+by+cz=d
+      a1,bright;
 
-  aizf=a*izf; bizf=b*izf; id=1/d;
+/*if(g_double_pixel == 1)
+{
+  width/=2; height/=2; focal/=2;
+}*/
 
-/*  if(g_width_factor != 1.0f)
-  {
-    bizf/=g_width_factor;
-  }*/
+zf=-focal;
+izf=1/zf;
+
+renderer3d_findplan(face->x1,face->y1,face->z1,face->x2,face->y2,face->z2,face->x3,face->y3,face->z3,&a,&b,&c,&d);
+
+aizf=a*izf; bizf=b*izf; id=1/d;
+
+/*if(g_width_factor != 1.0f)
+{
+  bizf/=g_width_factor;
+}*/
+
+//start lighting and backface culling
+tmp=a*face->x1+b*face->y1+c*face->z1;
+//dot product used for lighting and backface culling
+if(face->cull==1){ // backface culling
+  if(tmp<0){return;}
 }
 
-void rasterize_triangle(struct renderer_triangle* face, struct _surface* pSurface)
+if(face->fullbright==1){
+  a1=1;
+}
+else
+{
+  dist=sqrt(a*a+b*b+c*c);
+  a1=(g_lights->directional_light_x*a+g_lights->directional_light_y*b+g_lights->directional_light_z*c)/dist;
+  if(tmp>=0){
+    if(a1<0){a1=0;}
+  }else{
+    if(a1<0){a1=-a1;}else{a1=0;}
+  }
+  a1=g_lights->ambient_light_intensity+fabs(g_lights->head_light_intensity*c/dist)+g_lights->directional_light_intensity*a1;
+}
+
+bright=a1; if(bright<0){bright=0;}
+
+red=(int)(bright*face->red); green=(int)(bright*face->green); blue=(int)(bright*face->blue);
+if(red>255){red=255;}
+if(green>255){green=255;}
+if(blue>255){blue=255;}
+
+face->red=red;
+face->green=green;
+face->blue=blue;
+}
+
+void rasterize_triangle(struct renderer_triangle* face)
 {
   float aizfxcr;
   float tmp;
@@ -284,7 +332,7 @@ void rasterize_triangle(struct renderer_triangle* face, struct _surface* pSurfac
       jmax=(int)width-1;
     }
 
-    surface_set_current_pixel(pSurface,jmin,i);
+    surface_set_current_pixel(g_surface,jmin,i);
 
     idx=i*width+jmin;
 
@@ -296,18 +344,18 @@ void rasterize_triangle(struct renderer_triangle* face, struct _surface* pSurfac
       if(distmin[idx]<dist)
       {
         distmin[idx]=dist;
-        surface_set_current_pixel_color(pSurface,face->red,face->green,face->blue);
+        surface_set_current_pixel_color(g_surface,face->red,face->green,face->blue);
       }
 
-      surface_advance_current_pixel(pSurface);
+      surface_advance_current_pixel(g_surface);
     }
   }
 }
 
-void renderer3d_render_triangle(struct renderer_triangle* pTriangle, struct frustum* pFrustum, struct _surface* pSurface, struct lights* pLights)
+void renderer3d_render_triangle(struct renderer_triangle* pTriangle)
 {
   struct renderer_triangle extra_face;
-  int triangle_count = clip_triangle(pTriangle, pFrustum, &extra_face);
+  int triangle_count = clip_triangle(pTriangle, &extra_face);
   if(triangle_count == 0)
   {
     return;
@@ -315,12 +363,68 @@ void renderer3d_render_triangle(struct renderer_triangle* pTriangle, struct frus
 
   shade_triangle(pTriangle);
 
-  rasterize_triangle(pTriangle, pSurface);
+  rasterize_triangle(pTriangle);
   if(triangle_count == 2)
   {
     extra_face.red   = pTriangle->red;
     extra_face.green = pTriangle->green;
     extra_face.blue  = pTriangle->blue;
-    rasterize_triangle(&extra_face, pSurface);
+    rasterize_triangle(&extra_face);
+  }
+}
+
+void renderer3d_start_frame()
+{
+  clear_depth_buffer();
+}
+
+void renderer3d_finish_frame(int back_red, int back_green, int back_blue)
+{
+  int i,j;
+  unsigned long int crf=0;
+  float izmax=1/g_frustum->zmax;
+  float izfog=1/g_zfog;
+  float ratio2=1/(izmax-izfog);
+  int red0   = back_red;
+  int green0 = back_green;
+  int blue0  = back_blue;
+
+  for(j=0;j<=(int)height-1;j++)
+  {
+    float tmp=1.0-sin(3.1416*j/(float)height); tmp*=50;
+    float redf=red0-tmp;
+    float greenf=green0-tmp;
+    float bluef=blue0-tmp;
+    back_red=(int)redf; back_green=(int)greenf; back_blue=(int)bluef;
+
+    surface_set_current_pixel(g_surface,0,j);
+
+    for(i=0;i<=(int)width-1;i++)
+    {
+      if(distmin[++crf]==izmax)
+      {
+        surface_set_current_pixel_color(g_surface,back_red,back_green,back_blue);
+      }
+      else
+      {
+        if(distmin[crf]<izfog)
+        {
+          int pixel_red, pixel_green, pixel_blue;
+          surface_get_current_pixel_color(g_surface,&pixel_red,&pixel_green,&pixel_blue);
+
+          tmp=(distmin[crf]-izfog)*ratio2;
+          //pixel_red=(int)(pixel_red*(1-tmp));
+          //pixel_green=(int)(pixel_green*(1-tmp));
+          //pixel_blue=(int)(pixel_blue*(1-tmp));
+          pixel_red+=(int)(tmp*(back_red-pixel_red));
+          pixel_green+=(int)(tmp*(back_green-pixel_green));
+          pixel_blue+=(int)(tmp*(back_blue-pixel_blue));
+
+          surface_set_current_pixel_color(g_surface,pixel_red,pixel_green,pixel_blue);
+        }
+      }
+
+      surface_advance_current_pixel(g_surface);
+    }
   }
 }
