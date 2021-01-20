@@ -1,4 +1,5 @@
 rm -f ./*.o ./skunks2
+gcc -c src/renderer3d.c -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
 gcc -c src/list.c -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
 gcc -c src/trans.c -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
 gcc -c src/readfile.c -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
@@ -14,4 +15,4 @@ gcc -c src/input.c -o input.o `sdl2-config --cflags --libs` -lm -ldl -O3 -fomit-
 gcc -c src/render32.c -o render32.o -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
 gcc -c src/participant.c -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
 gcc -c src/entity.c -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W &&
-gcc src/framework.c participant.o entity.o list.o trans.o readfile.o platform.o clock.o render32.o surface_sdl2.o surface_content.o physics.o input.o vehicle.o camera.o skunks2.o -o skunks2 `sdl2-config --cflags --libs` -I./ODE/local/include -L./ODE/local/lib -lode -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W
+gcc src/framework.c renderer3d.o participant.o entity.o list.o trans.o readfile.o platform.o clock.o render32.o surface_sdl2.o surface_content.o physics.o input.o vehicle.o camera.o skunks2.o -o skunks2 `sdl2-config --cflags --libs` -I./ODE/local/include -L./ODE/local/lib -lode -lm -ldl -O3 -fomit-frame-pointer -ffast-math -funroll-loops -funsafe-math-optimizations -Wall -W

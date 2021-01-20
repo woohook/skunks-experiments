@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "trans.h"
 #include "list.h"
 
+#include "renderer3d.h"
+
 #define DOUBLEPIX 0  // 1 - large pixels; 0 - normal pixels
 
 #define FOV 90  // horizontal viewing angle (in degrees)
@@ -102,9 +104,11 @@ lightpr g_light = {0,1.0f,0,0,0,0,0};
 float g_width_factor = 1.0f;
 float g_view_angle = 90.0f;
 int g_double_pixel = 0;
-float zfog=80;  // fog distance (m)
 float zmin=1e-3;
 float zmax=120; // visibility (m)
+
+struct frustum aFrustum;
+struct lights theLights;
 
 struct _mesh* create_mesh()
 {
@@ -380,107 +384,7 @@ void set_double_pixel(int double_pixel)
   g_double_pixel = double_pixel;
 }
 
-void displaysdl(struct _surface* pSurface,struct _list* materials,tria *face,float *distmin,float focal, lightpr* light);
-
-/*functie care elimina triunghiurile care sunt in plus*/
-void fclip(struct _surface* pSurface, struct _list* materials, tria *face,float tgh,float tgv, float* distmin, int focal, lightpr* pRotLight)
-{int j,k,l,kmin,invs;
-float x[4],y[4],z[4],tmp,tmp2;
-tria facedisp;
-
-  if((face->z1<=zmin)&&(face->z2<=zmin)&&(face->z3<=zmin)){return;}
-  if((face->z1>=zmax)&&(face->z2>=zmax)&&(face->z3>=zmax)){return;}
-    if((face->x1>tgv*face->z1)&&(face->x2>tgv*face->z2)&&(face->x3>tgv*face->z3)){return;}
-    if((face->y1>tgh*face->z1)&&(face->y2>tgh*face->z2)&&(face->y3>tgh*face->z3)){return;}
-  if((face->x1 < -tgv*face->z1)&&(face->x2 < -tgv*face->z2)&&(face->x3 < -tgv*face->z3)){return;}
-  if((face->y1 < -tgh*face->z1)&&(face->y2 < -tgh*face->z2)&&(face->y3 < -tgh*face->z3)){return;}
-
-  if((face->z1>zmin)&&(face->z2>zmin)&&(face->z3>zmin))
-  {
-    j++;facedisp=*face;
-    displaysdl(pSurface,materials,&facedisp,distmin,focal,pRotLight);
-  }
-  else{
-    x[1]=face->x1;x[2]=face->x2;x[3]=face->x3;
-    y[1]=face->y1;y[2]=face->y2;y[3]=face->y3;
-    z[1]=face->z1;z[2]=face->z2;z[3]=face->z3;
-
-    invs=1;
-
-    for(k=1;k<=2;k++){kmin=k;
-      for(l=k+1;l<=3;l++){
-	if(z[l]<z[kmin]){kmin=l;}
-      }if(kmin!=k){ invs*=-1;
-	tmp=x[k];x[k]=x[kmin];x[kmin]=tmp;
-	tmp=y[k];y[k]=y[kmin];y[kmin]=tmp;
-	tmp=z[k];z[k]=z[kmin];z[kmin]=tmp;
-      }
-    } /*ordonat varfuri dupa z*/
-
-  if((z[1]<=zmin)&&(z[2]<=zmin)){
-    j++;
-      tmp=(zmin-z[1])/(z[3]-z[1]);
-        facedisp.x1=tmp*(x[3]-x[1])+x[1];
-        facedisp.y1=tmp*(y[3]-y[1])+y[1];
-      tmp=(zmin-z[2])/(z[3]-z[2]);
-        facedisp.x2=tmp*(x[3]-x[2])+x[2];
-        facedisp.y2=tmp*(y[3]-y[2])+y[2];
-	  facedisp.x3=x[3];
-	  facedisp.y3=y[3];
-	    facedisp.z1=facedisp.z2=zmin;
-	    facedisp.z3=z[3];
-	      facedisp.material_id = face->material_id;
-
-	      facedisp.cull=face->cull;
-	      if(invs==(-1)){
-	        tmp2=facedisp.x1; facedisp.x1=facedisp.x2; facedisp.x2=tmp2;
-                tmp2=facedisp.y1; facedisp.y1=facedisp.y2; facedisp.y2=tmp2;
-                tmp2=facedisp.z1; facedisp.z1=facedisp.z2; facedisp.z2=tmp2;
-	      }
-              displaysdl(pSurface,materials,&facedisp,distmin,focal,pRotLight);
-  }else{
-    j++;
-      tmp=(zmin-z[1])/(z[2]-z[1]);
-        facedisp.x1=tmp*(x[2]-x[1])+x[1];
-	facedisp.y1=tmp*(y[2]-y[1])+y[1];
-	  facedisp.x2=x[2];
-	  facedisp.y2=y[2];
-	    facedisp.x3=x[3];
-	    facedisp.y3=y[3];
-	      facedisp.z1=zmin;
-	      facedisp.z2=z[2];
-	      facedisp.z3=z[3];
-	        facedisp.material_id = face->material_id;
-
-	        facedisp.cull=face->cull;
-	        if(invs==(-1)){
-	          tmp2=facedisp.x1; facedisp.x1=facedisp.x2; facedisp.x2=tmp2;
-                  tmp2=facedisp.y1; facedisp.y1=facedisp.y2; facedisp.y2=tmp2;
-                  tmp2=facedisp.z1; facedisp.z1=facedisp.z2; facedisp.z2=tmp2;
-	        }
-                displaysdl(pSurface,materials,&facedisp,distmin,focal,pRotLight);
-    j++;
-        facedisp.x1=tmp*(x[2]-x[1])+x[1];
-	facedisp.y1=tmp*(y[2]-y[1])+y[1];
-      tmp=(zmin-z[1])/(z[3]-z[1]);
-        facedisp.x2=tmp*(x[3]-x[1])+x[1];
-	facedisp.y2=tmp*(y[3]-y[1])+y[1];
-	  facedisp.x3=x[3];
-	  facedisp.y3=y[3];
-	    facedisp.z1=facedisp.z2=zmin;
-	    facedisp.z3=z[3];
-	      facedisp.material_id = face->material_id;
-
-	      facedisp.cull=face->cull;
-	      if(invs==(1)){
-	        tmp2=facedisp.x1; facedisp.x1=facedisp.x2; facedisp.x2=tmp2;
-                tmp2=facedisp.y1; facedisp.y1=facedisp.y2; facedisp.y2=tmp2;
-                tmp2=facedisp.z1; facedisp.z1=facedisp.z2; facedisp.z2=tmp2;
-	      }
-              displaysdl(pSurface,materials,&facedisp,distmin,focal,pRotLight);
-  }
-  }
-}
+//void displaysdl(struct _surface* pSurface,struct _list* materials,tria *face,float *distmin,float focal, lightpr* light);
 
 
 /*functie care verifica daca punctul M(x,y,z) se afla in interiorul triunghiului ABC
@@ -551,251 +455,16 @@ void findplan(float x1, float y1, float z1, float x2, float y2, float z2, float 
 	/*ecuatia planului este ax+by+cz=d*/
 }
 
-void clear_depth_buffer(float* depthbuffer, unsigned int width, unsigned int height)
-{
-  int i;
-  unsigned long int area = width*height+1;
-  float izmax=1/zmax;
-  for(i=0;i<=(int)area;i++)
-  {
-    depthbuffer[i]=izmax;
-  }
-}
-
-void finish_frame(struct _surface* pSurface, float* depthbuffer)
-{
-  int i,j;
-  unsigned long int crf=0;
-  float izmax=1/zmax;
-  float izfog=1/zfog;
-  float ratio2=1/(izmax-izfog);
-  pixcol backcol = g_backcol;
-  int red0=backcol.red;
-  int green0=backcol.green;
-  int blue0=backcol.blue;
-  pixcol pixcb;
-  int width = surface_get_width(pSurface);
-  int height = surface_get_height(pSurface);
-
-  for(j=0;j<=(int)height-1;j++)
-  {
-    float tmp=1.0-sin(3.1416*j/(float)height); tmp*=50;
-    float redf=red0-tmp;
-    float greenf=green0-tmp;
-    float bluef=blue0-tmp;
-    backcol.red=(int)redf; backcol.green=(int)greenf; backcol.blue=(int)bluef;
-
-    surface_set_current_pixel(pSurface,0,j);
-
-    for(i=0;i<=(int)width-1;i++)
-    {
-      if(depthbuffer[++crf]==izmax)
-      {
-        surface_set_current_pixel_color(pSurface,backcol.red,backcol.green,backcol.blue);
-      }
-      else
-      {
-        if(depthbuffer[crf]<izfog)
-        {
-          surface_get_current_pixel_color(pSurface,&pixcb.red,&pixcb.green,&pixcb.blue);
-
-          tmp=(depthbuffer[crf]-izfog)*ratio2;
-          //pixcb.red=(int)(pixcb.red*(1-tmp));
-          //pixcb.green=(int)(pixcb.green*(1-tmp));
-          //pixcb.blue=(int)(pixcb.blue*(1-tmp));
-          pixcb.red+=(int)(tmp*(backcol.red-pixcb.red));
-          pixcb.green+=(int)(tmp*(backcol.green-pixcb.green));
-          pixcb.blue+=(int)(tmp*(backcol.blue-pixcb.blue));
-
-          surface_set_current_pixel_color(pSurface,pixcb.red,pixcb.green,pixcb.blue);
-        }
-      }
-
-      surface_advance_current_pixel(pSurface);
-    }
-  }
-}
-
-void render_triangle(struct _surface* pSurface, float *distmin, struct _list* materials, tria *face, float zf, float aizf, float bizf, float id, float c)
-{
-  float aizfxcr;
-  float tmp;
-  float ratio2, ratio3, ratio4;
-  int width = surface_get_width(pSurface);
-  int height = surface_get_height(pSurface);
-  float thres = 1/(width+height);
-  tripf ftr;    // proiectii varfuri triunghi
-  trilim lim;    // limite triunghi pe axa y
-  float ystart, yend;
-  float dist;
-  int i, j, jmin, jmax, xcr, ycr;
-  unsigned long int idx;
-  struct material* pMaterial = 0;
-
-  // find trangle limits
-  ftr.x1=face->x1*zf/face->z1;
-  ftr.x2=face->x2*zf/face->z2;
-  ftr.x3=face->x3*zf/face->z3;
-
-  ftr.y1=face->y1*zf/face->z1;
-  ftr.y2=face->y2*zf/face->z2;
-  ftr.y3=face->y3*zf/face->z3;
-
-  if(ftr.x2>ftr.x3){tmp=ftr.y2;ftr.y2=ftr.y3;ftr.y3=tmp; tmp=ftr.x2;ftr.x2=ftr.x3;ftr.x3=tmp;}
-  if(ftr.x1>ftr.x2){{tmp=ftr.y1;ftr.y1=ftr.y2;ftr.y2=tmp; tmp=ftr.x1;ftr.x1=ftr.x2;ftr.x2=tmp;}
-  if(ftr.x2>ftr.x3){tmp=ftr.y2;ftr.y2=ftr.y3;ftr.y3=tmp; tmp=ftr.x2;ftr.x2=ftr.x3;ftr.x3=tmp;}}
-  // ordered triangle vertices
-
-  lim.imin=(int)((int)(height>>1)+ftr.x1+1);
-  lim.imax=(int)((int)(height>>1)+ftr.x3);
-
-  if(lim.imin<0){lim.imin=0;}
-  if(lim.imax>((int)height-1)){lim.imax=(int)height-1;}
-  // found triangle limits
-
-  if(fabs(ftr.x2-ftr.x1)>thres){ratio2=(ftr.y2-ftr.y1)/(ftr.x2-ftr.x1);}else{ratio2=1e5;}
-  if(fabs(ftr.x3-ftr.x1)>thres){ratio3=(ftr.y3-ftr.y1)/(ftr.x3-ftr.x1);}else{ratio3=1e5;}
-  if(fabs(ftr.x3-ftr.x2)>thres){ratio4=(ftr.y3-ftr.y2)/(ftr.x3-ftr.x2);}else{ratio4=1e5;}
-
-  for(i=lim.imin;i<=lim.imax;i++)
-  {
-    xcr=-(int)(height>>1)+i;
-
-    aizfxcr=aizf*xcr;
-
-    if(xcr<ftr.x2)
-    {
-      ystart=(ratio2*(xcr-ftr.x1)+ftr.y1);
-      yend=(ratio3*(xcr-ftr.x1)+ftr.y1);
-    }
-    else
-    {
-      ystart=(ratio4*(xcr-ftr.x2)+ftr.y2);
-      yend=(ratio3*(xcr-ftr.x1)+ftr.y1);
-    }
-
-    if(yend<ystart)
-    {
-      tmp=ystart; ystart=yend; yend=tmp;
-    }
-
-    if(g_width_factor != 1.0f)
-    {
-      ystart*=g_width_factor;
-      yend*=g_width_factor;
-    }
-
-    jmin=(int)(-yend+(int)(width>>1))+1;
-    jmax=(int)(-ystart+(int)(width>>1));
-    if(jmin<0)
-    {
-      jmin=0;
-    }
-    if(jmax>((int)width-1))
-    {
-      jmax=(int)width-1;
-    }
-
-    surface_set_current_pixel(pSurface,jmin,i);
-
-    idx=i*width+jmin;
-
-    for(j=jmin;j<=jmax;j++)
-    {
-      ycr=(int)(width>>1)-j;
-      dist=id*(aizfxcr+bizf*ycr+c);
-      idx++;
-      if(distmin[idx]<dist)
-      {
-        distmin[idx]=dist;
-        pMaterial = list_get_value(materials, face->material_id);
-        surface_set_current_pixel_color(pSurface,pMaterial->redd,pMaterial->greend,pMaterial->blued);
-      }
-
-      surface_advance_current_pixel(pSurface);
-    }
-  }
-}
-
-void displaysdl(struct _surface* pSurface, struct _list* materials,tria *face,float *distmin,float focal, lightpr* light)
-{
-int red,green,blue;
-float zf,dist;
-float tmp;
-float a,b,c,d,izf, /*izf=1/zf - pt. marit viteza; ecuatia planului este ax+by+cz=d*/
-      a1,bright,
-      aizf,bizf,id;
-unsigned int width = surface_get_width(pSurface);
-unsigned int height = surface_get_height(pSurface);
-struct material* pMaterial = 0;
-
-if(g_double_pixel == 1)
-{
-  width/=2; height/=2; focal/=2;
-}
-
-zf=-focal;
-izf=1/zf;
-
-findplan(face->x1,face->y1,face->z1,face->x2,face->y2,face->z2,face->x3,face->y3,face->z3,&a,&b,&c,&d);
-
-aizf=a*izf; bizf=b*izf; id=1/d;
-
-if(g_width_factor != 1.0f)
-{
-  bizf/=g_width_factor;
-}
-
-pMaterial = list_get_value(materials,face->material_id);
-
-/*start lighting and backface culling*/
-tmp=a*face->x1+b*face->y1+c*face->z1;
-/*dot product used for lighting and backface culling*/
-if(face->cull==1){ // backface culling
-  if(tmp<0){return;}
-}
-
-if(pMaterial->fullbright==1){
-  a1=1;
-}else{
-  dist=sqrt(a*a+b*b+c*c);
-  a1=(light->dx*a+light->dy*b+light->dz*c)/dist;
-  if(tmp>=0){
-    if(a1<0){a1=0;}
-  }else{
-    if(a1<0){a1=-a1;}else{a1=0;}
-  }
-  a1=light->ambient+fabs(light->headlight*light->headlight_intensity*c/dist)+light->directional*a1;
-}
-
-bright=a1; if(bright<0){bright=0;}
-
-red=(int)(bright*pMaterial->red); green=(int)(bright*pMaterial->green); blue=(int)(bright*pMaterial->blue);
-if(red>255){red=255;}
-if(green>255){green=255;}
-if(blue>255){blue=255;}
-
-pMaterial->redd=red;
-pMaterial->greend=green;
-pMaterial->blued=blue;
-/*finished lighting and backface culling*/
-
-  render_triangle(pSurface, distmin, materials, face, zf, aizf, bizf, id, c);
-}
-
 /*function which displays the objcts which are closer than zmax
 nob - total number of objects
 cam - camera*/
 void odis(struct _surface* pSurface, struct _matrix* view_transform)
 {int j,focal;
 unsigned int width,height;
-unsigned long int area;
 static int sem=0; /*number of triangles for which memory has been allocated*/
 static tria face; /*triangles and displayed triangles in global system*/
 static matrix transform; /* current object's world transformation */
 static float *distmin; /*Zbuffer for sending to displaysdl()*/
-
-lightpr rotlight; /*rotated light parameters*/
 
 float tgh,tgv;
 float x,y,z,ix,iy,iz,jx,jy,jz,kx,ky,kz; /*temporary variables for transformations*/
@@ -851,10 +520,13 @@ width=surface_get_width(pSurface);
 height=surface_get_height(pSurface);
 focal=(int)(width/(2*tan(g_view_angle*0.008726646)));
 
-area=(width+1)*(height+1);
-
 tgh=(float)width/(2*(float)focal);
 tgv=(float)height/(2*(float)focal);
+
+aFrustum.zmin = zmin;
+aFrustum.zmax = zmax;
+aFrustum.tgh  = tgh;
+aFrustum.tgv  = tgv;
 
 if(g_width_factor != 1.0f)
 {
@@ -863,12 +535,12 @@ if(g_width_factor != 1.0f)
 }
 
 if(!sem){
-  if(!(distmin=(float *)malloc(area*sizeof(float)))){printf("Out of memory");}
+  renderer3d_initialize(pSurface, &aFrustum, &theLights);
   sem=1;}
 
-clear_depth_buffer(distmin,width,height);
-
 surface_begin_rendering(pSurface);
+
+renderer3d_start_frame();
 
 ix=view_transform->vx[1]-view_transform->vx[0];
 jx=view_transform->vx[2]-view_transform->vx[0];
@@ -883,13 +555,12 @@ kx=view_transform->vx[3]-view_transform->vx[0];
 x=g_light.dx;
 y=g_light.dy;
 z=g_light.dz;
-rotlight.dx=x*ix+y*iy+z*iz;
-rotlight.dy=x*jx+y*jy+z*jz;
-rotlight.dz=x*kx+y*ky+z*kz; /*rotated light*/
-rotlight.ambient=g_light.ambient;
-rotlight.headlight=g_light.headlight;
-rotlight.headlight_intensity=g_light.headlight_intensity;
-rotlight.directional=g_light.directional;
+theLights.directional_light_x=x*ix+y*iy+z*iz;
+theLights.directional_light_y=x*jx+y*jy+z*jz;
+theLights.directional_light_z=x*kx+y*ky+z*kz; /*rotated light*/
+theLights.ambient_light_intensity=g_light.ambient;
+theLights.head_light_intensity=g_light.headlight*g_light.headlight_intensity;
+theLights.directional_light_intensity=g_light.directional;
 
 struct _list_item* instanceNode = list_get_first(g_instances);
 while(instanceNode != 0){
@@ -919,12 +590,12 @@ while(instanceNode != 0){
   ycen=transform.vy[0]-ycen+x*fiy+y*fjy+z*fky;
   zcen=transform.vz[0]-zcen+x*fiz+y*fjz+z*fkz;
 
-  if(xcen-view_transform->vx[0]-radius>(1.74*zmax)){continue;}
-  if(xcen-view_transform->vx[0]+radius<(-1.74*zmax)){continue;}
-  if(ycen-view_transform->vy[0]-radius>(1.74*zmax)){continue;}
-  if(ycen-view_transform->vy[0]+radius<(-1.74*zmax)){continue;}
-  if(zcen-view_transform->vz[0]-radius>(1.74*zmax)){continue;}
-  if(zcen-view_transform->vz[0]+radius<(-1.74*zmax)){continue;}
+  if(xcen-view_transform->vx[0]-radius>(1.74*aFrustum.zmax)){continue;}
+  if(xcen-view_transform->vx[0]+radius<(-1.74*aFrustum.zmax)){continue;}
+  if(ycen-view_transform->vy[0]-radius>(1.74*aFrustum.zmax)){continue;}
+  if(ycen-view_transform->vy[0]+radius<(-1.74*aFrustum.zmax)){continue;}
+  if(zcen-view_transform->vz[0]-radius>(1.74*aFrustum.zmax)){continue;}
+  if(zcen-view_transform->vz[0]+radius<(-1.74*aFrustum.zmax)){continue;}
 
   for(j=0;j<=3;j++){
     transform.vx[j]-=view_transform->vx[0];
@@ -954,7 +625,7 @@ while(instanceNode != 0){
   if((ycen+radius)<(zcen+radius)*(-tgh)){continue;}
   if((xcen-radius)>(zcen+radius)*tgv){continue;}
   if((xcen+radius)<(zcen+radius)*(-tgv)){continue;}
-  if(((zcen-radius)<zmax)&&((zcen+radius)>0)){
+  if(((zcen-radius)<aFrustum.zmax)&&((zcen+radius)>0)){
 
     fix=transform.vx[1]-transform.vx[0];
     fjx=transform.vx[2]-transform.vx[0];
@@ -990,14 +661,16 @@ while(instanceNode != 0){
       face.y3=transform.vy[0]+x*fiy+y*fjy+z*fky;
       face.z3=transform.vz[0]+x*fiz+y*fjz+z*fkz; /*updated positions of triangles*/
 
-      fclip(pSurface, pMesh->materials, &face,tgh,tgv, distmin, focal, &rotlight);
+      struct material* pMat = list_get_value(pMesh->materials, face.material_id);
+      struct renderer_triangle tri = {face.x1,face.y1,face.z1,face.x2,face.y2,face.z2,face.x3,face.y3,face.z3,pMat->red,pMat->green,pMat->blue, (int)pMat->fullbright, (int)face.cull};
+      renderer3d_render_triangle(&tri);
 
       faceNode = list_item_get_next(faceNode);
     }
   }
 }
 
-finish_frame(pSurface,distmin);
+renderer3d_finish_frame(g_backcol.red, g_backcol.green, g_backcol.blue);
 
 surface_end_rendering(pSurface);
 }
