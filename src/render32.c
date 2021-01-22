@@ -139,7 +139,7 @@ struct _mesh* create_mesh()
   return pMesh;
 }
 
-void create_mesh_instance(struct _mesh* pMesh, matrix* transform)
+struct mesh_instance* create_mesh_instance(struct _mesh* pMesh, matrix* transform)
 {
   if(g_instances==0)
   {
@@ -158,6 +158,8 @@ void create_mesh_instance(struct _mesh* pMesh, matrix* transform)
     pInstance->transform = transform;
     list_add_value(g_instances, pInstance);
   }
+
+  return pInstance;
 }
 
 // function which finds the center and size of the current mesh
