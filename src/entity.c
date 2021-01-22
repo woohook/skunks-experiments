@@ -30,12 +30,20 @@ void entity_destroy(struct _sgob* pEntity)
   free(pEntity);
 }
 
-void entity_apply(void (*applyFunction)(struct _list_item*))
+int entity_apply(int (*applyFunction)(struct _list_item*, void*), void* pContext)
 {
   struct _list_item* entityNode = list_get_first(g_entities);
   while(entityNode != 0)
   {
-    (*applyFunction)(entityNode);
+    int status = (*applyFunction)(entityNode, pContext);
+
+    if(status != 0)
+    {
+      return status;
+    }
+
     entityNode = list_item_get_next(entityNode);
   }
+
+  return 0;
 }
