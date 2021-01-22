@@ -18,8 +18,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "trans.h"
 
+struct object_type
+{
+  char name[MAXWLG];
+  struct _mesh* pMesh;
+  struct _refpo* geom;
+};
+
 typedef struct _sgob
 {
+  struct object_type* pObjectType;
+  struct mesh_instance* pMeshInstance;
  REALN radius; /*radius of sphere in which the object is included*/
 matrix transform; /*directions of local axes in global coordinates - v[1]=i, v[2]=j, v[3]=k
                and origin of local system, in global coord. - v[0];
