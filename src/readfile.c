@@ -63,13 +63,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define FREE_WHEEL 6
 #define TRAILER_WHEEL 7
 
-struct object_type
-{
-  char name[MAXWLG];
-  struct _mesh* pMesh;
-  struct _refpo* geom;
-};
-
 char item_name[] = "object0000";
 
 struct _list* g_object_types = 0;
@@ -559,6 +552,7 @@ s[0]='1';while(s[0]){
                     prepare_item_name(list_get_size(parts));
 
                       object=entity_create();
+                      object->pObjectType = pObjectType;
                       object->radius = 0;
                       object->lev = 0;
                       object->physics_object = 0;
@@ -569,7 +563,6 @@ s[0]='1';while(s[0]){
                       }
 
                       list_add_value(parts,object);
-                      create_mesh_instance(pObjectType->pMesh, &object->transform);
 	              object->transform.vx[0]=object->transform.vy[0]=object->transform.vz[0]=0;
 	              object->transform.vx[1]=object->transform.vy[2]=object->transform.vz[3]=1;
 	              object->transform.vx[2]=object->transform.vx[3]=0;
@@ -769,12 +762,12 @@ s[0]='1';while(s[0]){
 
                       object=entity_create();
                       object_index++;
+                      object->pObjectType = pObjectType;
                       object->radius = 0;
                       object->lev = 0;
                       object->physics_object = 0;
                       object->vehicle = 0;
 
-                      create_mesh_instance(pObjectType->pMesh, &object->transform);
 	              object->transform.vx[0]=object->transform.vy[0]=object->transform.vz[0]=0;
 	              object->transform.vx[1]=object->transform.vy[2]=object->transform.vz[3]=1;
 	              object->transform.vx[2]=object->transform.vx[3]=0;

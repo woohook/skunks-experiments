@@ -15,6 +15,9 @@
 
 struct _list* g_participants = 0;
 
+struct _sgob* g_current_vehicle = 0;
+struct _sgob* g_closest_vehicle = 0;
+
 struct participant
 {
   struct _sgob* pEntity;
@@ -23,6 +26,32 @@ struct participant
   struct _camera* pCamera;
   float switch_avatar;
 };
+
+struct closest_vehicle_pair
+{
+  struct _sgob* pCurrentVehicle;
+  struct _sgob* pClosestVehicle;
+};
+
+int get_closest_vehicle(struct _list_item* pItem, void* pContext)
+{
+  struct closest_vehicle_pair* context = (struct closest_vehicle_pair*)pContext;
+
+  struct _sgob* pEntity = list_item_get_value(pItem);
+  if(pEntity == context->pCurrentVehicle)
+  {
+    return 0;
+  }
+
+  if(pEntity->vehicle == 0)
+  {
+    return 0;
+  }
+
+  context->pClosestVehicle = pEntity;
+
+  return 1;
+}
 
 struct participant* participant_create()
 {
@@ -84,11 +113,10 @@ void participant_process()
 
     if(pParticipant->switch_avatar > 0.0f)
     {
-      struct _sgob* closestVehicle = entity_get_closest_vehicle(pParticipant->pEntity);
-      if(closestVehicle != 0)
+      struct closest_vehicle_pair context = {pParticipant->pEntity, 0};
+      if(entity_apply(&get_closest_vehicle, &context) == 1)
       {
-        participant_assign_entity(pParticipant, closestVehicle);
-        return;
+        participant_assign_entity(pParticipant, context.pClosestVehicle);
       }
     }
 

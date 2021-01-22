@@ -17,6 +17,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "framework.h"
 #include "platform.h"
 #include "clock.h"
+#include "tiles.h"
 #include "physics.h"
 #include "vehicle.h"
 #include "render32.h"
@@ -44,6 +45,7 @@ int main(int argc,char *argv[])
   surface_initialize();
   participant_initialize();
   skunks_initialize();
+  tiles_initialize();
 
   while(g_shutdown_request == 0)
   {
@@ -56,8 +58,10 @@ int main(int argc,char *argv[])
     surface_process();
     participant_process();
     skunks_process();
+    tiles_process();
   }
 
+  tiles_release();
   skunks_release();
   participant_release();
   surface_release();
