@@ -30,25 +30,6 @@ void entity_destroy(struct _sgob* pEntity)
   free(pEntity);
 }
 
-struct _sgob* entity_get_closest_vehicle(struct _sgob* pCurrentVehicle)
-{
-  struct _list_item* entityNode = list_get_first(g_entities);
-  while(entityNode != 0)
-  {
-    struct _sgob* pEntity = list_item_get_value(entityNode);
-    if(pEntity != pCurrentVehicle)
-    {
-      if(pEntity->vehicle != 0)
-      {
-        return pEntity;
-      }
-    }
-    entityNode = list_item_get_next(entityNode);
-  }
-
-  return 0;
-}
-
 void entity_apply(void (*applyFunction)(struct _list_item*))
 {
   struct _list_item* entityNode = list_get_first(g_entities);
