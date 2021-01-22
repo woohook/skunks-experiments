@@ -48,3 +48,13 @@ struct _sgob* entity_get_closest_vehicle(struct _sgob* pCurrentVehicle)
 
   return 0;
 }
+
+void entity_apply(void (*applyFunction)(struct _list_item*))
+{
+  struct _list_item* entityNode = list_get_first(g_entities);
+  while(entityNode != 0)
+  {
+    (*applyFunction)(entityNode);
+    entityNode = list_item_get_next(entityNode);
+  }
+}
