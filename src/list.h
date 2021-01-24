@@ -16,3 +16,5 @@ struct _list_item* list_item_get_next(struct _list_item* item);
 
 void* list_item_get_value(struct _list_item* item);
 void* list_get_value(struct _list* list, int item_index);
+
+int list_apply(struct _list* pList, int (*applyFunction)(struct _list_item*, void*), void* pContext);

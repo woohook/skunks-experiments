@@ -149,3 +149,21 @@ void* list_get_value(struct _list* list, int item_index)
 
   return list_item_get_value(next_item);
 }
+
+int list_apply(struct _list* pList, int (*applyFunction)(struct _list_item*, void*), void* pContext)
+{
+  struct _list_item* pItem = list_get_first(pList);
+  while(pItem != 0)
+  {
+    int status = (*applyFunction)(pItem, pContext);
+
+    if(status != 0)
+    {
+      return status;
+    }
+
+    pItem = list_item_get_next(pItem);
+  }
+
+  return 0;
+}
