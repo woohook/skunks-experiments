@@ -95,7 +95,7 @@ struct material_action
 
 struct _list* g_meshes = 0;
 
-struct _list* g_instances = 0;
+struct _list* g_scene[3][3] = {{0,0,0}, {0,0,0}, {0,0,0}};
 
 struct _list* g_actions = 0;
 
@@ -141,9 +141,9 @@ struct _mesh* create_mesh()
 
 struct mesh_instance* create_mesh_instance(struct _mesh* pMesh, matrix* transform)
 {
-  if(g_instances==0)
+  if(g_scene[1][1]==0)
   {
-    g_instances = list_create();
+    g_scene[1][1] = list_create();
   }
 
   mesh_instance* pInstance = (mesh_instance*)malloc(sizeof(mesh_instance));
@@ -156,7 +156,7 @@ struct mesh_instance* create_mesh_instance(struct _mesh* pMesh, matrix* transfor
   {
     pInstance->pMesh = pMesh;
     pInstance->transform = transform;
-    list_add_value(g_instances, pInstance);
+    list_add_value(g_scene[1][1], pInstance);
   }
 
   return pInstance;
@@ -564,7 +564,16 @@ theLights.ambient_light_intensity=g_light.ambient;
 theLights.head_light_intensity=g_light.headlight*g_light.headlight_intensity;
 theLights.directional_light_intensity=g_light.directional;
 
-struct _list_item* instanceNode = list_get_first(g_instances);
+for(int tile_x = 0; tile_x < 3; ++tile_x)
+{
+  for(int tile_z = 0; tile_z < 3; ++tile_z)
+  {
+    if(g_scene[tile_x][tile_z] == 0)
+    {
+      continue;
+    }
+
+struct _list_item* instanceNode = list_get_first(g_scene[tile_x][tile_z]);
 while(instanceNode != 0){
   mesh_instance* pInstance = list_item_get_value(instanceNode);
   mesh* pMesh = pInstance->pMesh;
@@ -670,6 +679,8 @@ while(instanceNode != 0){
       faceNode = list_item_get_next(faceNode);
     }
   }
+    }  // end for tile_z
+  }  // end for tile_x
 }
 
 renderer3d_finish_frame(g_backcol.red, g_backcol.green, g_backcol.blue);
@@ -694,7 +705,17 @@ void renderer_release()
 {
   odis(0,0); // free static variables
 
-  list_release(g_instances, 1);
+  for(int tile_x = 0; tile_x < 3; ++tile_x)
+  {
+    for(int tile_z = 0; tile_z < 3; ++tile_z)
+    {
+      if(g_scene[tile_x][tile_z] != 0)
+      {
+        list_release(g_scene[tile_x][tile_z], 1);
+        g_scene[tile_x][tile_z] = 0;
+      }
+    }
+  }
 
   struct _list_item* meshNode = list_get_first(g_meshes);
   while(meshNode != 0)
