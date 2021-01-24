@@ -171,8 +171,6 @@ int find_tile_list(struct _list_item* pTileListEntry, void* pContext)
 
 struct tile_list* create_tile_list(int y, int z)
 {
-  printf("new tile_list (%d,%d)\n", y, z);
-
   struct tile_list* pTileList = (struct tile_list*)malloc(sizeof(struct tile_list));
   pTileList->y = y;
   pTileList->z = z;
