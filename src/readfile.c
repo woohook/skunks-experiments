@@ -586,8 +586,9 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
 	            tx+=dx; ty+=dy; tz+=dz;
 
-	              translat(&object->transform,tx,ty,tz);
-
+                    translat(&object->transform,tx,ty,tz);
+                    int isDynamic = 1;
+                    object->pMeshInstance = create_mesh_instance(pObjectType->pMesh, &object->transform, isDynamic);
                     object->physics_object = create_collision_geometry_instance(pObjectType->geom, tx, ty, tz, 0, 0, 0, &object->transform);
 
                     if(part_type_id == CAR_BODY)
@@ -787,6 +788,8 @@ s[0]='1';while(s[0]){
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); object->lev=atoi(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); // friction value not used
 
+                    int isStatic = 0;
+                    object->pMeshInstance = create_mesh_instance(pObjectType->pMesh, &object->transform, isStatic);
                     object->physics_object = create_collision_geometry_instance(pObjectType->geom, tx, ty, tz, rx, ry, rz, 0);
 	          break;
 
