@@ -95,7 +95,17 @@ struct material_action
 
 struct _list* g_meshes = 0;
 
-struct _list* g_scene[3][3] = {{0,0,0}, {0,0,0}, {0,0,0}};
+struct tile_list
+{
+  int y, z;
+  struct _list* entities;
+};
+
+int g_scene_initialized = 0;
+int g_center_tile_y = 0;
+int g_center_tile_z = 0;
+struct _list* g_tile_lists = 0;
+struct tile_list* g_scene[3][3] = {{0,0,0}, {0,0,0}, {0,0,0}};
 
 struct _list* g_actions = 0;
 
@@ -139,11 +149,60 @@ struct _mesh* create_mesh()
   return pMesh;
 }
 
+struct find_tile_list_params
+{
+  int y, z;
+  struct tile_list* pOutTileList;
+};
+
+int find_tile_list(struct _list_item* pTileListEntry, void* pContext)
+{
+  struct find_tile_list_params* params = (struct find_tile_list_params*)pContext;
+  struct tile_list* pTileList = list_item_get_value(pTileListEntry);
+  if( (pTileList->y == params->y)
+  &&  (pTileList->z == params->z))
+  {
+    params->pOutTileList = pTileList;
+    return 1;
+  }
+
+  return 0;
+}
+
+struct tile_list* create_tile_list(int y, int z)
+{
+  printf("new tile_list (%d,%d)\n", y, z);
+
+  struct tile_list* pTileList = (struct tile_list*)malloc(sizeof(struct tile_list));
+  pTileList->y = y;
+  pTileList->z = z;
+  pTileList->entities = list_create();
+
+  if(g_tile_lists == 0)
+  {
+    g_tile_lists = list_create();
+  }
+  list_add_value(g_tile_lists, pTileList);
+
+  return pTileList;
+}
+
 struct mesh_instance* create_mesh_instance(struct _mesh* pMesh, matrix* transform)
 {
-  if(g_scene[1][1]==0)
+  struct tile_list* pTileList = 0;
+
+  int y = ((int)transform->vy[0]) / 100;
+  int z = ((int)transform->vz[0]) / 100;
+  struct find_tile_list_params params = {y,z,0};
+
+  if( (g_tile_lists == 0)
+  ||  (list_apply(g_tile_lists, find_tile_list, &params) != 1))
   {
-    g_scene[1][1] = list_create();
+    pTileList = create_tile_list(y,z);
+  }
+  else
+  {
+    pTileList = params.pOutTileList;
   }
 
   mesh_instance* pInstance = (mesh_instance*)malloc(sizeof(mesh_instance));
@@ -152,12 +211,10 @@ struct mesh_instance* create_mesh_instance(struct _mesh* pMesh, matrix* transfor
     printf("Out of memory");
     exit(-1);
   }
-  else
-  {
-    pInstance->pMesh = pMesh;
-    pInstance->transform = transform;
-    list_add_value(g_scene[1][1], pInstance);
-  }
+
+  pInstance->pMesh = pMesh;
+  pInstance->transform = transform;
+  list_add_value(pTileList->entities, pInstance);
 
   return pInstance;
 }
@@ -457,6 +514,37 @@ void findplan(float x1, float y1, float z1, float x2, float y2, float z2, float 
 	/*ecuatia planului este ax+by+cz=d*/
 }
 
+int update_scene_tile_lists(struct _list_item* pTileListEntry, void* pContext)
+{
+  pContext = pContext;  // prevent unused parameter warning
+
+  struct tile_list* pTileList = list_item_get_value(pTileListEntry);
+  if( (pTileList->y >= g_center_tile_y - 1)
+  &&  (pTileList->y <= g_center_tile_y + 1)
+  &&  (pTileList->z >= g_center_tile_z - 1)
+  &&  (pTileList->z <= g_center_tile_z + 1))
+  {
+    int tile_y = 1 + pTileList->y - g_center_tile_y;
+    int tile_z = 1 + pTileList->z - g_center_tile_z;
+    g_scene[tile_y][tile_z] = pTileList;
+  }
+
+  return 0;
+}
+
+void scene_update_tile_set(int new_center_tile_y, int new_center_tile_z)
+{
+  if( (new_center_tile_y != g_center_tile_y)
+  ||  (new_center_tile_z != g_center_tile_z)
+  ||  (g_scene_initialized == 0))
+  {
+    g_center_tile_y = new_center_tile_y;
+    g_center_tile_z = new_center_tile_z;
+    g_scene_initialized = 1;
+    list_apply(g_tile_lists, update_scene_tile_lists, 0);
+  }
+}
+
 /*function which displays the objcts which are closer than zmax
 nob - total number of objects
 cam - camera*/
@@ -564,16 +652,21 @@ theLights.ambient_light_intensity=g_light.ambient;
 theLights.head_light_intensity=g_light.headlight*g_light.headlight_intensity;
 theLights.directional_light_intensity=g_light.directional;
 
-for(int tile_x = 0; tile_x < 3; ++tile_x)
+int new_center_tile_y = ((int)view_transform->vy[0]) / 100;
+int new_center_tile_z = ((int)view_transform->vz[0]) / 100;
+scene_update_tile_set(new_center_tile_y, new_center_tile_z);
+
+for(int tile_y = 0; tile_y < 3; ++tile_y)
 {
   for(int tile_z = 0; tile_z < 3; ++tile_z)
   {
-    if(g_scene[tile_x][tile_z] == 0)
+    struct tile_list* pTileList = g_scene[tile_y][tile_z];
+    if(pTileList == 0)
     {
       continue;
     }
 
-struct _list_item* instanceNode = list_get_first(g_scene[tile_x][tile_z]);
+struct _list_item* instanceNode = list_get_first(pTileList->entities);
 while(instanceNode != 0){
   mesh_instance* pInstance = list_item_get_value(instanceNode);
   mesh* pMesh = pInstance->pMesh;
@@ -680,7 +773,7 @@ while(instanceNode != 0){
     }
   }
     }  // end for tile_z
-  }  // end for tile_x
+  }  // end for tile_y
 }
 
 renderer3d_finish_frame(g_backcol.red, g_backcol.green, g_backcol.blue);
@@ -705,17 +798,14 @@ void renderer_release()
 {
   odis(0,0); // free static variables
 
-  for(int tile_x = 0; tile_x < 3; ++tile_x)
+  for(int tile_y = 0; tile_y < 3; ++tile_y)
   {
     for(int tile_z = 0; tile_z < 3; ++tile_z)
     {
-      if(g_scene[tile_x][tile_z] != 0)
-      {
-        list_release(g_scene[tile_x][tile_z], 1);
-        g_scene[tile_x][tile_z] = 0;
-      }
+      g_scene[tile_y][tile_z] = 0;
     }
   }
+  list_release(g_tile_lists,1);
 
   struct _list_item* meshNode = list_get_first(g_meshes);
   while(meshNode != 0)
