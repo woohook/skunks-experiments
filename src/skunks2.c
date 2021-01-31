@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "readfile.h"
 #include "camera.h"
 #include "participant.h"
+#include "tiles.h"
 
 
 #define SCREENWIDTH 800   // screen width (pixels)
@@ -75,7 +76,16 @@ void skunks_initialize()
     }
   }
 
-  readtrack(worldName);
+  if(strncmp("tracks/random",worldName,13)==0)
+  {
+    set_ambient_light(0.7f);
+    set_background_color(127,127,255);
+    tiles_generate_random(pVehicle);
+  }
+  else
+  {
+    readtrack(worldName);
+  }
 
   if(pVehicle == 0)
   {
