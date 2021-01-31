@@ -63,19 +63,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define FREE_WHEEL 6
 #define TRAILER_WHEEL 7
 
-char item_name[] = "object0000";
-
 struct _list* g_object_types = 0;
-
-void prepare_item_name(int id)
-{
-  int index = id;
-  for(int digit_index = 9; digit_index > 5; digit_index--)
-  {
-    item_name[digit_index] = (char)('0' + (index % 10));
-    index = index / 10;
-  }
-}
 
 /*functie care returneaza 1 daca i se transmite un caracter de delimitare si 0 daca nu*/
 int verdel(char s)
@@ -549,12 +537,10 @@ s[0]='1';while(s[0]){
                     {
                       pObjectType = load_object_type(s,car);
                     }
-                    prepare_item_name(list_get_size(parts));
 
                       object=entity_create();
                       object->pObjectType = pObjectType;
                       object->radius = 0;
-                      object->lev = 0;
                       object->physics_object = 0;
                       object->vehicle = 0;
                       if(list_get_size(parts)==0)
@@ -715,15 +701,12 @@ list_release(parts, 0);
 void readtrack(char *numefis)
 {int err,lincr=1; /*lincr-current line*/
 char s[MAXWLG]; /*a word*/
+char s2[MAXWLG]; /*a word*/
 FILE *fis;
 int bred=130,bgreen=160,bblue=200; /*background color*/
-struct object_type* pObjectType = 0;
-sgob* object = 0;
 REALN tx,ty,tz,rx,ry,rz, /*initial translations and rotations of the object*/
       fred=1.0,fgreen=1.0,fblue=1.0, /*color multiplication factors*/
       len;
-int previousNumberOfMeshes = 0;
-int object_index = previousNumberOfMeshes+1;
 
 float light_ambient=0.5;
 float light_headlight=0.3;
@@ -731,11 +714,6 @@ float light_directional=0.5;
 float light_dx=-0.5;
 float light_dy=1;
 float light_dz=1; /*set default values for the light*/
-
-  if(0 != g_object_types)
-  {
-    previousNumberOfMeshes = list_get_size(g_object_types);
-  }
 
   if(!(fis=fopen(numefis,"r"))){printf("Error: File %s could not be open\r\n",numefis);exit(1);}
 s[0]='1';while(s[0]){
@@ -753,44 +731,16 @@ s[0]='1';while(s[0]){
 	          break;
 
 	  case OBJECT_INSTANCE:
-	            err=fisgetw(fis,s,&lincr);
-                    pObjectType = find_object_type(s);
-                    if(!pObjectType)
-                    {
-                      pObjectType = load_object_type(s,0);
-                    }
-                      prepare_item_name(object_index);
-
-                      object=entity_create();
-                      object_index++;
-                      object->pObjectType = pObjectType;
-                      object->radius = 0;
-                      object->lev = 0;
-                      object->physics_object = 0;
-                      object->vehicle = 0;
-
-	              object->transform.vx[0]=object->transform.vy[0]=object->transform.vz[0]=0;
-	              object->transform.vx[1]=object->transform.vy[2]=object->transform.vz[3]=1;
-	              object->transform.vx[2]=object->transform.vx[3]=0;
-	              object->transform.vy[1]=object->transform.vy[3]=0;
-	              object->transform.vz[1]=object->transform.vz[2]=0;
-	              eval_obj(pObjectType->pMesh,object);
+	            err=fisgetw(fis,s2,&lincr);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tx=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ty=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); tz=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rz=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); ry=atof(s);
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); rx=atof(s);
-	              rotatz(&object->transform,0,0,rz);
-	              rotaty(&object->transform,0,0,ry);
-	              rotatx(&object->transform,0,0,rx);
-	              translat(&object->transform,tx,ty,tz);
-	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); object->lev=atoi(s);
+	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,0); // level value not used
 	            err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); // friction value not used
-
-                    int isStatic = 0;
-                    object->pMeshInstance = create_mesh_instance(pObjectType->pMesh, &object->transform, isStatic);
-                    object->physics_object = create_collision_geometry_instance(pObjectType->geom, tx, ty, tz, rx, ry, rz, 0);
+                    loader_load_entity(s2, tx, ty, tz, rx, ry, rz);
 	          break;
 
 	  case AMBIENT_LIGHT: err=fisgetw(fis,s,&lincr);afermex(numefis,lincr,s,2); light_ambient=atof(s); break;
@@ -820,4 +770,37 @@ set_ambient_light(light_ambient);
 set_headlight(light_headlight);
 set_directional_light(light_directional, light_dx, light_dy, light_dz);
 set_background_color(bred,bgreen,bblue);
+}
+
+void loader_load_entity(char* modelFilename, float tx, float ty, float tz, float rx, float ry, float rz)
+{
+  sgob* object = 0;
+  struct object_type* pObjectType = 0;
+
+  pObjectType = find_object_type(modelFilename);
+  if(!pObjectType)
+  {
+    pObjectType = load_object_type(modelFilename,0);
+  }
+
+  object=entity_create();
+  object->pObjectType = pObjectType;
+  object->radius = 0;
+  object->physics_object = 0;
+  object->vehicle = 0;
+
+  object->transform.vx[0]=object->transform.vy[0]=object->transform.vz[0]=0;
+  object->transform.vx[1]=object->transform.vy[2]=object->transform.vz[3]=1;
+  object->transform.vx[2]=object->transform.vx[3]=0;
+  object->transform.vy[1]=object->transform.vy[3]=0;
+  object->transform.vz[1]=object->transform.vz[2]=0;
+  eval_obj(pObjectType->pMesh,object);
+  rotatz(&object->transform,0,0,rz);
+  rotaty(&object->transform,0,0,ry);
+  rotatx(&object->transform,0,0,rx);
+  translat(&object->transform,tx,ty,tz);
+
+  int isStatic = 0;
+  object->pMeshInstance = create_mesh_instance(pObjectType->pMesh, &object->transform, isStatic);
+  object->physics_object = create_collision_geometry_instance(pObjectType->geom, tx, ty, tz, rx, ry, rz, 0);
 }
